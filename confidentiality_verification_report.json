@@ -1,0 +1,54 @@
+{
+  "repository": "AegisOne",
+  "generated_at_local": "2026-05-12",
+  "branch": "private/rebrand-aegisone",
+  "status": "pass_validation_blocked_pending_private_remote",
+  "checks": {
+    "no_public_remotes": {
+      "status": "pass",
+      "evidence": "git remote -v returned no remotes before private origin setup."
+    },
+    "private_origin_configured": {
+      "status": "blocked",
+      "evidence": "No private remote URL was available in this session, and the available GitHub connector cannot create repositories."
+    },
+    "repository_visibility_private": {
+      "status": "blocked",
+      "evidence": "Remote repository visibility cannot be verified until a private remote URL or repository-management capability is provided."
+    },
+    "no_active_public_publishing_targets": {
+      "status": "pass",
+      "evidence": "Root package metadata is private and no public publishConfig, .npmrc, container push workflow, or release workflow was found."
+    },
+    "no_leaked_secrets": {
+      "status": "pass",
+      "evidence": "Credential-pattern search found no active checked-in external secret material in the audited source/config surface."
+    },
+    "no_telemetry_leakage": {
+      "status": "pass",
+      "evidence": "No external analytics or telemetry endpoint was found; local /metrics remains local runtime observability."
+    },
+    "no_public_workflows": {
+      "status": "pass",
+      "evidence": "No .github workflows were present."
+    },
+    "no_inherited_deployment_hooks": {
+      "status": "pass",
+      "evidence": "No checked-in deployment hook configuration was found."
+    },
+    "no_accidental_artifact_publication": {
+      "status": "pass",
+      "evidence": "Artifact generation scripts are local-only; no automatic public upload or release target was found."
+    },
+    "integrity_validation_gate": {
+      "status": "pass",
+      "evidence": "Fresh npm run proof:full and npm run test:local:concurrency passed. Concurrency observed winner_count 100, loser_count 100, duplicate_allows 0; final_verdict PASS_READY_FOR_PROOF_EXPANSION; drift_mismatch_count 0; replay_mismatch_count 0."
+    }
+  },
+  "required_before_push": [
+    "Create or provide a private remote repository URL for AegisOne.",
+    "Verify remote visibility is PRIVATE.",
+    "Add only that private URL as origin.",
+    "Re-run git remote -v and validation before push."
+  ]
+}

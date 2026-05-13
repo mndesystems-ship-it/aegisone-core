@@ -1,0 +1,55 @@
+{
+  "schema_version": "ecs.volatile.validation.v1",
+  "scope": "volatile-benchmark-bundle",
+  "tolerance_percent": {
+    "throughput_delta_max": 3,
+    "latency_p99_delta_max": 3
+  },
+  "metrics": {
+    "throughput_rps": [
+      {
+        "profile": "allow_burst",
+        "throughput_rps": 6154.550613
+      },
+      {
+        "profile": "refuse_burst",
+        "throughput_rps": 6209.664349
+      },
+      {
+        "profile": "mixed_50_50",
+        "throughput_rps": 6142.245814
+      },
+      {
+        "profile": "adversarial_malformed",
+        "throughput_rps": 8670.116795
+      },
+      {
+        "profile": "replay_storm",
+        "throughput_rps": 5914.227147
+      }
+    ],
+    "latency_p99_ms": [
+      {
+        "profile": "allow_burst",
+        "p99": 0.4828
+      },
+      {
+        "profile": "refuse_burst",
+        "p99": 0.516
+      },
+      {
+        "profile": "mixed_50_50",
+        "p99": 0.4655
+      },
+      {
+        "profile": "adversarial_malformed",
+        "p99": 0.4806
+      },
+      {
+        "profile": "replay_storm",
+        "p99": 0.5527
+      }
+    ],
+    "controlled_benchmark_p99_ns": 13900
+  }
+}

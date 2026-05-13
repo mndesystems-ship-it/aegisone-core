@@ -1,0 +1,10 @@
+{
+  "description": "CI-oriented policy profile. Intended for status, diff, test, build, and deterministic Node script execution only.",
+  "allowed_command_classes": [
+    "git status",
+    "git diff",
+    "npm test",
+    "npm run build",
+    "node scripts/*.mjs"
+  ]
+}

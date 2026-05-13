@@ -1,0 +1,68 @@
+<h2>No-code guided layout</h2>
+<p class="subtitle">This version removes paste-first JSON. The user sets up a check with normal controls, then can inspect technical details after the result.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Recommended first screen</div>
+  <div class="mockup-body">
+    <div class="mock-nav">MNDe Safety Check <span style="margin-left:auto">System ready</span></div>
+    <div style="display:grid;grid-template-columns:260px 1fr;gap:18px;margin-top:16px">
+      <div class="mock-sidebar">
+        <div class="label">Start Here</div>
+        <div style="display:grid;gap:10px">
+          <button class="mock-button">Safe sample</button>
+          <button class="mock-button" style="background:#57606a">High-cost sample</button>
+          <button class="mock-button" style="background:#57606a">Upload receipt</button>
+        </div>
+      </div>
+      <div class="mock-content" style="padding:0">
+        <h3>Check a GPU job before it runs</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;margin-bottom:14px">Set the request in plain language. No JSON required.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <div class="label">GPU Count</div>
+            <input class="mock-input" value="2">
+          </div>
+          <div>
+            <div class="label">Hours</div>
+            <input class="mock-input" value="4">
+          </div>
+          <div>
+            <div class="label">GPU Type</div>
+            <input class="mock-input" value="a10g">
+          </div>
+          <div>
+            <div class="label">Estimated cost</div>
+            <input class="mock-input" value="$40.00">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="mock-button">Run safety check</button>
+          <button class="mock-button" style="background:#57606a">Show advanced JSON</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:18px">
+      <div class="placeholder" style="height:70px">Decision: allowed or blocked</div>
+      <div class="placeholder" style="height:70px">Why it happened</div>
+      <div class="placeholder" style="height:70px">Receipt tools</div>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>Why this fits</h4>
+    <ul>
+      <li>No paste box on first screen.</li>
+      <li>Clear domain words: GPU count, hours, estimated cost.</li>
+      <li>Technical JSON is still available for auditing, but not required.</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>Tradeoff</h4>
+    <ul>
+      <li>We need to map form controls into the existing strict request JSON behind the scenes.</li>
+      <li>Some unusual request fields may stay advanced-only for now.</li>
+    </ul>
+  </div>
+</div>

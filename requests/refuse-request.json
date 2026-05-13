@@ -1,0 +1,60 @@
+{
+  "execution_request": {
+    "actor": {
+      "user_id": "operator"
+    },
+    "execution": {
+      "auto_scale": false,
+      "max_retries": 0,
+      "max_scale_multiplier": 1,
+      "retry_on_fail": false
+    },
+    "orbit_intent": {
+      "action": "execute",
+      "boundary": "production-local",
+      "lifecycle_state": "ARMED",
+      "orbit_version": "2.0",
+      "payload": {
+        "tool_calls": [
+          {
+            "priority": 1,
+            "tool": "provision-gpu-job"
+          }
+        ]
+      },
+      "signatures": [
+        {
+          "alg": "ed25519.v1",
+          "sig": "operator-approved"
+        }
+      ]
+    },
+    "release_request": {
+      "already_consumed": false,
+      "execution_id": "exec-production-refuse-001",
+      "hold_state": "APPROVED"
+    },
+    "request_id": "production-refuse-001",
+    "resources": {
+      "gpu_count": 99,
+      "gpu_type": "a10g",
+      "hours": 4
+    },
+    "runtime_observation": {
+      "actual_gpu_count": 99,
+      "actual_hours": 4,
+      "actual_total_cost_cents": 198000,
+      "kill_switch_active": false
+    },
+    "submitted_region": "us-west-2",
+    "tool_calls": [
+      {
+        "priority": 1,
+        "tool": "provision-gpu-job"
+      }
+    ]
+  },
+  "pricing_data": {
+    "gpu_hour_cents": 500
+  }
+}

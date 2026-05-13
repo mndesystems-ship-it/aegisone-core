@@ -1,0 +1,30 @@
+{
+  "schema_version": "ecs.audit.cost_impact_report.v1",
+  "cases": [
+    {
+      "case_id": "gpu_jobs",
+      "total_projected_cost_cents": 768000,
+      "allowed_cost_cents": 500000,
+      "prevented_cost_cents": 268000,
+      "decision": "REFUSE",
+      "reason_code": "ERR_GPU_LIMIT"
+    },
+    {
+      "case_id": "autoscaling_loops",
+      "total_projected_cost_cents": 96000,
+      "allowed_cost_cents": 96000,
+      "prevented_cost_cents": 0,
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW"
+    },
+    {
+      "case_id": "retry_storms",
+      "total_projected_cost_cents": 60000,
+      "allowed_cost_cents": 60000,
+      "prevented_cost_cents": 0,
+      "decision": "REFUSE",
+      "reason_code": "ERR_RETRY_LIMIT"
+    }
+  ],
+  "aggregate_prevented_spend_cents": 268000
+}

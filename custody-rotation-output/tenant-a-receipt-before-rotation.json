@@ -1,0 +1,17 @@
+{
+  "schema_version": "mnde.custody.receipt.v1",
+  "tenant_id": "tenant-a",
+  "request_hash": "ca5a4ef18bdadc6c87012ba08d151d59c97d3dbee1188424a30d99a510ae9143",
+  "decision_hash": "27187cbbffb9e81659002644f3a08e87b5384f2649f650acde06955e84e58496",
+  "policy_hash": "72993b6cb83904d39a8c73bd0651aa6251288ede5dbc2c7bcbdc54cc5bbf5d77",
+  "decision": "ALLOW",
+  "reason_code": "OK_ALLOW",
+  "signature": {
+    "algorithm": "ED25519",
+    "signer_id": "tenant-a-signer-v1",
+    "key_id": "tenant-a-key-v1",
+    "key_set_version": "ks-tenant-a-001",
+    "public_key_hash": "f1643eae2582069bc13078e1a83a1956cb520b373e296d8ca4f89f1889e62b9e",
+    "value": "f67631400f5f3bcec87bfb38a806c7ec864c76f67dbcea7310abb1bb5893891debc784546632699719eeaad10637ae212f246ef865f777077a33f09bee6fe109"
+  }
+}

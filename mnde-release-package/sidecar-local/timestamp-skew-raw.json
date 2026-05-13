@@ -1,0 +1,90 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8787/v1/decisions",
+    "headers": {
+      "content-type": "application/json",
+      "x-mnde-key-id": "local-client-1",
+      "x-mnde-timestamp": "2000-01-01T00:00:00.000Z",
+      "x-mnde-nonce": "2e3661e2e1adfd182f832b2de3c9a45b",
+      "x-mnde-body-sha256": "9fbc6c4b8f781d17785c8eba80b93e1dc35f28ad35840369ba59d69e8eac1db1",
+      "x-mnde-signature-alg": "ed25519.v1",
+      "x-mnde-signature": "1b67eb9e64d2445266dd895f0e71625e1c7392d5515a4f8928aed0b4a138ddc30bc199be080afea378b42a089a22dd21f1041fa165d5edcee4e2530d0014a103"
+    },
+    "body": {
+      "execution_request": {
+        "actor": {
+          "user_id": "example-app"
+        },
+        "execution": {
+          "auto_scale": false,
+          "max_retries": 0,
+          "max_scale_multiplier": 1,
+          "retry_on_fail": false
+        },
+        "orbit_intent": {
+          "action": "execute",
+          "boundary": "example-sidecar",
+          "lifecycle_state": "ARMED",
+          "orbit_version": "2.0",
+          "payload": {
+            "tool_calls": [
+              {
+                "priority": 1,
+                "tool": "provision-gpu-job"
+              }
+            ]
+          },
+          "signatures": [
+            {
+              "alg": "ed25519.v1",
+              "sig": "example-action-signature"
+            }
+          ]
+        },
+        "release_request": {
+          "already_consumed": false,
+          "execution_id": "exec-example-allow-1776585214339",
+          "hold_state": "APPROVED"
+        },
+        "request_id": "example-allow-1776585214339",
+        "resources": {
+          "gpu_count": 2,
+          "gpu_type": "a10g",
+          "hours": 4
+        },
+        "runtime_observation": {
+          "actual_gpu_count": 2,
+          "actual_hours": 4,
+          "actual_total_cost_cents": 4000,
+          "kill_switch_active": false
+        },
+        "submitted_region": "us-west-2",
+        "tool_calls": [
+          {
+            "priority": 1,
+            "tool": "provision-gpu-job"
+          }
+        ]
+      },
+      "pricing_data": {
+        "gpu_hour_cents": 500
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "body": {
+      "schema_version": "mnde.api.response.v1",
+      "request_id": null,
+      "decision": "REFUSE",
+      "reason_code": "ERR_REQUEST_TIMESTAMP_SKEW",
+      "request_hash": null,
+      "decision_hash": null,
+      "total_cost_usd": "0.00",
+      "allowed_cost_usd": "0.00",
+      "prevented_cost_usd": "0.00",
+      "receipt": null
+    }
+  }
+}

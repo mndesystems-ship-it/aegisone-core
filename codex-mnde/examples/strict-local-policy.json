@@ -1,0 +1,4 @@
+{
+  "description": "Strict local Codex policy. Read-only and test/build commands are allowed; mutating, deploy, package, and network actions require approval or fail closed.",
+  "extends": "../../codex_mnde_policy.json"
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": "mnde.independent_audit.findings.v1",
+  "findings": [
+    {
+      "id": "F-001",
+      "severity": "critical",
+      "title": "Manifest does not pin execution binaries",
+      "evidence": [
+        "C:\\Users\\Shadow\\Desktop\\INsol\\audit-proof-bundle\\manifest.json",
+        "C:\\Users\\Shadow\\Desktop\\INsol\\technical-drop-package\\audit-proof-bundle\\manifest.json"
+      ],
+      "details": "The provided manifests enumerate output artifacts and selected build metadata, but do not define the exact MNDe engine binaries and SHA-256 values required for a compliant black-box audit."
+    },
+    {
+      "id": "F-002",
+      "severity": "critical",
+      "title": "Published audit path rebuilds or transpiles during execution",
+      "evidence": [
+        "C:\\Users\\Shadow\\Desktop\\INsol\\audit\\run_bundle.ps1",
+        "C:\\Users\\Shadow\\Desktop\\INsol\\scripts\\local-test-helpers.ps1",
+        "C:\\Users\\Shadow\\Desktop\\INsol\\scripts\\run_full_local_proof.ps1"
+      ],
+      "details": "The shipped harness invokes node --experimental-strip-types for TypeScript and cargo run --quiet --release for Rust. That violates the requested ban on recompilation, rebuild, and transpilation during audit execution."
+    },
+    {
+      "id": "F-003",
+      "severity": "critical",
+      "title": "No independently verifiable auditor signature path",
+      "evidence": [
+        "C:\\Users\\Shadow\\Desktop\\INsol\\stable-proof-bundle\\signatures.jsonl",
+        "C:\\Users\\Shadow\\Desktop\\INsol\\audit-proof-bundle\\signed_receipts.jsonl"
+      ],
+      "details": "Shipped receipts and signatures use HMAC-SHA256 with key id ecs-hmac-key-v1. No auditor public key, detached artifact signatures, or independent verification material was shipped."
+    },
+    {
+      "id": "F-004",
+      "severity": "high",
+      "title": "No git provenance available in shipped workspace",
+      "evidence": [
+        "C:\\Users\\Shadow\\Desktop\\INsol"
+      ],
+      "details": "The workspace is not a git checkout and no .git directory was found. The required commit-hash verification step cannot be completed."
+    },
+    {
+      "id": "F-005",
+      "severity": "high",
+      "title": "Published performance evidence does not satisfy the requested sustained-window proof",
+      "evidence": [
+        "C:\\Users\\Shadow\\Desktop\\INsol\\audit-proof-bundle\\performance_report.json",
+        "C:\\Users\\Shadow\\Desktop\\INsol\\audit-proof-bundle\\benchmark_report.md"
+      ],
+      "details": "Published profiles include throughput values of 3890.2014, 3796.593696, 3412.792237, and 9734.084285 req/s, and no shipped artifact demonstrates every 10-second window at or above 10,000 req/s for a 300-second run."
+    },
+    {
+      "id": "F-006",
+      "severity": "high",
+      "title": "Second-machine parity and live external deployment proof were not reproducible from the drop",
+      "evidence": [
+        "C:\\Users\\Shadow\\Desktop\\INsol\\AUDIT_README.md",
+        "C:\\Users\\Shadow\\Desktop\\INsol\\CLAIM.md"
+      ],
+      "details": "The supplied package references parity and proof bundles, but the requested independent second-machine execution, network disconnect choreography, and live external traffic observer workflow are not executable from this single local workspace."
+    }
+  ]
+}

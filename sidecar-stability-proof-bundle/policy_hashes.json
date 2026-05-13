@@ -1,0 +1,8 @@
+{
+  "schema_version": "mnde.policy_hashes.v1",
+  "policy_hashes_seen": [
+    "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87"
+  ],
+  "policy_hash_count": 1,
+  "policy_drift_detected": false
+}

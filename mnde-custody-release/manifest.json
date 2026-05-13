@@ -1,0 +1,179 @@
+{
+  "schema_version": "mnde.custody.manifest.v1",
+  "generated_at": "2026-05-03T20:00:38.047Z",
+  "release_version": "1.0.0",
+  "package_type": "custody-only",
+  "immutable_after_publish": true,
+  "artifacts": [
+    {
+      "file": "app/custody/runtime.js",
+      "sha256": "5f82a13b6f6d43ba091f5d1af3f5107b4c8cf49eff4a68734920caeb96e3670f",
+      "bytes": 39050
+    },
+    {
+      "file": "app/release/cli.js",
+      "sha256": "b38a87aaf47055f5dffd3e3f3ea8511b610c1b5df06475989e99e2bbc6292df1",
+      "bytes": 4682
+    },
+    {
+      "file": "app/release/integrity.js",
+      "sha256": "5dc388da4f1c7105f39d993592dac35717402098a907fb6dea21aff7df56424f",
+      "bytes": 12641
+    },
+    {
+      "file": "app/release/paths.js",
+      "sha256": "4e3aa0bfd3cc2caf3db3e89aa04df2693ff861f5ec43199c59e47fc488529f39",
+      "bytes": 1395
+    },
+    {
+      "file": "app/release/provenance.js",
+      "sha256": "cd70978a0e245d14bab92e4bee3e85b6aad4fe3bc00e3ece6bae952c008410cc",
+      "bytes": 287
+    },
+    {
+      "file": "app/release/verify_manifest.js",
+      "sha256": "d6a7a19f48ff49e8d9d9a196a614ad4c7d81f06fc89035279ce56d2d13aa18b4",
+      "bytes": 181
+    },
+    {
+      "file": "app/shared/custody_keys.js",
+      "sha256": "7425ec73a60aa22460533ac9854a55ed8cbc24dbe513e95745419f10e8e10cfb",
+      "bytes": 12056
+    },
+    {
+      "file": "app/shared/forbidden_content.js",
+      "sha256": "c01d2f433574909fd9fbf19f2ab8ead3917eabebefe5323ddce5843f681c6d67",
+      "bytes": 4683
+    },
+    {
+      "file": "app/shared/json.js",
+      "sha256": "0016e96ddb81ee583d1de297e4af3152bbb3e69771c8e6fb91d73e71b29ba70e",
+      "bytes": 8247
+    },
+    {
+      "file": "app/shared/operations.js",
+      "sha256": "fe005fd0e49657dbf230c68f43194c3534452657be042ad0e8bb276448b7ebda",
+      "bytes": 4910
+    },
+    {
+      "file": "app/shared/policy-trust.js",
+      "sha256": "b7e58f505840c180bf7b8c891b20ef44738e3c2d6f06565faf23e5cea7aea9e0",
+      "bytes": 1084
+    },
+    {
+      "file": "bin/mnde-custody.cmd",
+      "sha256": "87784f3e613d4b0608d33fe45ecb63e17c11af222d6b9cc3006607c89a3e28cd",
+      "bytes": 75
+    },
+    {
+      "file": "bin/node/node.exe",
+      "sha256": "58e74bf02fc5bbacc41dcb8bef089961cd5bddd37830b87784e4fc624d145d1f",
+      "bytes": 91426304
+    },
+    {
+      "file": "bin/preflight-check.cmd",
+      "sha256": "51ddd62aa85c61f64faa0ce8d05ce707f67c3e8e5718574fc3d34763de81c5a8",
+      "bytes": 91
+    },
+    {
+      "file": "bin/verify-custody-release.cmd",
+      "sha256": "30d8c440b773d7a7c7b658caf80fb4b648eef084908e05aaef57c472a8d4d8bd",
+      "bytes": 98
+    },
+    {
+      "file": "config/custody.config.template.json",
+      "sha256": "3d01125e842fce23d3378a131b3080799e48719d51dcefc7dda9ebc7ea79767b",
+      "bytes": 1127
+    },
+    {
+      "file": "custody.md",
+      "sha256": "54ec731828b364495deda52eacffe57812d12a07f68fe4192880d946dc349884",
+      "bytes": 2548
+    },
+    {
+      "file": "examples/custody_rotation_example.mjs",
+      "sha256": "bed17bbee56b559600b2fb0b47f858b6a6e8147da7912804b82119a4ed141356",
+      "bytes": 4336
+    },
+    {
+      "file": "install.cmd",
+      "sha256": "e1eca07a4eb239c73557291eac2f0a753c2d8d1c0c9405389927193ad8bb6b4a",
+      "bytes": 103
+    },
+    {
+      "file": "lifecycle/common.ps1",
+      "sha256": "00c209507f84c31c86d4f87c6edcf4d03fdb8a233ff82049f39e16149b0dc494",
+      "bytes": 2594
+    },
+    {
+      "file": "lifecycle/install.ps1",
+      "sha256": "5c4c195f453926ba0c932229edc9c88be4b107f9fd8f8bfcc08e842243ad2864",
+      "bytes": 3338
+    },
+    {
+      "file": "lifecycle/MNDeServiceHost.cs",
+      "sha256": "ef2c9edc6855dffb1f50e199822687dde051bdf2c8bda4e31938943183b43729",
+      "bytes": 3850
+    },
+    {
+      "file": "lifecycle/restart.ps1",
+      "sha256": "fbb75c7f96f72022d741b0722816f35d71c0962f5635886bc255fe4d540feda5",
+      "bytes": 251
+    },
+    {
+      "file": "lifecycle/start.ps1",
+      "sha256": "f5a18795cc1759a50e523a25f0ae981a01212b471ffb7235dfec80dd0bc1bc3a",
+      "bytes": 828
+    },
+    {
+      "file": "lifecycle/status.ps1",
+      "sha256": "5fa0dfec5e513221c93fa7278c4b7af823933429ec587e949fcff0eae2f4f351",
+      "bytes": 1024
+    },
+    {
+      "file": "lifecycle/stop.ps1",
+      "sha256": "8c7965cf2da3dedf9380cd6b4bd546c6a50cec92a260b3418451dbd16828ebb4",
+      "bytes": 788
+    },
+    {
+      "file": "lifecycle/uninstall.ps1",
+      "sha256": "fd5b9ddc2adca406b1b21b25a02fbd17cc72333d80a06101beda2dfa875d1581",
+      "bytes": 901
+    },
+    {
+      "file": "operator_runbook.md",
+      "sha256": "f40fd574b70806530b7f5613b9ae57e31a7d060cd21fe55b10ed85338c30e04b",
+      "bytes": 3229
+    },
+    {
+      "file": "provenance.json",
+      "sha256": "0fecdf24930445748298ad16b6a8a28455b3d7f69a9686e774074ca98173cb9a",
+      "bytes": 911
+    },
+    {
+      "file": "restart.cmd",
+      "sha256": "3f822d0e824ec82cb4e272dae74bbaf7feb45ceae744294b5fe65caf1ad1c3e0",
+      "bytes": 103
+    },
+    {
+      "file": "start.cmd",
+      "sha256": "196eef33e05b33f3dfa8ab4da90c13148fe80eb996633ef94887169c9bcb0e53",
+      "bytes": 101
+    },
+    {
+      "file": "status.cmd",
+      "sha256": "a5cbece09287179bd054f19d53afac856ed2d9a5d1d3f7a4d3df64326f8117eb",
+      "bytes": 102
+    },
+    {
+      "file": "stop.cmd",
+      "sha256": "c41660e3214503f72643b9c745807fd6d33ee7fedaf9072b09c85acd6abef390",
+      "bytes": 100
+    },
+    {
+      "file": "uninstall.cmd",
+      "sha256": "eb66f1d399d96e6170a53df1ec413bb4216b947d9f9e2a19eb6e8a22790af08c",
+      "bytes": 105
+    }
+  ]
+}

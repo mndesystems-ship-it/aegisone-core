@@ -1,0 +1,37 @@
+{
+    "service_name":  "MNDeCustody",
+    "started_at":  "2026-04-23T03:15:01.707Z",
+    "ok":  true,
+    "ready":  true,
+    "startup_state":  "READY",
+    "manifest_ok":  true,
+    "config_ok":  true,
+    "log_status":  {
+                       "ok":  true,
+                       "code":  "OK_LOG_WRITTEN",
+                       "warning":  null
+                   },
+    "receipt_store_status":  {
+                                 "ok":  true,
+                                 "code":  "OK_RECEIPT_STORE"
+                             },
+    "disk_status":  {
+                        "ok":  true,
+                        "code":  "OK_DISK",
+                        "free_bytes":  19547013120,
+                        "min_free_bytes":  1,
+                        "monitored_paths":  [
+                                                "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\runtime.log",
+                                                "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\receipts.jsonl",
+                                                "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\archive"
+                                            ]
+                    },
+    "custody_status":  {
+                           "ok":  true,
+                           "code":  "OK_CUSTODY_READY"
+                       },
+    "signer_status":  {
+                          "ok":  true,
+                          "code":  "OK_SIGNER"
+                      }
+}

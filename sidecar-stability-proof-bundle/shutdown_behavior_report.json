@@ -1,0 +1,8 @@
+{
+  "schema_version": "mnde.shutdown_behavior_report.v1",
+  "harness_terminated_sidecar_after_validation": true,
+  "bounded_shutdown_timer_ms": 1000,
+  "final_active_requests": 0,
+  "final_open_sockets_at_metrics_poll": 1,
+  "endpoint_hang_detected_before_shutdown": false
+}

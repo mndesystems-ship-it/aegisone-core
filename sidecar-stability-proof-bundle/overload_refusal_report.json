@@ -1,0 +1,9 @@
+{
+  "schema_version": "mnde.overload_refusal_report.v1",
+  "overload_refusals_total": 884,
+  "worker_pool_saturation_refusals": 884,
+  "receipt_queue_saturation_refusals": 0,
+  "request_timeout_refusals": 0,
+  "unsigned_allows_blocked": 0,
+  "all_observed_overload_failed_closed": true
+}

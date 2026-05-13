@@ -1,0 +1,133 @@
+{
+  "schema_version": "ecs.audit.adversarial_report.v1",
+  "cases": [
+    {
+      "case_id": "field_order_mutation",
+      "expectation": "same request_hash and decision_hash",
+      "observed": {
+        "baseline_request_hash": "76f2bf7a1ec853d785cc38b317045779d2b0afc4637a99e3b1bbf223bdb8ddbc",
+        "mutated_request_hash": "76f2bf7a1ec853d785cc38b317045779d2b0afc4637a99e3b1bbf223bdb8ddbc",
+        "baseline_decision_hash": "35b9ac2422e28c9119ed98c1a857f4b14cade44ef69b7787f92ca952734c61be",
+        "mutated_decision_hash": "35b9ac2422e28c9119ed98c1a857f4b14cade44ef69b7787f92ca952734c61be"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "duplicate_key_injection",
+      "expectation": "REFUSE at parse boundary",
+      "observed": {
+        "decision": "REFUSE",
+        "request_hash": "eff03f0931acb23ba024b443cc320ddae8ce830328c6b07dba04634c24742eaf",
+        "decision_hash": "a7e3548d092da04f45d80ef9fb63376847dd616389af3f4519ad22686074fd93",
+        "reason_code": "ERR_DUPLICATE_JSON_KEYS",
+        "parse_boundary": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "unknown_fields",
+      "expectation": "REFUSE fail closed",
+      "observed": {
+        "decision": "REFUSE",
+        "request_hash": "6d1db1e0c6a2f2a1d2eec97ef52ed9aae8601440926a1a0a69168ef6b013efc2",
+        "decision_hash": "0b629a371a8c0d07ad26547ca57af6f056148914d69e33423e0b4da2fda6344d",
+        "reason_code": "ERR_SCHEMA_VALIDATION",
+        "parse_boundary": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "missing_required_fields",
+      "expectation": "REFUSE fail closed",
+      "observed": {
+        "decision": "REFUSE",
+        "request_hash": "f2dc80df69f3e8d53d2d4579e46f89b2a60b6ab43dbb7d172be9aeb077c8dea2",
+        "decision_hash": "3498e2ac0d0ad5356244f24ea25b527482f07c29c8f722a43d9c7a1cb013ed76",
+        "reason_code": "ERR_SCHEMA_VALIDATION",
+        "parse_boundary": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "partial_input",
+      "expectation": "REFUSE fail closed",
+      "observed": {
+        "decision": "REFUSE",
+        "request_hash": "d17e9d25e5fbe09c883a60789e08f5de6d0294e84ff2dade2b3a13d8838bf5cf",
+        "decision_hash": "e8bb0336ed459e86ccf1d5aa58243a96f19d240a7ef848c10ae910bc8df9636d",
+        "reason_code": "ERR_SCHEMA_VALIDATION",
+        "parse_boundary": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "malformed_json",
+      "expectation": "REFUSE at parse boundary",
+      "observed": {
+        "decision": "REFUSE",
+        "request_hash": "a9073b74c938f91d73c635ab6579bd52be8e4989927bc28403e77a3820aa2dcc",
+        "decision_hash": "fe28990144c6b7f482541b3157f9d26254f16ec701d1ca14e1a396e20a345ef9",
+        "reason_code": "ERR_INVALID_JSON_SYNTAX",
+        "parse_boundary": true
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "tool_call_reordering",
+      "expectation": "deterministic refusal",
+      "observed": {
+        "decision": "REFUSE",
+        "reason_code": "ERR_TOOL_CALL_SEQUENCE",
+        "decision_hash": "aa0252e44e8e84401c5175884016872ebbd580b545459c05953d3f14cd3e67ef"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "retry_explosion",
+      "expectation": "deterministic refusal",
+      "observed": {
+        "decision": "REFUSE",
+        "reason_code": "ERR_RETRY_LIMIT",
+        "prevented_cost_usd": "0.00"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "policy_tamper",
+      "expectation": "deterministic refusal",
+      "observed": {
+        "decision": "REFUSE",
+        "reason_code": "ERR_POLICY_SCHEMA"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "receipt_tamper",
+      "expectation": "signature verification fails",
+      "observed": {
+        "request_hash": "76f2bf7a1ec853d785cc38b317045779d2b0afc4637a99e3b1bbf223bdb8ddbc",
+        "signature_valid": false
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "unrelated_request_contamination",
+      "expectation": "REFUSE when runtime state exceeds current request",
+      "observed": {
+        "decision": "REFUSE",
+        "reason_code": "ERR_RUNTIME_GPU_DRIFT"
+      },
+      "status": "PASS"
+    },
+    {
+      "case_id": "boundary_numeric_case",
+      "expectation": "ALLOW exactly at safe numeric boundary",
+      "observed": {
+        "decision": "ALLOW",
+        "total_cost_usd": "4960.00"
+      },
+      "status": "PASS"
+    }
+  ],
+  "failures": 0
+}

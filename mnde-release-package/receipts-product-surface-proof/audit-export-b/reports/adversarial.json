@@ -1,0 +1,1 @@
+{"cases":[{"case_id":"empty_duplicate_manifest_check","passed":true},{"case_id":"proof_resolution_required","passed":true},{"case_id":"signature_validation_required","passed":true}],"cases_run":3,"failures":0,"report_hash":"6c5fcfe20552b6e4b7933b762836eea2de5489d11d0c2a627d3de8d548005bc3","schema_version":"mnde.audit_export_adversarial.v1"}

@@ -1,0 +1,8 @@
+{
+  "schema_version": "mnde.degraded_mode_report.v1",
+  "runtime_degraded_final": 0,
+  "runtime_fatal_final": 0,
+  "degraded_refusals": 0,
+  "watchdog_interventions": 0,
+  "health_remained_available": true
+}

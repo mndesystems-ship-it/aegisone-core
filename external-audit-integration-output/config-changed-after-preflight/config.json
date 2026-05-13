@@ -1,0 +1,40 @@
+{
+  "schema_version": "mnde.custody.config.v1",
+  "mode": "custody-only",
+  "strict": true,
+  "service_name": "MNDeCustody",
+  "runtime": {
+    "bind": "127.0.0.1:9898",
+    "deny_internal_signing": true,
+    "fail_on_forbidden_artifacts": true,
+    "health_path": "/healthz",
+    "ready_path": "/readyz"
+  },
+  "logging": {
+    "path": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\logs\\runtime.log",
+    "runtime_log": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\logs\\runtime.log",
+    "install_log": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\logs\\install.log",
+    "verification_log": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\logs\\verification.log",
+    "max_bytes": 1048576,
+    "max_files": 5,
+    "required_for_audit_integrity": false
+  },
+  "receipts": {
+    "path": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\receipts\\receipts.jsonl",
+    "archive_path": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\receipts\\archive",
+    "rotation_mode": "size",
+    "max_bytes": 10485760,
+    "max_count": 100000
+  },
+  "disk": {
+    "min_free_bytes": 1024
+  },
+  "signer": {
+    "timeout_ms": 5000
+  },
+  "policy": {
+    "mode": "required",
+    "path": "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\external-audit-integration-output\\config-changed-after-preflight\\policy.json",
+    "expected_hash": "474422ceb7fe726e860a60378df3365cbfdbf879a63d187d420ea95f616be341"
+  }
+}

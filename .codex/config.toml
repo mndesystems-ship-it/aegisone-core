@@ -1,0 +1,18 @@
+[shell]
+default_wrapper = "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\mnde-run.cmd"
+enforce_wrapper = true
+fail_closed_on_wrapper_error = true
+
+[env]
+MNDE_DECISION_URL = "http://127.0.0.1:8787/v1/decisions"
+MNDE_CODEX_POLICY = "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\codex_mnde_policy.json"
+MNDE_RECEIPT_LOG = "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\receipts.jsonl"
+MNDE_WORKSPACE_ROOT = "C:\\Users\\Shadow\\Downloads\\INsol\\INsol"
+
+[policy]
+dangerous_actions = "mnde_required"
+network_actions = "prompt_required"
+sandbox_escape = "refuse"
+git_push = "mnde_required"
+package_installs = "prompt_required"
+file_deletes = "refuse_unless_policy_allows"

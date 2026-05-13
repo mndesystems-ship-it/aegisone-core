@@ -1,0 +1,71 @@
+<h2>Which first-use layout feels easiest?</h2>
+<p class="subtitle">The goal is that someone can open the page cold and still know what to do next.</p>
+
+<div class="cards">
+  <div class="card" data-choice="guided" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">A. Guided Check</div>
+        <div class="mockup-body">
+          <div class="mock-nav">MNDe Proof Check <span style="float:right">Endpoint ready</span></div>
+          <div style="display:grid;gap:12px;margin-top:12px">
+            <div class="placeholder" style="height:52px">1. Choose a sample or import JSON</div>
+            <div class="placeholder" style="height:52px">2. Run decision check</div>
+            <div class="placeholder" style="height:52px">3. Review result and receipt</div>
+            <button class="mock-button">Run sample check</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Guided Check</h3>
+      <p>Turns the app into a simple three-step task. Best for people who do not know what MNDe, receipts, or policies mean yet.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="dashboard" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B. Plain Dashboard</div>
+        <div class="mockup-body">
+          <div class="mock-nav">Request | Result | Receipt | System</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+            <div class="placeholder" style="height:120px">Paste or import request</div>
+            <div class="placeholder" style="height:120px">Decision summary</div>
+          </div>
+          <div class="placeholder" style="height:54px;margin-top:12px">Receipt tools</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Plain Dashboard</h3>
+      <p>Keeps all current tools visible, but renames technical labels and groups them by job.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="receipt-first" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C. Receipt First</div>
+        <div class="mockup-body">
+          <div class="placeholder" style="height:72px">Drop a receipt to verify it</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+            <button class="mock-button">Verify</button>
+            <button class="mock-button">Replay</button>
+            <button class="mock-button">Export</button>
+          </div>
+          <div class="placeholder" style="height:78px;margin-top:12px">Result explained in plain language</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Receipt First</h3>
+      <p>Optimized for auditors who arrive with a receipt file and only need to prove whether it is valid.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>My recommendation</h3>
+  <p>Pick <strong>Guided Check</strong>. It gives the page a clear beginning, middle, and end, while keeping the receipt tools available after a result exists.</p>
+</div>

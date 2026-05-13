@@ -1,0 +1,20 @@
+{
+    "logging":  {
+                    "max_files":  2,
+                    "max_bytes":  2048,
+                    "verification_log":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\fresh-machine-proof\\verification.log",
+                    "runtime_log":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\fresh-machine-proof\\runtime.log",
+                    "install_log":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\fresh-machine-proof\\install.log"
+                },
+    "service_name":  "MNDeCustody",
+    "strict":  true,
+    "schema_version":  "mnde.custody.config.v1",
+    "runtime":  {
+                    "bind":  "127.0.0.1:8877",
+                    "ready_path":  "/readyz",
+                    "health_path":  "/healthz",
+                    "deny_internal_signing":  true,
+                    "fail_on_forbidden_artifacts":  true
+                },
+    "mode":  "custody-only"
+}

@@ -1,0 +1,35 @@
+{
+    "mode":  "custody-only",
+    "schema_version":  "mnde.custody.config.v1",
+    "signer":  {
+                   "timeout_ms":  5000
+               },
+    "service_name":  "MNDeCustody",
+    "disk":  {
+                 "min_free_bytes":  1
+             },
+    "strict":  true,
+    "runtime":  {
+                    "bind":  "127.0.0.1:8891",
+                    "ready_path":  "/readyz",
+                    "health_path":  "/healthz",
+                    "deny_internal_signing":  true,
+                    "fail_on_forbidden_artifacts":  true
+                },
+    "receipts":  {
+                     "path":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\receipts.jsonl",
+                     "rotation_mode":  "size",
+                     "max_bytes":  4096,
+                     "max_count":  10,
+                     "archive_path":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\archive"
+                 },
+    "logging":  {
+                    "runtime_log":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\runtime.log",
+                    "max_files":  2,
+                    "install_log":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\install.log",
+                    "path":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\runtime.log",
+                    "max_bytes":  2048,
+                    "required_for_audit_integrity":  false,
+                    "verification_log":  "C:\\Users\\Shadow\\Downloads\\INsol\\INsol\\operations-health-output\\verification.log"
+                }
+}

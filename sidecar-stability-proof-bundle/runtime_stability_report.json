@@ -1,0 +1,10 @@
+{
+  "schema_version": "mnde.runtime_stability_report.v1",
+  "half_dead_detected": false,
+  "health_failures": 0,
+  "decision_transport_errors": 0,
+  "refresh_errors": 0,
+  "active_requests_final": 0,
+  "completed_http_responses": 10524,
+  "accepted_requests": 6892
+}

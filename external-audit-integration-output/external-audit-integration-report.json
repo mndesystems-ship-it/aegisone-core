@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "results": [
+    {
+      "name": "read-only receipt directory",
+      "ok": false,
+      "code": "ERR_RECEIPT_WRITE_FAILED"
+    },
+    {
+      "name": "missing receipt directory",
+      "ok": true,
+      "code": "OK_CUSTODY_READY"
+    },
+    {
+      "name": "locked receipt file",
+      "ok": false,
+      "code": "ERR_RECEIPT_WRITE_FAILED"
+    },
+    {
+      "name": "invalid preflight lock",
+      "ok": false,
+      "code": "ERR_PREFLIGHT_LOCK_MISSING"
+    },
+    {
+      "name": "config changed after preflight",
+      "ok": false,
+      "code": "ERR_PREFLIGHT_CONFIG_MISMATCH"
+    },
+    {
+      "name": "policy changed after preflight",
+      "ok": false,
+      "code": "ERR_PREFLIGHT_POLICY_MISMATCH"
+    }
+  ]
+}

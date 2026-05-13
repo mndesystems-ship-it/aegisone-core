@@ -1,0 +1,23 @@
+{
+  "schema_version": "mnde.custody.provenance.v1",
+  "release_version": "1.0.0",
+  "release_tag": "v1.0.0",
+  "package_type": "custody-only",
+  "git_commit_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "build_timestamp_utc": "2026-01-01T00:00:00.000Z",
+  "build_command": "npm run release:build",
+  "target_platform": "win32",
+  "target_arch": "x64",
+  "builder_identity": {
+    "user": "external-audit",
+    "host": "local"
+  },
+  "toolchain": {
+    "node_version": "v24.14.1",
+    "rust_version": "not-bundled",
+    "cargo_version": "not-bundled"
+  },
+  "provenance_status": "complete",
+  "provenance_notes": [],
+  "artifacts": {}
+}

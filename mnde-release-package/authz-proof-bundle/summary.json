@@ -1,0 +1,10 @@
+{
+  "schema_version": "mnde.authz_proof_summary.v1",
+  "role_assigned": true,
+  "privileged_action_allowed_before_revoke": true,
+  "role_revoked": true,
+  "privileged_action_refused_after_revoke": true,
+  "policy_zero_drift": true,
+  "authz_zero_drift": true,
+  "final_verdict": "INTEGRATED"
+}

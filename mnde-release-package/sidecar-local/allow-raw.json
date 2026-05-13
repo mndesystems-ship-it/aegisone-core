@@ -1,0 +1,148 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8787/v1/decisions",
+    "headers": {
+      "content-type": "application/json",
+      "x-mnde-key-id": "local-client-1",
+      "x-mnde-timestamp": "2026-04-19T07:53:05.469Z",
+      "x-mnde-nonce": "705eaae5c2ce76c03d01131e6b99da8b",
+      "x-mnde-body-sha256": "bfac098fc026ea4c1c8c74f5b866f2fa03a6e3b1748d9205d66e85241eed90ec",
+      "x-mnde-signature-alg": "ed25519.v1",
+      "x-mnde-signature": "9b91089b4c1ea56979c8418b57ab98bedaaff9597969c02016d36175092c7a7a0d30e7393eda889374e26e775e8daec41ac69da51908e38c05855c3b370adc0d"
+    },
+    "body": {
+      "execution_request": {
+        "actor": {
+          "user_id": "example-app"
+        },
+        "execution": {
+          "auto_scale": false,
+          "max_retries": 0,
+          "max_scale_multiplier": 1,
+          "retry_on_fail": false
+        },
+        "orbit_intent": {
+          "action": "execute",
+          "boundary": "example-sidecar",
+          "lifecycle_state": "ARMED",
+          "orbit_version": "2.0",
+          "payload": {
+            "tool_calls": [
+              {
+                "priority": 1,
+                "tool": "provision-gpu-job"
+              }
+            ]
+          },
+          "signatures": [
+            {
+              "alg": "ed25519.v1",
+              "sig": "example-action-signature"
+            }
+          ]
+        },
+        "release_request": {
+          "already_consumed": false,
+          "execution_id": "exec-example-allow-1776585185469",
+          "hold_state": "APPROVED"
+        },
+        "request_id": "example-allow-1776585185469",
+        "resources": {
+          "gpu_count": 2,
+          "gpu_type": "a10g",
+          "hours": 4
+        },
+        "runtime_observation": {
+          "actual_gpu_count": 2,
+          "actual_hours": 4,
+          "actual_total_cost_cents": 4000,
+          "kill_switch_active": false
+        },
+        "submitted_region": "us-west-2",
+        "tool_calls": [
+          {
+            "priority": 1,
+            "tool": "provision-gpu-job"
+          }
+        ]
+      },
+      "pricing_data": {
+        "gpu_hour_cents": 500
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "schema_version": "mnde.api.response.v1",
+      "request_id": "example-allow-1776585185469",
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW",
+      "request_hash": "7edc05c664b9caeb2eaa7c9979aba7b954c6fa34400df45bde91192bd1cd6757",
+      "decision_hash": "d997a8b9aa596ecdd562c76609a0c206db0c14779d011ba5fe0c568c2b5137e4",
+      "total_cost_usd": "40.00",
+      "allowed_cost_usd": "40.00",
+      "prevented_cost_usd": "0.00",
+      "policy_version": "policy.v1",
+      "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+      "receipt": {
+        "schema_version": "ecs.receipt.v2",
+        "canonical_request": "{\"execution_request\":{\"actor\":{\"user_id\":\"example-app\"},\"execution\":{\"auto_scale\":false,\"max_retries\":0,\"max_scale_multiplier\":1,\"retry_on_fail\":false},\"orbit_intent\":{\"action\":\"execute\",\"boundary\":\"example-sidecar\",\"lifecycle_state\":\"ARMED\",\"orbit_version\":\"2.0\",\"payload\":{\"tool_calls\":[{\"priority\":1,\"tool\":\"provision-gpu-job\"}]},\"signatures\":[{\"alg\":\"ed25519.v1\",\"sig\":\"example-action-signature\"}]},\"release_request\":{\"already_consumed\":false,\"execution_id\":\"exec-example-allow-1776585185469\",\"hold_state\":\"APPROVED\"},\"request_id\":\"example-allow-1776585185469\",\"resources\":{\"gpu_count\":2,\"gpu_type\":\"a10g\",\"hours\":4},\"runtime_observation\":{\"actual_gpu_count\":2,\"actual_hours\":4,\"actual_total_cost_cents\":4000,\"kill_switch_active\":false},\"submitted_region\":\"us-west-2\",\"tool_calls\":[{\"priority\":1,\"tool\":\"provision-gpu-job\"}]},\"policy_document\":{\"policy_version\":\"policy.v1\",\"rules\":{\"allow_auto_scale\":false,\"max_gpu_count\":4,\"max_hours\":8,\"max_retry_count\":1,\"max_total_cost_cents\":10000,\"require_manual_approval_above_cents\":5000},\"schema_version\":\"ecs.policy.v1\",\"trust\":{\"key_id\":\"85535d7b96bdd743\",\"key_version\":\"ed25519.v1\",\"public_key\":\"55ddc014f25e30d393b6ef3057c5df5f8394cb1c466d4c1e9d9ef1e00d4e53f5\",\"signature\":\"91d19e35fe5158b0154bc8516946ad1111d8abb49002b5048e1af12cac6367b8906bfe6e21c54fb731fc19a080e4a52ddd48e5bb887ac6eed99a938e92ed6a0d\"}},\"pricing_data\":{\"gpu_hour_cents\":500}}",
+        "request_hash": "7edc05c664b9caeb2eaa7c9979aba7b954c6fa34400df45bde91192bd1cd6757",
+        "decision_output": {
+          "decision": "ALLOW",
+          "decision_hash": "d997a8b9aa596ecdd562c76609a0c206db0c14779d011ba5fe0c568c2b5137e4",
+          "request_hash": "7edc05c664b9caeb2eaa7c9979aba7b954c6fa34400df45bde91192bd1cd6757",
+          "reason_code": "OK_ALLOW",
+          "total_cost_usd": "40.00",
+          "allowed_cost_usd": "40.00",
+          "prevented_cost_usd": "0.00",
+          "policy_version": "policy.v1",
+          "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+          "execution_id": "exec-example-allow-1776585185469"
+        },
+        "pipeline_trace": {
+          "preflight": {
+            "layer": "preflight",
+            "request_hash": "7edc05c664b9caeb2eaa7c9979aba7b954c6fa34400df45bde91192bd1cd6757",
+            "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+            "policy_version": "policy.v1"
+          },
+          "orbit": {
+            "layer": "orbit",
+            "decision": "ALLOW",
+            "reason_code": "OK_ORBIT",
+            "validation_hash": "94894ce13bd5f5d85b7d2caff46953de6fb4a2d16d4fbc986cf995536a22285f"
+          },
+          "arm": {
+            "layer": "arm",
+            "decision": "ALLOW",
+            "reason_code": "OK_ARM",
+            "projected_total_cost_cents": 4000,
+            "allowed_cost_cents": 4000,
+            "prevented_cost_cents": 0,
+            "execution_id": "exec-example-allow-1776585185469"
+          },
+          "ramona": {
+            "layer": "ramona",
+            "decision": "ALLOW",
+            "reason_code": "OK_RAM0NA",
+            "runtime_hash": "1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c"
+          }
+        },
+        "signature": {
+          "algorithm": "HMAC-SHA256",
+          "key_id": "ecs-prod-key-v2",
+          "value": "1396bdd3dc615d7d4f888b78d3b8f1f10da38a30bc006cd366b5bfdb9c7618c7"
+        },
+        "verifiable_signature": {
+          "algorithm": "ED25519",
+          "key_id": "receipt-ed25519-9873a7f3636ae58c",
+          "public_key_fingerprint": "9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783",
+          "value": "7da7dad42b917d146bf6357d88f955c2b5bf7bd16c1d1a0404e1d304bd1d13b278c85f42a10d53401c0308994c0c1e82d4ab1b114611acbfee644ccc5b09840a"
+        }
+      }
+    }
+  }
+}

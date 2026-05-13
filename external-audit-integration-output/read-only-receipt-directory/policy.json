@@ -1,0 +1,17 @@
+{
+  "schema_version": "mnde.policy.v1",
+  "policy_version": "policy.v1",
+  "rules": {
+    "max_total_cost_usd": 100,
+    "allow_auto_scale": false,
+    "max_gpu_count": 4,
+    "max_hours": 8,
+    "require_manual_approval_above_usd": 50
+  },
+  "trust": {
+    "key_version": "ed25519.v1",
+    "key_id": "8ae36e639ce0b56d",
+    "signing_public_key": "a881e32d48b9f9a38c4c0756a90a78b365831cbfdb3d2174c32cbebdfeb4239d",
+    "signature": "a6b06f3bb1ae4ab2ec7e0f33085e40dd801501658963645ba11eedf3e274a82b58f6a73932b6a8a278f88dcd77f27e299fb24971c0f8db01ee16e045a72f190a"
+  }
+}

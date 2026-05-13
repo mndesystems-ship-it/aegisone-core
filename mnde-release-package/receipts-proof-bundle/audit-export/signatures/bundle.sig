@@ -1,0 +1,1 @@
+{"algorithm":"Ed25519","key_id":"bundle-signing-key","root_hash":"55f0399cd688d79504bc2ef5edb7cc8b15a329981d64800721379171ae6c388a","signature":"tNRpxFsvPMkiLRzEfH0NeShvn7zsI9/spog9RD1tC2oZ7uw8MYCvUXPabeCVfkenOB+ktgsv12UQGGFgbGm4Ag=="}

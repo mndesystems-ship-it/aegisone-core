@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MNDe Systems | Deterministic Execution Control</title>
+    <meta name="description" content="MNDe Systems controls execution before runtime with deterministic ALLOW or REFUSE decisions and customer-custody signed receipts.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="MNDe Systems home">
+        <span class="brand-mark">M</span>
+        <span>MNDe Systems</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#architecture">Architecture</a>
+        <a href="#proof">Proof</a>
+        <a href="#workflow">Workflow</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Execution authority layer</p>
+          <h1>MNDe Systems</h1>
+          <p class="subhead">Deterministic execution control before runtime.</p>
+          <p class="hero-support">Every action asks first.<br>ALLOW or REFUSE.<br>Customer-custody signed receipts.</p>
+          <div class="cta-row" aria-label="Homepage actions">
+            <a class="button primary" href="#workflow">View Live Demo</a>
+            <a class="button secondary" href="#proof">Read Technical Proof</a>
+          </div>
+        </div>
+
+        <div class="authority-console" aria-label="MNDe decision console">
+          <div class="console-header">
+            <span>pre-runtime gate</span>
+            <span class="status-dot">online</span>
+          </div>
+          <div class="decision-stack">
+            <div class="signal-row">
+              <span>request.canonical_hash</span>
+              <strong>7b9e...41ac</strong>
+            </div>
+            <div class="signal-row">
+              <span>policy.version</span>
+              <strong>sidecar-custody-policy.v1</strong>
+            </div>
+            <div class="signal-row">
+              <span>custody.signer</span>
+              <strong>customer-prod-signer-1</strong>
+            </div>
+          </div>
+          <div class="decision-output">
+            <span>Decision</span>
+            <strong>ALLOW <em>or</em> REFUSE</strong>
+          </div>
+          <div class="receipt-line">receipt.signature_algorithm = ED25519</div>
+        </div>
+      </section>
+
+      <section class="proof-strip" aria-label="Verified release claims">
+        <span>Clean-room verified sidecar release</span>
+        <span>Customer-owned custody signing</span>
+        <span>Signed ALLOW and REFUSE receipts</span>
+        <span>Deterministic replay verification</span>
+        <span>Fail-closed startup</span>
+        <span>Zero release mutation after runtime</span>
+      </section>
+
+      <section class="section-shell architecture-section" id="architecture">
+        <div class="section-heading">
+          <p class="eyebrow">Architecture</p>
+          <h2>Execution asks before it acts.</h2>
+          <p>MNDe sits between automation and runtime, converting every execution attempt into a deterministic control decision.</p>
+        </div>
+        <div class="flow-diagram" aria-label="Execution flow">
+          <div class="flow-node source">Agent / API / Scheduler</div>
+          <div class="flow-arrow" aria-hidden="true"></div>
+          <div class="flow-node core">MNDe</div>
+          <div class="flow-arrow" aria-hidden="true"></div>
+          <div class="flow-node decision">ALLOW or REFUSE</div>
+          <div class="flow-arrow" aria-hidden="true"></div>
+          <div class="flow-node execution">Execution</div>
+        </div>
+      </section>
+
+      <section class="section-shell split-section">
+        <div class="section-heading">
+          <p class="eyebrow">Why MNDe Exists</p>
+          <h2>Runtime should not be the first control point.</h2>
+        </div>
+        <div class="problem-grid" aria-label="Execution risks MNDe controls">
+          <span>Runaway GPU jobs</span>
+          <span>Recursive agent loops</span>
+          <span>Unsafe tool execution</span>
+          <span>Unauthorized actions</span>
+          <span>Cost explosions</span>
+          <span>Missing audit proof</span>
+          <span>Non-deterministic policy enforcement</span>
+        </div>
+      </section>
+
+      <section class="section-shell how-section">
+        <div class="section-heading">
+          <p class="eyebrow">How It Works</p>
+          <h2>Deterministic control, signed before execution.</h2>
+        </div>
+        <ol class="step-list">
+          <li><span>01</span><strong>Request enters MNDe</strong></li>
+          <li><span>02</span><strong>Request canonicalized</strong></li>
+          <li><span>03</span><strong>Policy evaluated deterministically</strong></li>
+          <li><span>04</span><strong>Customer custody signer signs decision</strong></li>
+          <li><span>05</span><strong>Receipt persisted</strong></li>
+          <li><span>06</span><strong>Execution allowed or refused</strong></li>
+        </ol>
+      </section>
+
+      <section class="section-shell proof-section" id="proof">
+        <div class="section-heading">
+          <p class="eyebrow">Production Proof</p>
+          <h2>Machine-readable release evidence.</h2>
+          <p>The current sidecar-custody release is verified from a clean extract with runtime state isolated outside the signed release tree.</p>
+        </div>
+        <div class="proof-grid">
+          <article><span>Release Verification</span><strong>PASS</strong></article>
+          <article><span>Customer Custody</span><strong>PASS</strong></article>
+          <article><span>Receipt Verification</span><strong>PASS</strong></article>
+          <article><span>Replay Verification</span><strong>PASS</strong></article>
+          <article><span>Tamper Refusal</span><strong>PASS</strong></article>
+          <article><span>Restart Stability</span><strong>PASS</strong></article>
+          <article><span>Runtime Isolation</span><strong>PASS</strong></article>
+        </div>
+      </section>
+
+      <section class="section-shell workflow-section" id="workflow">
+        <div class="section-heading">
+          <p class="eyebrow">Real Workflow Example</p>
+          <h2>GPU job launch protection.</h2>
+        </div>
+        <div class="workflow-grid">
+          <div class="workflow-line" aria-label="GPU job protection flow">
+            <span>Agent requests GPU launch</span>
+            <span>MNDe evaluates request</span>
+            <span>ALLOW or REFUSE</span>
+            <span>Signed receipt emitted</span>
+            <span>Execution proceeds only if allowed</span>
+          </div>
+          <pre class="code-snippet"><code>decision = mnde.authorize(request)
+
+if decision == "ALLOW":
+    execute()
+else:
+    block()</code></pre>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

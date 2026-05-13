@@ -1,0 +1,257 @@
+[
+    {
+        "file":  "capture_hashes.json",
+        "sha256":  "3E973D54A551895657244DDD0A6BFD101805CC83094DF4DDDF634A6FB9E60ADF",
+        "length":  344
+    },
+    {
+        "file":  "attack-wave-bundle/attack_wave_results.json",
+        "sha256":  "065B6313A6BD6107B47DCA2206B311796294EF1DA65F6A4C1A0325E5824E2E5A",
+        "length":  6667
+    },
+    {
+        "file":  "audit-proof-bundle/adversarial_report.json",
+        "sha256":  "F6F4AA5DBA0A10B5650C26291570B824BF912CB9F0C37D8B9EDCBC4368A5E440",
+        "length":  4457
+    },
+    {
+        "file":  "audit-proof-bundle/benchmark_report.md",
+        "sha256":  "A13FFAE0269864BF2FC18DA6092EB66DF102DB189D5835E4A5CEAD2CC3510452",
+        "length":  938
+    },
+    {
+        "file":  "audit-proof-bundle/canonicalization_attack_report.json",
+        "sha256":  "3F93A149B694DC7612D68380968BC1ED491CB3BBE72EAB8182F2405457145442",
+        "length":  208
+    },
+    {
+        "file":  "audit-proof-bundle/cost_impact_report.json",
+        "sha256":  "21CE75898015162FC439B5DA8337FB89E70EF6B8AB34B043E5F5605F3B125C92",
+        "length":  790
+    },
+    {
+        "file":  "audit-proof-bundle/cost_prevention_cases.json",
+        "sha256":  "60F20CCCA0AD0A616503BA939AA4C69EA708D3C83A7B9CE80D8964802BFFC061",
+        "length":  7237
+    },
+    {
+        "file":  "audit-proof-bundle/determinism_proof.json",
+        "sha256":  "FC58CE0F511B35FF51F971454B6F8E3B33DACF3828CD5D30D3D97F394B3CE590",
+        "length":  746
+    },
+    {
+        "file":  "audit-proof-bundle/drift_report.json",
+        "sha256":  "EC4AFAEE5D89430F1911E789C6D1C24A7D50DD79115056364CA5E81E135E683A",
+        "length":  881
+    },
+    {
+        "file":  "audit-proof-bundle/failure_mode_report.json",
+        "sha256":  "E89D89467045740D50103BAA749811BEF06C5869A4B50AAE999268E2A6A88E93",
+        "length":  74
+    },
+    {
+        "file":  "audit-proof-bundle/manifest.json",
+        "sha256":  "505837CCF7C99652E7FFE0A03886053FD3D2B7CE4206966DAFC348466DF14725",
+        "length":  2821
+    },
+    {
+        "file":  "audit-proof-bundle/parity_report.json",
+        "sha256":  "5CD452FE30F0D40B4373F19DE5415A35CDC7BC2C75C7F2BC931C09B6C7460C65",
+        "length":  551
+    },
+    {
+        "file":  "audit-proof-bundle/parity_vectors.json",
+        "sha256":  "60E47AF7130969FC1A4343465A856CC719793E560262A5267F90F17163EAD1C4",
+        "length":  3910
+    },
+    {
+        "file":  "audit-proof-bundle/performance_report.json",
+        "sha256":  "A6D5DF34F6DCBE0E64BFFB0FDC84D59986DD944392ED45A1AE6BE53557CDD1AD",
+        "length":  6772
+    },
+    {
+        "file":  "audit-proof-bundle/replay_report.json",
+        "sha256":  "0A182AA9FE78799490C88AF63F84083CEDE3FC30DEF187072B1FF264D0576C02",
+        "length":  141
+    },
+    {
+        "file":  "audit-proof-bundle/rust_parity_output.json",
+        "sha256":  "6DCC535465BB9F2E63F8DC69D125FE07306B3EA02BDA04222C3FF56182E41221",
+        "length":  9216
+    },
+    {
+        "file":  "audit-proof-bundle/schema_enforcement_report.json",
+        "sha256":  "D75B0D46407C393FFC9029636FD2E0C078475BC2478DC5CDEBA8930C0E977159",
+        "length":  1137
+    },
+    {
+        "file":  "audit-proof-bundle/signed_receipts.jsonl",
+        "sha256":  "EA93D414E13F7E5649053E7475829D7C97E6DAA66DD7838122EE3B8DBA089191",
+        "length":  7526
+    },
+    {
+        "file":  "audit-proof-bundle/summary.json",
+        "sha256":  "F14C027BA6A74EAC338928DDD8B59DD9AD5FFCD6975A1627709218E99FE62F83",
+        "length":  1243
+    },
+    {
+        "file":  "audit-proof-bundle/test_matrix.json",
+        "sha256":  "C730DBC1E17728C8D19C6BC0FBBD2CD67D6442B50D01DB61C3E747945AD10880",
+        "length":  2243
+    },
+    {
+        "file":  "audit-proof-bundle/throughput_report.json",
+        "sha256":  "B675525A36A022A0858EF53153D991DDA869D8C9387827CB4650DD9481C2F2D5",
+        "length":  192
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/all_failing_cases.jsonl",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "length":  0
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/canonicalization_failures.jsonl",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "length":  0
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/determinism_failures.jsonl",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "length":  0
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/minimal_repro_inputs.json",
+        "sha256":  "D1C712A55E0694E887C0D3D633F75195B14A3BFA62D113CFBBF478F9BDAFD3FE",
+        "length":  116
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/parity_failures.jsonl",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "length":  0
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/replay_failures.jsonl",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "length":  0
+    },
+    {
+        "file":  "audit-proof-bundle/full_logs/schema_incorrect_accepts.jsonl",
+        "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "length":  0
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/failure_concurrent_write.jsonl",
+        "sha256":  "E1B8420FE4DE6AF8AA49A3FB390DB64C3422A0419A520AD595A9390FF869B15A",
+        "length":  257
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/failure_corrupted_entry.jsonl",
+        "sha256":  "6C55D4ADB82A0C057A49FEBF31C2BED90CE3650B52142C56D1AB0FCFECE00CCB",
+        "length":  3082
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/failure_interrupted_execution.jsonl",
+        "sha256":  "207270040573C58E602CFC6223AF6E2FA831D5BF6C18F3E34166C3A8014EE818",
+        "length":  2064
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/failure_partial_write.jsonl",
+        "sha256":  "5135F984D2D36479102C06F5B83E3A52A6C2B1A9506362F529048C3246C25FF2",
+        "length":  1541
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/parity_report.json",
+        "sha256":  "BFE2C8AADAC40BF3B203863F66F17F8430E4FDE3F965528CF410A43C24969A78",
+        "length":  13149
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/parity_vectors.json",
+        "sha256":  "453EEED71D3F68CE0792BB0E92A8123F4E075F65E097B6B7EEB473CC210DFF26",
+        "length":  208367
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/replay_results.json",
+        "sha256":  "6A7A2436E89D5BF20926F10AD2F0E16E996D98142C10BFD4E4412D3F441F4317",
+        "length":  164
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/rust_parity_output.json",
+        "sha256":  "18D6AEEE16766B7A32014D2BB84A0B34B218907EE3F3AFC2C139A3CE88DD6FFA",
+        "length":  33881
+    },
+    {
+        "file":  "audit-proof-bundle/proof_bundle/signed_receipts.jsonl",
+        "sha256":  "01BA4719C80B6FE911B091A7C05124B64EEECE964E09C058EF8F9805DACA546B",
+        "length":  1
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/agent_behavior_report.json",
+        "sha256":  "37333EB70A5A8A27ACAE832107C7FD088D3A32FF584EC1F385B49A1929AB22EA",
+        "length":  1082
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/combined_benchmark_report.json",
+        "sha256":  "23D5211C3F1781BC452BBC192E3E7FAD092E2104AA1A6A739A1306F5BC3D1FA2",
+        "length":  6873
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/cost_report.json",
+        "sha256":  "00B32659B82CAA043FC2CF71AE807907E89436A08B20079D150AD1C89EA18367",
+        "length":  762
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/determinism_report.json",
+        "sha256":  "297CAEB5223275D45851BD4ADFC767E5FD1211359F333C940A510BC54FE53C63",
+        "length":  259
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/latency_real_validation.json",
+        "sha256":  "DFE81433116068A06F41E6FDA70F52D9415E54C0A66B50DC363A072FC61668B0",
+        "length":  2423
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/latency_report.json",
+        "sha256":  "ECCF464C3566C3419FB6D4D743F8B49C4AA849014719CE6853AE9F3043F17652",
+        "length":  1105
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/manifest.json",
+        "sha256":  "963D74EF2841250E0806ABC6724EB4144B69A34311B3C70425D161D14B0456B4",
+        "length":  873
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/replay_report.json",
+        "sha256":  "65AD4C362122BBC7361393B721CB870886F3DC39E4ACED7003728A0DB8EEA8DC",
+        "length":  145
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/standard_protection_results.json",
+        "sha256":  "5AD57E3A8C2F21F6D0643B13598999024526D43AE720F22B99BA15CBC65D0A95",
+        "length":  2215
+    },
+    {
+        "file":  "mnde-controlled-benchmark-bundle/summary.json",
+        "sha256":  "A12E8CFBB2A1CF5A8C3AD97BB6EF83C5477D243A5291466E55B7481232C52B64",
+        "length":  848
+    },
+    {
+        "file":  "post-remediation-verification-bundle/artifact_paths.txt",
+        "sha256":  "75DB0A21FCE85DD67D077BA7AA3801F96C7F4D9B46E2A83095F35071F34290EB",
+        "length":  395
+    },
+    {
+        "file":  "post-remediation-verification-bundle/post_verification_report.json",
+        "sha256":  "F33C50A54595E52AAB5B9146E47DB6C4597B87B0A5F14899272E4688F9D56DEB",
+        "length":  3925
+    },
+    {
+        "file":  "post-remediation-verification-bundle/produced_receipts.jsonl",
+        "sha256":  "D354DE7FD5372D94C5BF2CE2EE01EDE3A31BAC7D144AF5660EBE7999F2CCCD70",
+        "length":  14388
+    },
+    {
+        "file":  "remediation-wave-bundle/remediation_wave_results.json",
+        "sha256":  "379AAE580BDE4AD66A27D00C1DE6DF6507B85533B5EAF75BD64AD1BC089975DB",
+        "length":  4167
+    }
+]

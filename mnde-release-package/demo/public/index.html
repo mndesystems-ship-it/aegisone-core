@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MNDe Execution Control Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">MNDe black-box API demo</p>
+          <h1>Deterministic execution gate</h1>
+          <p>
+            Browser traffic goes to the demo backend on port 3000. The backend signs each
+            request, calls MNDe on port 8787, and returns the real signed response.
+          </p>
+        </div>
+        <div class="hero-status">
+          <span>Last decision</span>
+          <strong id="decisionHero">Awaiting run</strong>
+          <small id="heroReason">Signed request not sent yet</small>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel controls-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Execution request</p>
+              <h2>GPU job parameters</h2>
+            </div>
+            <span class="port">POST /demo</span>
+          </div>
+          <div class="controls">
+            <label>
+              GPU count
+              <div class="number-control">
+                <button id="gpuDown" type="button" aria-label="Decrease GPU count">-</button>
+                <input id="gpuCount" type="number" min="1" max="1000" step="1" value="2" />
+                <button id="gpuUp" type="button" aria-label="Increase GPU count">+</button>
+              </div>
+            </label>
+            <label>
+              Hours
+              <div class="number-control">
+                <button id="hoursDown" type="button" aria-label="Decrease hours">-</button>
+                <input id="hours" type="number" min="1" max="1000" step="1" value="4" />
+                <button id="hoursUp" type="button" aria-label="Increase hours">+</button>
+              </div>
+            </label>
+            <label>
+              GPU-hour price
+              <div class="money-control">
+                <span>$</span>
+                <input id="gpuPrice" type="number" min="0.01" max="1000" step="0.01" value="5.00" />
+              </div>
+            </label>
+            <button id="runButton" type="button">Run decision</button>
+          </div>
+          <div class="advanced-controls">
+            <label class="toggle-row">
+              <input id="retryOnFail" type="checkbox" />
+              <span>Retry on failure</span>
+            </label>
+            <label>
+              Max retries
+              <input id="maxRetries" type="number" min="0" max="999" step="1" value="0" />
+            </label>
+            <label class="toggle-row">
+              <input id="autoScale" type="checkbox" />
+              <span>Autoscale</span>
+            </label>
+            <label>
+              Scale multiplier
+              <input id="scaleMultiplier" type="number" min="1" max="100" step="1" value="1" />
+            </label>
+            <label class="toggle-row danger-toggle">
+              <input id="killSwitch" type="checkbox" />
+              <span>Kill switch active</span>
+            </label>
+            <label class="toggle-row danger-toggle">
+              <input id="failedAutoScale" type="checkbox" />
+              <span>Failed autoscale update</span>
+            </label>
+            <label>
+              Observed GPUs
+              <input id="observedGpuCount" type="number" min="1" max="1000" step="1" value="2" />
+            </label>
+          </div>
+          <div class="quick-actions">
+            <button id="safeButton" type="button">Safe example</button>
+            <button id="unsafeButton" type="button">Runaway example</button>
+            <button id="hoursLimitButton" type="button">Too many hours</button>
+            <button id="costLimitButton" type="button">Cost limit</button>
+            <button id="retryLimitButton" type="button">Retry storm</button>
+            <button id="autoScaleButton" type="button">Autoscale denied</button>
+            <button id="failedAutoScaleButton" type="button">Failed autoscale</button>
+            <button id="killSwitchButton" type="button">Kill switch</button>
+            <button id="verifyButton" type="button">Verify last receipt</button>
+          </div>
+          <div class="preview">
+            <div class="preview-row">
+              <span>Projected cost</span>
+              <strong id="projectedCost">$40.00</strong>
+            </div>
+            <div class="limit-track" aria-label="Policy cost usage">
+              <div id="costBar"></div>
+            </div>
+            <div class="preview-row muted-row">
+              <span>Signed policy budget</span>
+              <strong>$100.00</strong>
+            </div>
+            <div class="cost-breakdown" id="costBreakdown">
+              2 GPUs x 4 hours x $5.00
+            </div>
+          </div>
+        </div>
+
+        <div class="panel proof-panel">
+          <p class="section-kicker">Trust path</p>
+          <ol>
+            <li>Backend signs Ed25519 request</li>
+            <li>MNDe validates policy and cost</li>
+            <li>Response returns signed receipt</li>
+          </ol>
+          <div class="policy-box">
+            <span>Active policy</span>
+            <strong>4 GPUs / 8 hours / $100 max / retries <= 1 / autoscale off</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="result-grid">
+        <article id="decisionCard" class="decision-card">
+          <span>decision</span>
+          <strong id="decision">-</strong>
+        </article>
+        <article>
+          <span>reason_code</span>
+          <strong id="reason">-</strong>
+        </article>
+        <article>
+          <span>total_cost_usd</span>
+          <strong id="totalCost">-</strong>
+        </article>
+        <article>
+          <span>prevented_cost_usd</span>
+          <strong id="preventedCost">-</strong>
+        </article>
+        <article class="wide">
+          <span>request_hash</span>
+          <code id="requestHash">-</code>
+        </article>
+        <article class="wide">
+          <span>decision_hash</span>
+          <code id="decisionHash">-</code>
+        </article>
+      </section>
+
+      <section class="evidence">
+        <div class="panel history">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Session</p>
+              <h2>Decision history</h2>
+            </div>
+          </div>
+          <div id="historyList" class="history-list">
+            <p>No runs yet.</p>
+          </div>
+        </div>
+
+        <div class="panel verify">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Receipt</p>
+              <h2>Verification</h2>
+            </div>
+          </div>
+          <pre id="verifyOutput">No receipt verified yet.</pre>
+        </div>
+
+        <div class="panel logs">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Wire data</p>
+              <h2>Raw request and response</h2>
+            </div>
+          </div>
+          <pre id="logOutput">Click Run to call MNDe.</pre>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

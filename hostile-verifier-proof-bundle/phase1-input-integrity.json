@@ -1,0 +1,430 @@
+{
+  "variants": [
+    {
+      "name": "canonical",
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW",
+      "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+      "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+      "receipt": {
+        "schema_version": "ecs.receipt.v2",
+        "canonical_request": "{\"execution_request\":{\"actor\":{\"user_id\":\"user-001\"},\"execution\":{\"auto_scale\":false,\"max_retries\":0,\"max_scale_multiplier\":1,\"retry_on_fail\":false},\"orbit_intent\":{\"action\":\"execute\",\"boundary\":\"gpu-batch\",\"lifecycle_state\":\"ARMED\",\"orbit_version\":\"2.0\",\"payload\":{\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"signatures\":[{\"alg\":\"hmac-sha256\",\"sig\":\"orbit-signature-v1\"}]},\"release_request\":{\"already_consumed\":false,\"execution_id\":\"phase1-valid\",\"hold_state\":\"APPROVED\"},\"request_id\":\"phase1-valid\",\"resources\":{\"gpu_count\":2,\"gpu_type\":\"a10g\",\"hours\":4},\"runtime_observation\":{\"actual_gpu_count\":2,\"actual_hours\":4,\"actual_total_cost_cents\":4000,\"kill_switch_active\":false},\"submitted_region\":\"us-west-2\",\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"policy_document\":{\"policy_version\":\"policy.v1\",\"rules\":{\"allow_auto_scale\":false,\"max_gpu_count\":4,\"max_hours\":8,\"max_retry_count\":1,\"max_total_cost_cents\":10000,\"require_manual_approval_above_cents\":5000},\"schema_version\":\"ecs.policy.v1\"},\"pricing_data\":{\"gpu_hour_cents\":500}}",
+        "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+        "decision_output": {
+          "decision": "ALLOW",
+          "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+          "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+          "reason_code": "OK_ALLOW",
+          "total_cost_usd": "40.00",
+          "allowed_cost_usd": "40.00",
+          "prevented_cost_usd": "0.00",
+          "policy_version": "policy.v1",
+          "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+          "execution_id": "phase1-valid",
+          "key_set_version": "receipt-key-set-v1"
+        },
+        "pipeline_trace": {
+          "preflight": {
+            "layer": "preflight",
+            "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+            "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+            "policy_version": "policy.v1"
+          },
+          "orbit": {
+            "layer": "orbit",
+            "decision": "ALLOW",
+            "reason_code": "OK_ORBIT",
+            "validation_hash": "c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b"
+          },
+          "arm": {
+            "layer": "arm",
+            "decision": "ALLOW",
+            "reason_code": "OK_ARM",
+            "projected_total_cost_cents": 4000,
+            "allowed_cost_cents": 4000,
+            "prevented_cost_cents": 0,
+            "execution_id": "phase1-valid"
+          },
+          "ramona": {
+            "layer": "ramona",
+            "decision": "ALLOW",
+            "reason_code": "OK_RAM0NA",
+            "runtime_hash": "1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c"
+          }
+        },
+        "signature": {
+          "algorithm": "HMAC-SHA256",
+          "key_id": "ecs-prod-key-v2",
+          "value": "ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660"
+        },
+        "verifiable_signature": {
+          "algorithm": "ED25519",
+          "key_id": "receipt-ed25519-9873a7f3636ae58c",
+          "public_key_fingerprint": "9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783",
+          "value": "d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c"
+        }
+      },
+      "receipt_bytes": "{\"canonical_request\":\"{\\\"execution_request\\\":{\\\"actor\\\":{\\\"user_id\\\":\\\"user-001\\\"},\\\"execution\\\":{\\\"auto_scale\\\":false,\\\"max_retries\\\":0,\\\"max_scale_multiplier\\\":1,\\\"retry_on_fail\\\":false},\\\"orbit_intent\\\":{\\\"action\\\":\\\"execute\\\",\\\"boundary\\\":\\\"gpu-batch\\\",\\\"lifecycle_state\\\":\\\"ARMED\\\",\\\"orbit_version\\\":\\\"2.0\\\",\\\"payload\\\":{\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"signatures\\\":[{\\\"alg\\\":\\\"hmac-sha256\\\",\\\"sig\\\":\\\"orbit-signature-v1\\\"}]},\\\"release_request\\\":{\\\"already_consumed\\\":false,\\\"execution_id\\\":\\\"phase1-valid\\\",\\\"hold_state\\\":\\\"APPROVED\\\"},\\\"request_id\\\":\\\"phase1-valid\\\",\\\"resources\\\":{\\\"gpu_count\\\":2,\\\"gpu_type\\\":\\\"a10g\\\",\\\"hours\\\":4},\\\"runtime_observation\\\":{\\\"actual_gpu_count\\\":2,\\\"actual_hours\\\":4,\\\"actual_total_cost_cents\\\":4000,\\\"kill_switch_active\\\":false},\\\"submitted_region\\\":\\\"us-west-2\\\",\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"policy_document\\\":{\\\"policy_version\\\":\\\"policy.v1\\\",\\\"rules\\\":{\\\"allow_auto_scale\\\":false,\\\"max_gpu_count\\\":4,\\\"max_hours\\\":8,\\\"max_retry_count\\\":1,\\\"max_total_cost_cents\\\":10000,\\\"require_manual_approval_above_cents\\\":5000},\\\"schema_version\\\":\\\"ecs.policy.v1\\\"},\\\"pricing_data\\\":{\\\"gpu_hour_cents\\\":500}}\",\"decision_output\":{\"allowed_cost_usd\":\"40.00\",\"decision\":\"ALLOW\",\"decision_hash\":\"5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58\",\"execution_id\":\"phase1-valid\",\"key_set_version\":\"receipt-key-set-v1\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"prevented_cost_usd\":\"0.00\",\"reason_code\":\"OK_ALLOW\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"total_cost_usd\":\"40.00\"},\"pipeline_trace\":{\"arm\":{\"allowed_cost_cents\":4000,\"decision\":\"ALLOW\",\"execution_id\":\"phase1-valid\",\"layer\":\"arm\",\"prevented_cost_cents\":0,\"projected_total_cost_cents\":4000,\"reason_code\":\"OK_ARM\"},\"orbit\":{\"decision\":\"ALLOW\",\"layer\":\"orbit\",\"reason_code\":\"OK_ORBIT\",\"validation_hash\":\"c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b\"},\"preflight\":{\"layer\":\"preflight\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\"},\"ramona\":{\"decision\":\"ALLOW\",\"layer\":\"ramona\",\"reason_code\":\"OK_RAM0NA\",\"runtime_hash\":\"1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c\"}},\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"schema_version\":\"ecs.receipt.v2\",\"signature\":{\"algorithm\":\"HMAC-SHA256\",\"key_id\":\"ecs-prod-key-v2\",\"value\":\"ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660\"},\"verifiable_signature\":{\"algorithm\":\"ED25519\",\"key_id\":\"receipt-ed25519-9873a7f3636ae58c\",\"public_key_fingerprint\":\"9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783\",\"value\":\"d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c\"}}",
+      "total_cost_usd": "40.00",
+      "allowed_cost_usd": "40.00",
+      "prevented_cost_usd": "0.00",
+      "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87"
+    },
+    {
+      "name": "reordered",
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW",
+      "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+      "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+      "receipt": {
+        "schema_version": "ecs.receipt.v2",
+        "canonical_request": "{\"execution_request\":{\"actor\":{\"user_id\":\"user-001\"},\"execution\":{\"auto_scale\":false,\"max_retries\":0,\"max_scale_multiplier\":1,\"retry_on_fail\":false},\"orbit_intent\":{\"action\":\"execute\",\"boundary\":\"gpu-batch\",\"lifecycle_state\":\"ARMED\",\"orbit_version\":\"2.0\",\"payload\":{\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"signatures\":[{\"alg\":\"hmac-sha256\",\"sig\":\"orbit-signature-v1\"}]},\"release_request\":{\"already_consumed\":false,\"execution_id\":\"phase1-valid\",\"hold_state\":\"APPROVED\"},\"request_id\":\"phase1-valid\",\"resources\":{\"gpu_count\":2,\"gpu_type\":\"a10g\",\"hours\":4},\"runtime_observation\":{\"actual_gpu_count\":2,\"actual_hours\":4,\"actual_total_cost_cents\":4000,\"kill_switch_active\":false},\"submitted_region\":\"us-west-2\",\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"policy_document\":{\"policy_version\":\"policy.v1\",\"rules\":{\"allow_auto_scale\":false,\"max_gpu_count\":4,\"max_hours\":8,\"max_retry_count\":1,\"max_total_cost_cents\":10000,\"require_manual_approval_above_cents\":5000},\"schema_version\":\"ecs.policy.v1\"},\"pricing_data\":{\"gpu_hour_cents\":500}}",
+        "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+        "decision_output": {
+          "decision": "ALLOW",
+          "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+          "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+          "reason_code": "OK_ALLOW",
+          "total_cost_usd": "40.00",
+          "allowed_cost_usd": "40.00",
+          "prevented_cost_usd": "0.00",
+          "policy_version": "policy.v1",
+          "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+          "execution_id": "phase1-valid",
+          "key_set_version": "receipt-key-set-v1"
+        },
+        "pipeline_trace": {
+          "preflight": {
+            "layer": "preflight",
+            "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+            "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+            "policy_version": "policy.v1"
+          },
+          "orbit": {
+            "layer": "orbit",
+            "decision": "ALLOW",
+            "reason_code": "OK_ORBIT",
+            "validation_hash": "c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b"
+          },
+          "arm": {
+            "layer": "arm",
+            "decision": "ALLOW",
+            "reason_code": "OK_ARM",
+            "projected_total_cost_cents": 4000,
+            "allowed_cost_cents": 4000,
+            "prevented_cost_cents": 0,
+            "execution_id": "phase1-valid"
+          },
+          "ramona": {
+            "layer": "ramona",
+            "decision": "ALLOW",
+            "reason_code": "OK_RAM0NA",
+            "runtime_hash": "1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c"
+          }
+        },
+        "signature": {
+          "algorithm": "HMAC-SHA256",
+          "key_id": "ecs-prod-key-v2",
+          "value": "ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660"
+        },
+        "verifiable_signature": {
+          "algorithm": "ED25519",
+          "key_id": "receipt-ed25519-9873a7f3636ae58c",
+          "public_key_fingerprint": "9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783",
+          "value": "d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c"
+        }
+      },
+      "receipt_bytes": "{\"canonical_request\":\"{\\\"execution_request\\\":{\\\"actor\\\":{\\\"user_id\\\":\\\"user-001\\\"},\\\"execution\\\":{\\\"auto_scale\\\":false,\\\"max_retries\\\":0,\\\"max_scale_multiplier\\\":1,\\\"retry_on_fail\\\":false},\\\"orbit_intent\\\":{\\\"action\\\":\\\"execute\\\",\\\"boundary\\\":\\\"gpu-batch\\\",\\\"lifecycle_state\\\":\\\"ARMED\\\",\\\"orbit_version\\\":\\\"2.0\\\",\\\"payload\\\":{\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"signatures\\\":[{\\\"alg\\\":\\\"hmac-sha256\\\",\\\"sig\\\":\\\"orbit-signature-v1\\\"}]},\\\"release_request\\\":{\\\"already_consumed\\\":false,\\\"execution_id\\\":\\\"phase1-valid\\\",\\\"hold_state\\\":\\\"APPROVED\\\"},\\\"request_id\\\":\\\"phase1-valid\\\",\\\"resources\\\":{\\\"gpu_count\\\":2,\\\"gpu_type\\\":\\\"a10g\\\",\\\"hours\\\":4},\\\"runtime_observation\\\":{\\\"actual_gpu_count\\\":2,\\\"actual_hours\\\":4,\\\"actual_total_cost_cents\\\":4000,\\\"kill_switch_active\\\":false},\\\"submitted_region\\\":\\\"us-west-2\\\",\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"policy_document\\\":{\\\"policy_version\\\":\\\"policy.v1\\\",\\\"rules\\\":{\\\"allow_auto_scale\\\":false,\\\"max_gpu_count\\\":4,\\\"max_hours\\\":8,\\\"max_retry_count\\\":1,\\\"max_total_cost_cents\\\":10000,\\\"require_manual_approval_above_cents\\\":5000},\\\"schema_version\\\":\\\"ecs.policy.v1\\\"},\\\"pricing_data\\\":{\\\"gpu_hour_cents\\\":500}}\",\"decision_output\":{\"allowed_cost_usd\":\"40.00\",\"decision\":\"ALLOW\",\"decision_hash\":\"5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58\",\"execution_id\":\"phase1-valid\",\"key_set_version\":\"receipt-key-set-v1\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"prevented_cost_usd\":\"0.00\",\"reason_code\":\"OK_ALLOW\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"total_cost_usd\":\"40.00\"},\"pipeline_trace\":{\"arm\":{\"allowed_cost_cents\":4000,\"decision\":\"ALLOW\",\"execution_id\":\"phase1-valid\",\"layer\":\"arm\",\"prevented_cost_cents\":0,\"projected_total_cost_cents\":4000,\"reason_code\":\"OK_ARM\"},\"orbit\":{\"decision\":\"ALLOW\",\"layer\":\"orbit\",\"reason_code\":\"OK_ORBIT\",\"validation_hash\":\"c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b\"},\"preflight\":{\"layer\":\"preflight\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\"},\"ramona\":{\"decision\":\"ALLOW\",\"layer\":\"ramona\",\"reason_code\":\"OK_RAM0NA\",\"runtime_hash\":\"1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c\"}},\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"schema_version\":\"ecs.receipt.v2\",\"signature\":{\"algorithm\":\"HMAC-SHA256\",\"key_id\":\"ecs-prod-key-v2\",\"value\":\"ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660\"},\"verifiable_signature\":{\"algorithm\":\"ED25519\",\"key_id\":\"receipt-ed25519-9873a7f3636ae58c\",\"public_key_fingerprint\":\"9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783\",\"value\":\"d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c\"}}",
+      "total_cost_usd": "40.00",
+      "allowed_cost_usd": "40.00",
+      "prevented_cost_usd": "0.00",
+      "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87"
+    },
+    {
+      "name": "whitespace",
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW",
+      "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+      "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+      "receipt": {
+        "schema_version": "ecs.receipt.v2",
+        "canonical_request": "{\"execution_request\":{\"actor\":{\"user_id\":\"user-001\"},\"execution\":{\"auto_scale\":false,\"max_retries\":0,\"max_scale_multiplier\":1,\"retry_on_fail\":false},\"orbit_intent\":{\"action\":\"execute\",\"boundary\":\"gpu-batch\",\"lifecycle_state\":\"ARMED\",\"orbit_version\":\"2.0\",\"payload\":{\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"signatures\":[{\"alg\":\"hmac-sha256\",\"sig\":\"orbit-signature-v1\"}]},\"release_request\":{\"already_consumed\":false,\"execution_id\":\"phase1-valid\",\"hold_state\":\"APPROVED\"},\"request_id\":\"phase1-valid\",\"resources\":{\"gpu_count\":2,\"gpu_type\":\"a10g\",\"hours\":4},\"runtime_observation\":{\"actual_gpu_count\":2,\"actual_hours\":4,\"actual_total_cost_cents\":4000,\"kill_switch_active\":false},\"submitted_region\":\"us-west-2\",\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"policy_document\":{\"policy_version\":\"policy.v1\",\"rules\":{\"allow_auto_scale\":false,\"max_gpu_count\":4,\"max_hours\":8,\"max_retry_count\":1,\"max_total_cost_cents\":10000,\"require_manual_approval_above_cents\":5000},\"schema_version\":\"ecs.policy.v1\"},\"pricing_data\":{\"gpu_hour_cents\":500}}",
+        "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+        "decision_output": {
+          "decision": "ALLOW",
+          "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+          "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+          "reason_code": "OK_ALLOW",
+          "total_cost_usd": "40.00",
+          "allowed_cost_usd": "40.00",
+          "prevented_cost_usd": "0.00",
+          "policy_version": "policy.v1",
+          "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+          "execution_id": "phase1-valid",
+          "key_set_version": "receipt-key-set-v1"
+        },
+        "pipeline_trace": {
+          "preflight": {
+            "layer": "preflight",
+            "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+            "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+            "policy_version": "policy.v1"
+          },
+          "orbit": {
+            "layer": "orbit",
+            "decision": "ALLOW",
+            "reason_code": "OK_ORBIT",
+            "validation_hash": "c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b"
+          },
+          "arm": {
+            "layer": "arm",
+            "decision": "ALLOW",
+            "reason_code": "OK_ARM",
+            "projected_total_cost_cents": 4000,
+            "allowed_cost_cents": 4000,
+            "prevented_cost_cents": 0,
+            "execution_id": "phase1-valid"
+          },
+          "ramona": {
+            "layer": "ramona",
+            "decision": "ALLOW",
+            "reason_code": "OK_RAM0NA",
+            "runtime_hash": "1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c"
+          }
+        },
+        "signature": {
+          "algorithm": "HMAC-SHA256",
+          "key_id": "ecs-prod-key-v2",
+          "value": "ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660"
+        },
+        "verifiable_signature": {
+          "algorithm": "ED25519",
+          "key_id": "receipt-ed25519-9873a7f3636ae58c",
+          "public_key_fingerprint": "9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783",
+          "value": "d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c"
+        }
+      },
+      "receipt_bytes": "{\"canonical_request\":\"{\\\"execution_request\\\":{\\\"actor\\\":{\\\"user_id\\\":\\\"user-001\\\"},\\\"execution\\\":{\\\"auto_scale\\\":false,\\\"max_retries\\\":0,\\\"max_scale_multiplier\\\":1,\\\"retry_on_fail\\\":false},\\\"orbit_intent\\\":{\\\"action\\\":\\\"execute\\\",\\\"boundary\\\":\\\"gpu-batch\\\",\\\"lifecycle_state\\\":\\\"ARMED\\\",\\\"orbit_version\\\":\\\"2.0\\\",\\\"payload\\\":{\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"signatures\\\":[{\\\"alg\\\":\\\"hmac-sha256\\\",\\\"sig\\\":\\\"orbit-signature-v1\\\"}]},\\\"release_request\\\":{\\\"already_consumed\\\":false,\\\"execution_id\\\":\\\"phase1-valid\\\",\\\"hold_state\\\":\\\"APPROVED\\\"},\\\"request_id\\\":\\\"phase1-valid\\\",\\\"resources\\\":{\\\"gpu_count\\\":2,\\\"gpu_type\\\":\\\"a10g\\\",\\\"hours\\\":4},\\\"runtime_observation\\\":{\\\"actual_gpu_count\\\":2,\\\"actual_hours\\\":4,\\\"actual_total_cost_cents\\\":4000,\\\"kill_switch_active\\\":false},\\\"submitted_region\\\":\\\"us-west-2\\\",\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"policy_document\\\":{\\\"policy_version\\\":\\\"policy.v1\\\",\\\"rules\\\":{\\\"allow_auto_scale\\\":false,\\\"max_gpu_count\\\":4,\\\"max_hours\\\":8,\\\"max_retry_count\\\":1,\\\"max_total_cost_cents\\\":10000,\\\"require_manual_approval_above_cents\\\":5000},\\\"schema_version\\\":\\\"ecs.policy.v1\\\"},\\\"pricing_data\\\":{\\\"gpu_hour_cents\\\":500}}\",\"decision_output\":{\"allowed_cost_usd\":\"40.00\",\"decision\":\"ALLOW\",\"decision_hash\":\"5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58\",\"execution_id\":\"phase1-valid\",\"key_set_version\":\"receipt-key-set-v1\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"prevented_cost_usd\":\"0.00\",\"reason_code\":\"OK_ALLOW\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"total_cost_usd\":\"40.00\"},\"pipeline_trace\":{\"arm\":{\"allowed_cost_cents\":4000,\"decision\":\"ALLOW\",\"execution_id\":\"phase1-valid\",\"layer\":\"arm\",\"prevented_cost_cents\":0,\"projected_total_cost_cents\":4000,\"reason_code\":\"OK_ARM\"},\"orbit\":{\"decision\":\"ALLOW\",\"layer\":\"orbit\",\"reason_code\":\"OK_ORBIT\",\"validation_hash\":\"c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b\"},\"preflight\":{\"layer\":\"preflight\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\"},\"ramona\":{\"decision\":\"ALLOW\",\"layer\":\"ramona\",\"reason_code\":\"OK_RAM0NA\",\"runtime_hash\":\"1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c\"}},\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"schema_version\":\"ecs.receipt.v2\",\"signature\":{\"algorithm\":\"HMAC-SHA256\",\"key_id\":\"ecs-prod-key-v2\",\"value\":\"ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660\"},\"verifiable_signature\":{\"algorithm\":\"ED25519\",\"key_id\":\"receipt-ed25519-9873a7f3636ae58c\",\"public_key_fingerprint\":\"9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783\",\"value\":\"d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c\"}}",
+      "total_cost_usd": "40.00",
+      "allowed_cost_usd": "40.00",
+      "prevented_cost_usd": "0.00",
+      "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87"
+    },
+    {
+      "name": "escaped",
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW",
+      "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+      "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+      "receipt": {
+        "schema_version": "ecs.receipt.v2",
+        "canonical_request": "{\"execution_request\":{\"actor\":{\"user_id\":\"user-001\"},\"execution\":{\"auto_scale\":false,\"max_retries\":0,\"max_scale_multiplier\":1,\"retry_on_fail\":false},\"orbit_intent\":{\"action\":\"execute\",\"boundary\":\"gpu-batch\",\"lifecycle_state\":\"ARMED\",\"orbit_version\":\"2.0\",\"payload\":{\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"signatures\":[{\"alg\":\"hmac-sha256\",\"sig\":\"orbit-signature-v1\"}]},\"release_request\":{\"already_consumed\":false,\"execution_id\":\"phase1-valid\",\"hold_state\":\"APPROVED\"},\"request_id\":\"phase1-valid\",\"resources\":{\"gpu_count\":2,\"gpu_type\":\"a10g\",\"hours\":4},\"runtime_observation\":{\"actual_gpu_count\":2,\"actual_hours\":4,\"actual_total_cost_cents\":4000,\"kill_switch_active\":false},\"submitted_region\":\"us-west-2\",\"tool_calls\":[{\"priority\":1,\"tool\":\"deploy_irreversible\"}]},\"policy_document\":{\"policy_version\":\"policy.v1\",\"rules\":{\"allow_auto_scale\":false,\"max_gpu_count\":4,\"max_hours\":8,\"max_retry_count\":1,\"max_total_cost_cents\":10000,\"require_manual_approval_above_cents\":5000},\"schema_version\":\"ecs.policy.v1\"},\"pricing_data\":{\"gpu_hour_cents\":500}}",
+        "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+        "decision_output": {
+          "decision": "ALLOW",
+          "decision_hash": "5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58",
+          "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+          "reason_code": "OK_ALLOW",
+          "total_cost_usd": "40.00",
+          "allowed_cost_usd": "40.00",
+          "prevented_cost_usd": "0.00",
+          "policy_version": "policy.v1",
+          "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+          "execution_id": "phase1-valid",
+          "key_set_version": "receipt-key-set-v1"
+        },
+        "pipeline_trace": {
+          "preflight": {
+            "layer": "preflight",
+            "request_hash": "f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331",
+            "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87",
+            "policy_version": "policy.v1"
+          },
+          "orbit": {
+            "layer": "orbit",
+            "decision": "ALLOW",
+            "reason_code": "OK_ORBIT",
+            "validation_hash": "c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b"
+          },
+          "arm": {
+            "layer": "arm",
+            "decision": "ALLOW",
+            "reason_code": "OK_ARM",
+            "projected_total_cost_cents": 4000,
+            "allowed_cost_cents": 4000,
+            "prevented_cost_cents": 0,
+            "execution_id": "phase1-valid"
+          },
+          "ramona": {
+            "layer": "ramona",
+            "decision": "ALLOW",
+            "reason_code": "OK_RAM0NA",
+            "runtime_hash": "1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c"
+          }
+        },
+        "signature": {
+          "algorithm": "HMAC-SHA256",
+          "key_id": "ecs-prod-key-v2",
+          "value": "ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660"
+        },
+        "verifiable_signature": {
+          "algorithm": "ED25519",
+          "key_id": "receipt-ed25519-9873a7f3636ae58c",
+          "public_key_fingerprint": "9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783",
+          "value": "d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c"
+        }
+      },
+      "receipt_bytes": "{\"canonical_request\":\"{\\\"execution_request\\\":{\\\"actor\\\":{\\\"user_id\\\":\\\"user-001\\\"},\\\"execution\\\":{\\\"auto_scale\\\":false,\\\"max_retries\\\":0,\\\"max_scale_multiplier\\\":1,\\\"retry_on_fail\\\":false},\\\"orbit_intent\\\":{\\\"action\\\":\\\"execute\\\",\\\"boundary\\\":\\\"gpu-batch\\\",\\\"lifecycle_state\\\":\\\"ARMED\\\",\\\"orbit_version\\\":\\\"2.0\\\",\\\"payload\\\":{\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"signatures\\\":[{\\\"alg\\\":\\\"hmac-sha256\\\",\\\"sig\\\":\\\"orbit-signature-v1\\\"}]},\\\"release_request\\\":{\\\"already_consumed\\\":false,\\\"execution_id\\\":\\\"phase1-valid\\\",\\\"hold_state\\\":\\\"APPROVED\\\"},\\\"request_id\\\":\\\"phase1-valid\\\",\\\"resources\\\":{\\\"gpu_count\\\":2,\\\"gpu_type\\\":\\\"a10g\\\",\\\"hours\\\":4},\\\"runtime_observation\\\":{\\\"actual_gpu_count\\\":2,\\\"actual_hours\\\":4,\\\"actual_total_cost_cents\\\":4000,\\\"kill_switch_active\\\":false},\\\"submitted_region\\\":\\\"us-west-2\\\",\\\"tool_calls\\\":[{\\\"priority\\\":1,\\\"tool\\\":\\\"deploy_irreversible\\\"}]},\\\"policy_document\\\":{\\\"policy_version\\\":\\\"policy.v1\\\",\\\"rules\\\":{\\\"allow_auto_scale\\\":false,\\\"max_gpu_count\\\":4,\\\"max_hours\\\":8,\\\"max_retry_count\\\":1,\\\"max_total_cost_cents\\\":10000,\\\"require_manual_approval_above_cents\\\":5000},\\\"schema_version\\\":\\\"ecs.policy.v1\\\"},\\\"pricing_data\\\":{\\\"gpu_hour_cents\\\":500}}\",\"decision_output\":{\"allowed_cost_usd\":\"40.00\",\"decision\":\"ALLOW\",\"decision_hash\":\"5710c599babdd118918cc692022da9742c8f7f5e9331dcb5866e0de0f2a85a58\",\"execution_id\":\"phase1-valid\",\"key_set_version\":\"receipt-key-set-v1\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"prevented_cost_usd\":\"0.00\",\"reason_code\":\"OK_ALLOW\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"total_cost_usd\":\"40.00\"},\"pipeline_trace\":{\"arm\":{\"allowed_cost_cents\":4000,\"decision\":\"ALLOW\",\"execution_id\":\"phase1-valid\",\"layer\":\"arm\",\"prevented_cost_cents\":0,\"projected_total_cost_cents\":4000,\"reason_code\":\"OK_ARM\"},\"orbit\":{\"decision\":\"ALLOW\",\"layer\":\"orbit\",\"reason_code\":\"OK_ORBIT\",\"validation_hash\":\"c9da050460b2aa06187b53a8d7eb7d2d5395b8cd02019d641049db6f3a89ea8b\"},\"preflight\":{\"layer\":\"preflight\",\"policy_hash\":\"acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87\",\"policy_version\":\"policy.v1\",\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\"},\"ramona\":{\"decision\":\"ALLOW\",\"layer\":\"ramona\",\"reason_code\":\"OK_RAM0NA\",\"runtime_hash\":\"1b66052a8bbfe75818bea43d84cbbd7bab27187b2679f53a980579804f02228c\"}},\"request_hash\":\"f881eee18a511d0dc4c0db077afa642e8c693317fa5b4ebb9c31558b1d94b331\",\"schema_version\":\"ecs.receipt.v2\",\"signature\":{\"algorithm\":\"HMAC-SHA256\",\"key_id\":\"ecs-prod-key-v2\",\"value\":\"ff85e8786c3e425621c5aeb1b2efd695e90ec309f88fdd67a82f7e488de08660\"},\"verifiable_signature\":{\"algorithm\":\"ED25519\",\"key_id\":\"receipt-ed25519-9873a7f3636ae58c\",\"public_key_fingerprint\":\"9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783\",\"value\":\"d6cfdc2e43239eede6de1a470d6baad0f1d91b310e6f120241007688333900c422ce63d35694b5e84241ee54c9bfd5fe0f3041e9df1fc31df55bd30f5aed7d0c\"}}",
+      "total_cost_usd": "40.00",
+      "allowed_cost_usd": "40.00",
+      "prevented_cost_usd": "0.00",
+      "policy_hash": "acbd4b9d8339f32aa4273caa73ed49995c9c4ca7e9df9b62ceb14286c1b8ca87"
+    }
+  ],
+  "attacks": [
+    {
+      "name": "duplicate_root",
+      "decision": "REFUSE",
+      "reason_code": "ERR_DUPLICATE_JSON_KEYS",
+      "request_hash": "0a77e387b91cc8bfcb6e73c57a13e1a5f58b9ef91ecfa8ee87391b82474dd15f",
+      "decision_hash": "45d3dc6ed29a6f47d2fb2aad7796660884b59b0a1dbc621b5633eb895ff84f07",
+      "raw_sha256": "0a77e387b91cc8bfcb6e73c57a13e1a5f58b9ef91ecfa8ee87391b82474dd15f"
+    },
+    {
+      "name": "duplicate_nested",
+      "decision": "REFUSE",
+      "reason_code": "ERR_DUPLICATE_JSON_KEYS",
+      "request_hash": "15da25f00832ca2cbb5e6a1fcc766d10c1bfc14750b631ab36cef0f87a617c87",
+      "decision_hash": "963f723f02998ff0796b3eb22f81dffa67e3165b2d096bf4dfefb1f6bccfbbf4",
+      "raw_sha256": "15da25f00832ca2cbb5e6a1fcc766d10c1bfc14750b631ab36cef0f87a617c87"
+    },
+    {
+      "name": "unknown_root",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "5ff251aa2bf15a8ac7433291d10c879d039e3525b941a95082521826c7bf3845",
+      "decision_hash": "4a8e351065d12c394e8377777c92f380178e1648d8ff838f18503987bef5c72c",
+      "raw_sha256": "61ca44ce0132219f772f0506097492465abe880a5b8ea3e702b89e5fd510eb01"
+    },
+    {
+      "name": "unknown_execution_request",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "6ffde4161b8986db3a559e0c5c7560ba3062abb6358df7a54bf030961c06d8a5",
+      "decision_hash": "d03492ae09379c7e8f75c6f4ca4fca1a54ddccd588856e3548018fa937aed9dc",
+      "raw_sha256": "173d96e77f55967351cfae56392a5d81a7c1a23d10bdc634bdb93517633fba48"
+    },
+    {
+      "name": "unknown_actor",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "476c97c78f2a1000922d99b9d1d3e577d8ef7600cd9e9de98f90ef9256c0f78c",
+      "decision_hash": "efda9384f00ba064eea545c325230cfb6cb86c3db995ccef9722c2ef1a10c5a0",
+      "raw_sha256": "4c67411abdbb378a76037979d151c98ed79f8197b55fd0bc0c9235c0bb1780b1"
+    },
+    {
+      "name": "unknown_resources",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "494099c698d0744819ac209dc438d7a6da07d843a34a2dad2c2466119d4c361f",
+      "decision_hash": "836d985c478445ee6de44838de066c91502672c51428ea1d46c839adc74dc113",
+      "raw_sha256": "12dd6e3f35653c748ee76554837077db72ebd98a39c96fa2b0db30c2a1b13a0b"
+    },
+    {
+      "name": "unknown_execution",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "39cb72aa6bead2d4dcd549e2ae1c505aafdc59778056db63bed5db23d42ea3c6",
+      "decision_hash": "494d6e2246b75dd7ffbc575faee62b699ded4fe9eb07c4d06fda079bc443b328",
+      "raw_sha256": "af7724c427d7cd1f797ce630110e0736df87051790ac1c3e9694340b772821bb"
+    },
+    {
+      "name": "unknown_tool_call",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "d189e8dbbd805e3fd4c6599f3eeee8b50efa68bb56af0c23ce9dd0a51d5d70fa",
+      "decision_hash": "c564c367b74e16c9b3805c51cc5b31bb86ceb1e29f6482bc395edd4d89e2b78a",
+      "raw_sha256": "3f7857784f05afb780322b4966f24d8aa58249cb54d1368dfe1b4311100b10c6"
+    },
+    {
+      "name": "unknown_orbit",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "733ab333d4eb0e65fa31eaa3c716c906be47e6b19ba9b9eee1b79b94cf99a701",
+      "decision_hash": "945e5595ad18e8916b5e44a1ef552858aed18bb1a8a9a7736f07d96a9c369600",
+      "raw_sha256": "b7c48b2147de5196ac2fa48161e3ca91eac0fe58ad7184730e7dae1894c23995"
+    },
+    {
+      "name": "unknown_policy",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "3336a1499a238a2eca13b4b4c33c717b51ccd14e5652e7a2c071b5343c02bc1d",
+      "decision_hash": "e0e5529cb8919ae894454f11635ee386f118482aaf97de91cded5a7fe973539b",
+      "raw_sha256": "4bfb37bc9161075278012bc2da8c05dfa31bc52adf49d1dcd05fd5eab13d3881"
+    },
+    {
+      "name": "unknown_pricing",
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "aa38928c53295eed9f8ef477bbef2231d9618cd421cf65cb6065f10415393759",
+      "decision_hash": "d18866851f2971e34149684d4888e547c0b012e391787fd58bed83c7a9ba8b57",
+      "raw_sha256": "0cc2c38fa11c93d1050d5a827c7331c531e3258b251513c71c7e4d2c3b0e70ae"
+    },
+    {
+      "name": "float_number",
+      "decision": "REFUSE",
+      "reason_code": "ERR_INVALID_JSON_NUMBER",
+      "request_hash": "a76c49a3aa702aff2efaf10c7104b7b91609725c71f0fc014a4cbb37b051c9fd",
+      "decision_hash": "15227f92a7807b6d86e3ff36ddc194ebf1f9d6c85073b99ae1225a6b381cdbe3",
+      "raw_sha256": "a76c49a3aa702aff2efaf10c7104b7b91609725c71f0fc014a4cbb37b051c9fd"
+    },
+    {
+      "name": "string_number",
+      "decision": "REFUSE",
+      "reason_code": "ERR_TYPE_MISMATCH",
+      "request_hash": "0b71bc212737bf8d14ec28ccb3162a7f9ee9dd7b6de72da0c5df8544e985ee4a",
+      "decision_hash": "cba8c90a830680be8d76e2ae60b00a2df73df3391e0b2346bc121f0ecbfde24d",
+      "raw_sha256": "fc1d9e9b33b776dd95c018d6fc757c38a2dbf2b5fcc059bbb060c3be9ea041de"
+    },
+    {
+      "name": "scientific_number",
+      "decision": "REFUSE",
+      "reason_code": "ERR_INVALID_JSON_NUMBER",
+      "request_hash": "35a1b8f8a68f59cb19c90ce8f628c70ee47cd26272900f949d5e9b96a4bad23f",
+      "decision_hash": "fceacf010059c50e2e8924375374ca40249435386af1ac5a42b4bed6bbaec9a9",
+      "raw_sha256": "35a1b8f8a68f59cb19c90ce8f628c70ee47cd26272900f949d5e9b96a4bad23f"
+    },
+    {
+      "name": "negative_zero",
+      "decision": "REFUSE",
+      "reason_code": "ERR_INVALID_JSON_NUMBER",
+      "request_hash": "9bf0c37af522543394f25f8e43b2178ebbeec2c85fc6a76acd38770c93e4ce25",
+      "decision_hash": "5f0fd7cf8ebb5118584ff8b808b972b1050f5ce57e7b3d8c583666c8cc365e44",
+      "raw_sha256": "2f2942b836e0efc586d27e9c217ff23d152835d76aec505e50c9830fc06842ee"
+    },
+    {
+      "name": "reserved_timestamp",
+      "decision": "REFUSE",
+      "reason_code": "ERR_NON_DETERMINISTIC_INPUT",
+      "request_hash": "3b5f7677dd93a32abbab9baad9ed424dfacea70f5139b9aa140fd89a99bb8e73",
+      "decision_hash": "9bca1146f553070e6bd2c714fcc22d2fb4983f08aabcc48417306cd57d19d93f",
+      "raw_sha256": "497fe978cebf8fd0c17d06a43dc2af313e2a877617f430f847652748fe015b1b"
+    },
+    {
+      "name": "bad_escape",
+      "decision": "REFUSE",
+      "reason_code": "ERR_INVALID_JSON_SYNTAX",
+      "request_hash": "d791e3f7d4eb23a47ae2ffb0c19dd8abac556c37cea22f08787c914868a4f9d6",
+      "decision_hash": "156521fef3932ffd5ebcb5b5d0cfa989e59d2d2037277978dac5f4f6579b7c09",
+      "raw_sha256": "d791e3f7d4eb23a47ae2ffb0c19dd8abac556c37cea22f08787c914868a4f9d6"
+    },
+    {
+      "name": "large_payload_near_1mb",
+      "decision": "ALLOW",
+      "reason_code": "OK_ALLOW",
+      "request_hash": "f98fb53ebfa6689a3c622a1871fa41f93b0ebf87b87978344108678aea4b9961",
+      "decision_hash": "40e6a35b26eaeab4bff6a0cdc6d64b1a3cd88db945325fd6100da5f6ff57774d",
+      "raw_sha256": "a346cc5f0d712e6ca1698836e8dfcc9c9be273f04c8d1403a01f04b00de22f3e"
+    }
+  ]
+}

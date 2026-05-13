@@ -1,0 +1,131 @@
+{
+  "executive_result": {
+    "total_tests_run": 546,
+    "total_passed": 546,
+    "total_failed": 0,
+    "unexpected_allow_count": 0,
+    "double_allow_count": 0,
+    "generic_schema_fallback_count": 0,
+    "drift_mismatch_count": 0,
+    "replay_mismatch_count": 0
+  },
+  "regression_summary": {
+    "semantic_intent_blocking": true,
+    "execution_id_single_use": true,
+    "budget_token_enforcement": true,
+    "policy_version_pinning": true,
+    "policy_trust_validation": true,
+    "invalid_number_precision": true,
+    "duplicate_key_precedence": true
+  },
+  "determinism_summary": {
+    "decision_hash_stability": true,
+    "reason_code_stability": true,
+    "receipt_byte_stability": true
+  },
+  "concurrency_summary": {
+    "winner_count": 100,
+    "loser_count": 100,
+    "duplicate_allows": 0,
+    "refusal_code_distribution": {
+      "ERR_EXECUTION_ID_ALREADY_CONSUMED": 100
+    }
+  },
+  "budget_state_summary": {
+    "correct_reservations": 50,
+    "correct_refusals": 50,
+    "overdraft_or_double_spend": 0,
+    "samples": [
+      {
+        "token": "budget-0",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-1",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-2",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-3",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-4",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-5",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-6",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-7",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-8",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      },
+      {
+        "token": "budget-9",
+        "firstDecision": "ALLOW",
+        "firstOutcome": "OK_ALLOW",
+        "secondDecision": "REFUSE",
+        "secondOutcome": "ERR_BUDGET_TOKEN_EXHAUSTED"
+      }
+    ]
+  },
+  "legacy_audit_summary": {
+    "determinism_mismatch_rate": 0,
+    "replay_drift_rate": 0,
+    "parity_mismatch_rate": 0,
+    "rejection_accuracy": 100
+  },
+  "cross_layer_regression_checks": {
+    "preflight": true,
+    "orbit": true,
+    "arm": true,
+    "ramona": true
+  },
+  "final_verdict": "PASS_READY_FOR_PROOF_EXPANSION",
+  "artifact_list": [
+    "C:\\Users\\Shadow\\Desktop\\INsol\\mnde-release-package\\audit-proof-bundle",
+    "C:\\Users\\Shadow\\Desktop\\INsol\\mnde-release-package\\attack-wave-bundle\\attack_wave_results.json",
+    "C:\\Users\\Shadow\\Desktop\\INsol\\mnde-release-package\\remediation-wave-bundle\\remediation_wave_results.json",
+    "C:\\Users\\Shadow\\Desktop\\INsol\\mnde-release-package\\post-remediation-verification-bundle\\post_verification_report.json",
+    "C:\\Users\\Shadow\\Desktop\\INsol\\mnde-release-package\\post-remediation-verification-bundle\\produced_receipts.jsonl"
+  ]
+}

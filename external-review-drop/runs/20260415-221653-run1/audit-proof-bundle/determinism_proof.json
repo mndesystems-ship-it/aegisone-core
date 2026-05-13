@@ -1,0 +1,35 @@
+{
+  "schema_version": "ecs.audit.determinism_report.v2",
+  "total_runs": 1000000,
+  "mismatch_count": 0,
+  "mismatch_percentage": 0,
+  "target_zero_mismatches": true,
+  "profiles": [
+    {
+      "profile": "allow_burst",
+      "mismatch_count": 0,
+      "mismatch_percentage": 0
+    },
+    {
+      "profile": "refuse_burst",
+      "mismatch_count": 0,
+      "mismatch_percentage": 0
+    },
+    {
+      "profile": "mixed_50_50",
+      "mismatch_count": 0,
+      "mismatch_percentage": 0
+    },
+    {
+      "profile": "adversarial_malformed",
+      "mismatch_count": 0,
+      "mismatch_percentage": 0
+    },
+    {
+      "profile": "replay_storm",
+      "mismatch_count": 0,
+      "mismatch_percentage": 0
+    }
+  ],
+  "minimal_failing_cases": []
+}

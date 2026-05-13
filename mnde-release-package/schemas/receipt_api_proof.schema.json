@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"properties":{"file":{"type":"string"},"proof_root":{"type":"string"},"receipt":{"type":"object"},"strict":{"type":"boolean"}},"required":["proof_root","strict"],"type":"object"}

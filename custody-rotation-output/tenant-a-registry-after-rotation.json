@@ -1,0 +1,41 @@
+{
+  "schema_version": "mnde.custody.signer_registry.v1",
+  "policy": {
+    "allow_signer_reuse_across_tenants": false
+  },
+  "tenants": [
+    {
+      "tenant_id": "tenant-a",
+      "signer_sets": [
+        {
+          "key_set_version": "ks-tenant-a-001",
+          "status": "historical",
+          "signers": [
+            {
+              "signer_id": "tenant-a-signer-v1",
+              "key_id": "tenant-a-key-v1",
+              "public_key": "aa85b9b005e758cfa26cdc6bb0917d3e9fbf8c297888fc706126957300a24712",
+              "public_key_hash": "f1643eae2582069bc13078e1a83a1956cb520b373e296d8ca4f89f1889e62b9e",
+              "signature_algorithm": "ED25519",
+              "created_at": "2026-04-23T00:00:01Z"
+            }
+          ]
+        },
+        {
+          "key_set_version": "ks-tenant-a-002",
+          "status": "active",
+          "signers": [
+            {
+              "signer_id": "tenant-a-signer-v2",
+              "key_id": "tenant-a-key-v2",
+              "public_key": "27e312d4c240fe9ef68e0371ea1ab64245fee71a16bd7c7c2a0ec49f65b2ce83",
+              "public_key_hash": "f81a85ae56939764947e770b1fc71a295b38d3d60a42eced7f8fafd089026338",
+              "signature_algorithm": "ED25519",
+              "created_at": "2026-04-23T00:00:02Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

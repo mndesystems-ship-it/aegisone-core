@@ -1,0 +1,20 @@
+{
+  "schema_version": "mnde.policy_simulation_report.v1",
+  "total_sampled": 2,
+  "current_allows": 1,
+  "current_refuses": 1,
+  "new_allows": 1,
+  "new_refuses": 1,
+  "changed_decisions": 2,
+  "cost_delta_cents": -1500,
+  "top_changed_reasons": [
+    {
+      "reason": "ERR_GPU_LIMIT->ERR_HOURS_LIMIT",
+      "count": 1
+    },
+    {
+      "reason": "OK_ALLOW->OK_ALLOW",
+      "count": 1
+    }
+  ]
+}

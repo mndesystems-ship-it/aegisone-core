@@ -1,0 +1,12 @@
+{
+  "schema_version": "mnde.receipt_integrity_report.v1",
+  "total_receipts": 6892,
+  "parse_failures": 0,
+  "invalid_signatures": 0,
+  "unsigned_allows": 0,
+  "allow_count": 4792,
+  "refusal_count": 2100,
+  "append_only_order_observed": true,
+  "duplicate_request_hashes": 0,
+  "receipt_file_sha256": "6a2f3cbf1cf23456799beb05f78df13fa62fae1241d311509a6cd8ff4a38dd6d"
+}

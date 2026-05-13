@@ -1,0 +1,2 @@
+MNDe local sidecar listening on http://127.0.0.1:8787 worker=0 durability=throughput
+

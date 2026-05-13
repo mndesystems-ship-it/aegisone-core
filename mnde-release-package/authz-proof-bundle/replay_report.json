@@ -1,0 +1,18 @@
+{
+  "policy": {
+    "schema_version": "mnde.policy_verify_report.v1",
+    "policy_events_verified": 1,
+    "policy_receipts_verified": 1,
+    "decision_receipts_checked": 0,
+    "drift_count": 0,
+    "mismatches": []
+  },
+  "authz": {
+    "schema_version": "mnde.authz_verify_report.v1",
+    "authz_events_verified": 3,
+    "authz_receipts_verified": 3,
+    "active_role_policy_version": "roles.v1",
+    "drift_count": 0,
+    "mismatches": []
+  }
+}

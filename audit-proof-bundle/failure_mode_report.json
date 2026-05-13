@@ -1,0 +1,55 @@
+{
+  "schema_version": "ecs.audit.failure_mode_report.v1",
+  "cases": [
+    {
+      "case_id": "partial_writes",
+      "fails_closed": true,
+      "total_entries": 1,
+      "mismatches": [
+        {
+          "request_hash": "unparseable_receipt",
+          "error": "ERR_INVALID_JSON_SYNTAX"
+        }
+      ]
+    },
+    {
+      "case_id": "concurrent_writes",
+      "fails_closed": true,
+      "total_entries": 1,
+      "mismatches": [
+        {
+          "request_hash": "unparseable_receipt",
+          "error": "ERR_INVALID_JSON_SYNTAX"
+        }
+      ]
+    },
+    {
+      "case_id": "corrupted_entries",
+      "fails_closed": true,
+      "total_entries": 1,
+      "mismatches": [
+        {
+          "request_hash": "2a7a90d7652b679b08194572ac0bf97be9d64e01394b4f982a391653c6bf00e1",
+          "error": "ERR_RECEIPT_SIGNATURE_INVALID"
+        }
+      ]
+    },
+    {
+      "case_id": "clock_skew",
+      "fails_closed": true,
+      "total_entries": 2,
+      "mismatches": []
+    },
+    {
+      "case_id": "interrupted_execution",
+      "fails_closed": true,
+      "total_entries": 1,
+      "mismatches": [
+        {
+          "request_hash": "unparseable_receipt",
+          "error": "ERR_INVALID_JSON_SYNTAX"
+        }
+      ]
+    }
+  ]
+}

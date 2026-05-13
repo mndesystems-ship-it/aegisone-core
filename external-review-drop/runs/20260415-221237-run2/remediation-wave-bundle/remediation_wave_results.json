@@ -1,0 +1,131 @@
+{
+  "summary": {
+    "schema_version": "ecs.audit.remediation_wave_report.v1",
+    "total_cases": 12,
+    "pass_count": 12,
+    "fail_count": 0,
+    "failures": []
+  },
+  "cases": [
+    {
+      "test_id": "TC-061",
+      "category": "Semantic intent attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-062",
+      "category": "Semantic intent attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-063",
+      "category": "Semantic intent attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-064",
+      "category": "Semantic intent attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_FORBIDDEN_ACTION_IN_PARAMETERS",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-065",
+      "category": "Replay or concurrency attack",
+      "mode": "double_run",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_EXECUTION_ID_ALREADY_CONSUMED",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_EXECUTION_ID_ALREADY_CONSUMED",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-066",
+      "category": "Replay or concurrency attack",
+      "mode": "double_run",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_EXECUTION_ID_REPLAYED",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_EXECUTION_ID_REPLAYED",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-067",
+      "category": "Replay or concurrency attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_BUDGET_TOKEN_EXHAUSTED",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_BUDGET_TOKEN_EXHAUSTED",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-068",
+      "category": "Policy trust or version attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_POLICY_VERSION_MISMATCH",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_POLICY_VERSION_MISMATCH",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-069",
+      "category": "Policy trust or version attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_POLICY_KEY_ID_MISMATCH",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_POLICY_KEY_ID_MISMATCH",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-070",
+      "category": "Policy trust or version attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_INVALID_POLICY_SIGNATURE",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_INVALID_POLICY_SIGNATURE",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-071",
+      "category": "Reason code precision attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_DUPLICATE_JSON_KEYS",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_DUPLICATE_JSON_KEYS",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TC-072",
+      "category": "Reason code precision attack",
+      "mode": "pipeline",
+      "expected_outcome": "REFUSE",
+      "expected_reason_code": "ERR_INVALID_JSON_NUMBER",
+      "actual_outcome": "REFUSE",
+      "actual_reason_code": "ERR_INVALID_JSON_NUMBER",
+      "status": "PASS"
+    }
+  ]
+}

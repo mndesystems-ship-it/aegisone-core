@@ -1,0 +1,8 @@
+{
+  "schema_version": "ecs.audit.throughput_report.v1",
+  "runs": 10000,
+  "unique_request_hashes": 3,
+  "unique_decision_hashes": 3,
+  "zero_drift": true,
+  "state_leakage_detected": false
+}

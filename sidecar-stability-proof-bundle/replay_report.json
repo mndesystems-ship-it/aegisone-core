@@ -1,0 +1,12 @@
+{
+  "schema_version": "mnde.replay_report.v1",
+  "total_receipts": 6892,
+  "deterministic_engine_receipts": 6008,
+  "runtime_refusal_receipts": 884,
+  "exact_matches": 6008,
+  "replay_mismatches": 0,
+  "non_replayable_runtime_refusals": 884,
+  "invalid_signatures": 0,
+  "parse_failures": 0,
+  "mismatch_samples": []
+}

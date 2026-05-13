@@ -1,0 +1,71 @@
+{
+  "benchmark_version": "mnde.controlled_benchmark.v2",
+  "mode": "standard_protection",
+  "workload_hash": "e006c749dbe5ab0ab416d234913c13a74c7a6ecb3b6fe15b1d2e0d9cde84d3e0",
+  "input_validation": {
+    "source": "deterministically regenerated from prior benchmark generator",
+    "stored_prior_hash_available": false,
+    "verified_against_prior_totals": true,
+    "mutation_detected": false,
+    "total_cost_without_control_matches_prior": true,
+    "total_agent_cost_without_control_matches_prior": true
+  },
+  "protections_applied": {
+    "max_retry_count": 3,
+    "global_timeout_cap_seconds": 5400,
+    "rate_limit_requests": 45000,
+    "allowed_tool_list": [
+      "fetch_context",
+      "summarize",
+      "classify",
+      "lookup_cache",
+      "plan",
+      "delegate_safe"
+    ],
+    "simple_budget_ceiling_micro_usd": 60000000,
+    "agent_budget_ceiling_micro_usd": 9000000
+  },
+  "cost": {
+    "total_requests": 50000,
+    "total_executed": 37429,
+    "total_refused": 12571,
+    "total_cost_mode_micro_usd": 778815668918,
+    "cost_prevented_vs_no_control_micro_usd": 8126703423289,
+    "cost_reduction_percent_vs_no_control": 91.254685,
+    "runaway_events": 10000,
+    "runaway_events_executed": 1429,
+    "runaway_events_prevented": 8571,
+    "runaway_prevention_rate": 85.71,
+    "refusal_categories": {
+      "GLOBAL_TIMEOUT_CAP": 5998,
+      "MAX_RETRY_LIMIT": 6017,
+      "BASIC_RATE_LIMIT": 5000
+    }
+  },
+  "agent_behavior": {
+    "total_agent_runs": 20000,
+    "runs_completed": 12415,
+    "runs_stopped": 7585,
+    "unsafe_actions_executed": 2000,
+    "unsafe_actions_blocked": 2000,
+    "unsafe_block_rate": 50,
+    "loop_iterations": 149540,
+    "total_cost_mode_micro_usd": 34536502596,
+    "cost_prevented_vs_no_control_micro_usd": 102542779644,
+    "cost_reduction_percent_vs_no_control": 74.805454
+  },
+  "determinism_and_replay": {
+    "identical_input_runs": 100000,
+    "drift_mismatches": 0,
+    "replayed_decisions": 200000,
+    "replay_mismatches": 0,
+    "note": "No cryptographic binding or canonical replay receipts are produced in standard_protection mode."
+  },
+  "latency": {
+    "unit": "microseconds",
+    "p50": 50,
+    "p95": 68,
+    "p99": 72,
+    "max": 77
+  }
+}

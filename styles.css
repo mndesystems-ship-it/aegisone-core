@@ -1,0 +1,570 @@
+:root {
+  color-scheme: dark;
+  --bg: #05080e;
+  --panel: #0a111b;
+  --panel-strong: #0e1825;
+  --ink: #eef7ff;
+  --muted: #8ea2b9;
+  --line: #1d3147;
+  --line-strong: #31516d;
+  --cyan: #43d9ff;
+  --blue: #2f7df6;
+  --green: #55e6a5;
+  --refuse: #ff6b78;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(12, 28, 45, 0.86), rgba(5, 8, 14, 0) 420px),
+    radial-gradient(circle at 74% 0%, rgba(67, 217, 255, 0.11), transparent 34rem),
+    var(--bg);
+  color: var(--ink);
+  font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background-image:
+    linear-gradient(rgba(67, 217, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(67, 217, 255, 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, #000 0, transparent 72%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1,
+h2 {
+  letter-spacing: 0;
+  line-height: 0.96;
+}
+
+h1 {
+  max-width: 760px;
+  font-size: clamp(4rem, 10vw, 8.4rem);
+  font-weight: 850;
+}
+
+h2 {
+  max-width: 780px;
+  font-size: clamp(2.3rem, 5vw, 4.9rem);
+  font-weight: 820;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(49, 81, 109, 0.55);
+  background: rgba(5, 8, 14, 0.82);
+  backdrop-filter: blur(16px);
+}
+
+.brand,
+.site-header nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand {
+  color: #f5fbff;
+  font-weight: 760;
+}
+
+.brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  background: #081522;
+  color: var(--cyan);
+  font-weight: 860;
+}
+
+.site-header nav {
+  gap: 24px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.site-header nav a:hover {
+  color: var(--cyan);
+}
+
+.section-shell {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.72fr);
+  gap: 56px;
+  align-items: center;
+  min-height: calc(100vh - 72px);
+  padding: 72px 0 50px;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 24px;
+}
+
+.eyebrow {
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subhead {
+  max-width: 760px;
+  color: #c8d9e9;
+  font-size: clamp(1.45rem, 3vw, 2.35rem);
+  font-weight: 720;
+  line-height: 1.18;
+}
+
+.hero-support {
+  color: var(--muted);
+  font-size: clamp(1.05rem, 2vw, 1.28rem);
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  font-weight: 740;
+}
+
+.button.primary {
+  border-color: rgba(67, 217, 255, 0.62);
+  background: #d9f7ff;
+  color: #06111b;
+}
+
+.button.secondary {
+  background: rgba(14, 24, 37, 0.72);
+  color: #d7e8f8;
+}
+
+.authority-console,
+.proof-grid article,
+.code-snippet {
+  box-shadow: var(--shadow);
+}
+
+.authority-console {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(180deg, rgba(14, 24, 37, 0.96), rgba(7, 15, 24, 0.96));
+}
+
+.console-header,
+.signal-row,
+.decision-output,
+.proof-grid article,
+.workflow-line span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.console-header {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  color: var(--green);
+}
+
+.decision-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.signal-row {
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid rgba(49, 81, 109, 0.72);
+  background: rgba(5, 12, 20, 0.72);
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.signal-row strong,
+.decision-output strong,
+.proof-grid strong {
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.86rem;
+}
+
+.decision-output {
+  min-height: 104px;
+  padding: 18px;
+  border: 1px solid rgba(67, 217, 255, 0.54);
+  background: #071c2b;
+}
+
+.decision-output span {
+  color: var(--muted);
+}
+
+.decision-output strong {
+  color: var(--cyan);
+  font-size: clamp(1.7rem, 4vw, 2.8rem);
+}
+
+.decision-output em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.9rem;
+}
+
+.receipt-line {
+  padding: 12px;
+  border-left: 3px solid var(--cyan);
+  background: rgba(67, 217, 255, 0.08);
+  color: #ccefff;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.proof-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  border-block: 1px solid var(--line);
+  background: rgba(10, 17, 27, 0.74);
+}
+
+.proof-strip span {
+  min-height: 86px;
+  padding: 18px;
+  border-right: 1px solid var(--line);
+  color: #d8e7f4;
+  font-size: 0.9rem;
+  font-weight: 680;
+}
+
+.architecture-section,
+.split-section,
+.how-section,
+.proof-section,
+.workflow-section {
+  padding: 110px 0;
+}
+
+.section-heading {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.section-heading p:not(.eyebrow) {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
+.flow-diagram {
+  display: grid;
+  grid-template-columns: 1.25fr 44px 0.8fr 44px 1fr 44px 0.8fr;
+  align-items: center;
+}
+
+.flow-node {
+  display: grid;
+  min-height: 126px;
+  place-items: center;
+  padding: 22px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: #ecf7ff;
+  text-align: center;
+  font-weight: 760;
+}
+
+.flow-node.core {
+  border-color: rgba(67, 217, 255, 0.72);
+  background: #071c2b;
+  color: var(--cyan);
+}
+
+.flow-arrow {
+  height: 1px;
+  background: var(--line-strong);
+  position: relative;
+}
+
+.flow-arrow::after {
+  position: absolute;
+  top: -4px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  content: "";
+  border-top: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  rotate: 45deg;
+}
+
+.split-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.problem-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.problem-grid span {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  background: rgba(10, 17, 27, 0.72);
+  color: #d4e4f2;
+  font-weight: 660;
+}
+
+.step-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-list li {
+  display: grid;
+  align-content: space-between;
+  min-height: 150px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.step-list span {
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-weight: 760;
+}
+
+.step-list strong {
+  font-size: 1.12rem;
+}
+
+.proof-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.proof-grid article {
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--panel-strong);
+}
+
+.proof-grid span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 680;
+}
+
+.proof-grid strong {
+  color: var(--green);
+  font-size: 1.2rem;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.workflow-line {
+  display: grid;
+  gap: 10px;
+}
+
+.workflow-line span {
+  min-height: 62px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  background: rgba(10, 17, 27, 0.74);
+  color: #e7f3fc;
+  font-weight: 700;
+}
+
+.workflow-line span::after {
+  content: "↓";
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+}
+
+.workflow-line span:last-child::after {
+  content: "";
+}
+
+.code-snippet {
+  min-height: 100%;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--line-strong);
+  background: #07101a;
+  color: #dff7ff;
+  font: 1rem/1.7 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .authority-console {
+    animation: settle 700ms ease-out both;
+  }
+
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (max-width: 980px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+    height: auto;
+    padding: 18px 20px;
+  }
+
+  .hero,
+  .split-section,
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-diagram {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .flow-arrow {
+    width: 1px;
+    height: 28px;
+    justify-self: center;
+  }
+
+  .flow-arrow::after {
+    top: auto;
+    right: -4px;
+    bottom: -1px;
+    rotate: 135deg;
+  }
+
+  .step-list,
+  .proof-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .section-shell {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .site-header nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .hero {
+    min-height: auto;
+    padding-top: 52px;
+  }
+
+  .authority-console {
+    padding: 14px;
+  }
+
+  .proof-strip,
+  .step-list,
+  .proof-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-strip span {
+    min-height: 64px;
+  }
+
+  .architecture-section,
+  .split-section,
+  .how-section,
+  .proof-section,
+  .workflow-section {
+    padding: 72px 0;
+  }
+}

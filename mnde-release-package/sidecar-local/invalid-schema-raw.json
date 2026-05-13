@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8787/v1/decisions",
+    "headers": {
+      "content-type": "application/json",
+      "x-mnde-key-id": "local-client-1",
+      "x-mnde-timestamp": "2026-04-19T07:53:34.310Z",
+      "x-mnde-nonce": "a703fd37b3cb3f05881d8a3a85343b85",
+      "x-mnde-body-sha256": "4d36bbd519e3e1466bded29975d71e983bce95c8c1550dad329932017a0b7217",
+      "x-mnde-signature-alg": "ed25519.v1",
+      "x-mnde-signature": "8bcad9739b482ef130aa1511cf350b5a0857c8dd5f6dda40427532b4a43b0326772a76862b1e85ceef3a3fd0488e3d387c41dfcd46192f15b97d2154c8588603"
+    },
+    "body": {
+      "invalid_request": true
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "schema_version": "mnde.api.response.v1",
+      "request_id": null,
+      "decision": "REFUSE",
+      "reason_code": "ERR_SCHEMA_VALIDATION",
+      "request_hash": "0fba5b57fca8f95d3fad53dbb207a27c8dd81dd34af3a7fd90f03575073e10f9",
+      "decision_hash": "c182d44ec82521f4ab26033e78b77c751d284161b52e11299060be99b436abf2",
+      "total_cost_usd": "0.00",
+      "allowed_cost_usd": "0.00",
+      "prevented_cost_usd": "0.00",
+      "receipt": null
+    }
+  }
+}

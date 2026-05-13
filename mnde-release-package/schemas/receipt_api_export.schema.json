@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,"properties":{"build_timestamp":{"type":"string"},"format":{"enum":["dir","tar"]},"out":{"type":"string"},"proof_root":{"type":"string"},"receipts":{"type":"string"},"strict":{"type":"boolean"}},"required":["receipts","proof_root","out","format","strict","build_timestamp"],"type":"object"}

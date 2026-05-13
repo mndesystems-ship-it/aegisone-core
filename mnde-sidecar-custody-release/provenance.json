@@ -1,0 +1,28 @@
+{
+  "schema_version": "mnde.custody.provenance.v1",
+  "release_version": "1.0.0",
+  "release_tag": "v1.0.0",
+  "package_type": "sidecar-custody",
+  "git_commit_hash": "6e81e70730b2ea03242d643eb7b4f7fed20e6ebb",
+  "build_timestamp_utc": "2026-05-12T03:13:26.300Z",
+  "build_command": "node scripts/build_sidecar_custody_release.mjs",
+  "target_platform": "win32",
+  "target_arch": "x64",
+  "builder_identity": {
+    "user": "Shadow",
+    "host": "SHADOW-4D72POFI"
+  },
+  "toolchain": {
+    "node_version": "v24.14.1",
+    "rust_version": "not-bundled",
+    "cargo_version": "not-bundled"
+  },
+  "provenance_status": "complete",
+  "provenance_notes": [],
+  "artifacts": {
+    "sidecar": "bin/mnde-sidecar-custody.cmd",
+    "verifier": "bin/verify-release.cmd",
+    "receipt_verifier": "bin/verify-custody-receipt.cmd",
+    "bundled_node": "bin/node/node.exe"
+  }
+}

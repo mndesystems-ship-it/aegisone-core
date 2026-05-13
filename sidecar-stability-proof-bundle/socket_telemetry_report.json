@@ -1,0 +1,9 @@
+{
+  "schema_version": "mnde.socket_telemetry_report.v1",
+  "open_sockets_final": 1,
+  "idle_sockets_final": 0,
+  "idle_sockets_destroyed_total": 0,
+  "l0_connections_accepted_total": 10525,
+  "l0_connections_closed_total": 10524,
+  "l0_overload_503_sheds": 100
+}

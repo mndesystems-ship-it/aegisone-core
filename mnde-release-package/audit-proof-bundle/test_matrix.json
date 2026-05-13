@@ -1,0 +1,105 @@
+{
+  "schema_version": "ecs.audit.test_matrix.v2",
+  "seed": 20260412,
+  "total_unique_cases": 1000,
+  "profiles": [
+    {
+      "profile": "allow_burst",
+      "unique_cases": 200,
+      "request_size_bytes": {
+        "min": 1617,
+        "max": 1048608
+      },
+      "nested_depth": {
+        "min": 7,
+        "max": 7
+      },
+      "high_cardinality_fields": {
+        "min": 2,
+        "max": 65
+      },
+      "randomized_key_order": true,
+      "valid_cases": 200,
+      "invalid_cases": 0
+    },
+    {
+      "profile": "refuse_burst",
+      "unique_cases": 200,
+      "request_size_bytes": {
+        "min": 1615,
+        "max": 1048606
+      },
+      "nested_depth": {
+        "min": 7,
+        "max": 7
+      },
+      "high_cardinality_fields": {
+        "min": 2,
+        "max": 65
+      },
+      "randomized_key_order": true,
+      "valid_cases": 200,
+      "invalid_cases": 0
+    },
+    {
+      "profile": "mixed_50_50",
+      "unique_cases": 200,
+      "request_size_bytes": {
+        "min": 1615,
+        "max": 1048608
+      },
+      "nested_depth": {
+        "min": 7,
+        "max": 7
+      },
+      "high_cardinality_fields": {
+        "min": 2,
+        "max": 65
+      },
+      "randomized_key_order": true,
+      "valid_cases": 200,
+      "invalid_cases": 0
+    },
+    {
+      "profile": "adversarial_malformed",
+      "unique_cases": 200,
+      "request_size_bytes": {
+        "min": 1066,
+        "max": 1048618
+      },
+      "nested_depth": {
+        "min": 1,
+        "max": 14
+      },
+      "high_cardinality_fields": {
+        "min": 2,
+        "max": 65
+      },
+      "randomized_key_order": true,
+      "valid_cases": 0,
+      "invalid_cases": 200
+    },
+    {
+      "profile": "replay_storm",
+      "unique_cases": 200,
+      "request_size_bytes": {
+        "min": 1509,
+        "max": 1048500
+      },
+      "nested_depth": {
+        "min": 7,
+        "max": 7
+      },
+      "high_cardinality_fields": {
+        "min": 2,
+        "max": 65
+      },
+      "randomized_key_order": true,
+      "valid_cases": 200,
+      "invalid_cases": 0
+    }
+  ],
+  "schema_depth_cap_detected": 8,
+  "within_schema_depth_variance_for_valid_cases": false,
+  "out_of_schema_deep_nesting_exercised_via_rejection_cases": true
+}

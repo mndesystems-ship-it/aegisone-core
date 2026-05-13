@@ -1,0 +1,111 @@
+{
+  "schema_version": "mnde.codex.policy.v1",
+  "policy_version": "v1",
+  "policy_hash": "fb6f7f21966be57707125b995c24e19c9f9b44db2630150586c591211f577f1e",
+  "workspace_binding": "local",
+  "allow_patterns": [
+    {
+      "regex": "^npm\\s+test$",
+      "reason": "OK_POLICY_ALLOWLIST"
+    },
+    {
+      "regex": "^npm\\s+run\\s+build$",
+      "reason": "OK_POLICY_ALLOWLIST"
+    },
+    {
+      "regex": "^node\\s+scripts\\/[^\\s]+\\.mjs(\\s+.*)?$|^node\\s+scripts\\\\[^\\s]+\\.mjs(\\s+.*)?$",
+      "reason": "OK_NODE_SCRIPT_ALLOWLIST"
+    },
+    {
+      "regex": "^node\\s+-e\\s+.+$",
+      "reason": "OK_NODE_INLINE_LOCAL_TEST"
+    },
+    {
+      "regex": "^git\\s+status(\\s+.*)?$",
+      "reason": "OK_GIT_READONLY"
+    },
+    {
+      "regex": "^git\\s+diff(\\s+.*)?$",
+      "reason": "OK_GIT_READONLY"
+    },
+    {
+      "regex": "^(Get-Content|type|rg|dir|Get-ChildItem|Select-String)\\b.*$",
+      "reason": "OK_READONLY_INSPECTION"
+    }
+  ],
+  "git_allow_patterns": [
+    {
+      "regex": "^git\\s+status(\\s+.*)?$",
+      "reason": "OK_GIT_READONLY"
+    },
+    {
+      "regex": "^git\\s+diff(\\s+.*)?$",
+      "reason": "OK_GIT_READONLY"
+    }
+  ],
+  "prompt_required_patterns": [
+    {
+      "regex": "^npm\\s+(install|i|update|upgrade)\\b.*$",
+      "reason": "PROMPT_PACKAGE_INSTALL"
+    },
+    {
+      "regex": "\\bdeploy\\b|\\.\\/deploy\\.ps1|\\\\deploy\\.ps1",
+      "reason": "PROMPT_DEPLOY_SCRIPT"
+    },
+    {
+      "regex": "^docker\\s+compose\\s+up\\b.*$",
+      "reason": "PROMPT_DOCKER_COMPOSE_UP"
+    },
+    {
+      "regex": "^terraform\\s+apply\\b.*$",
+      "reason": "PROMPT_TERRAFORM_APPLY"
+    },
+    {
+      "regex": "^kubectl\\s+apply\\b.*$",
+      "reason": "PROMPT_KUBECTL_APPLY"
+    }
+  ],
+  "refuse_patterns": [
+    {
+      "regex": "\\brm\\s+-rf\\b|\\brmdir\\s+/s\\b|\\bdel\\s+/s\\b|\\bRemove-Item\\b.*\\b-Recurse\\b",
+      "reason": "ERR_DESTRUCTIVE_DELETE"
+    },
+    {
+      "regex": "\\bformat\\b.*\\b([A-Z]:|disk|volume)\\b|diskpart\\b",
+      "reason": "ERR_FORMAT_DISK_COMMAND"
+    },
+    {
+      "regex": "\\.\\.\\/|\\.\\.\\\\",
+      "reason": "ERR_PATH_TRAVERSAL"
+    },
+    {
+      "regex": "\\b(private\\.pem|receipt_signing_private\\.pem|policy_ed25519_private\\.pem|client_ed25519_private\\.pem)\\b",
+      "reason": "ERR_PRIVATE_KEY_ACCESS"
+    },
+    {
+      "regex": "\\b(receipts\\.jsonl|manifest\\.json)\\b.*\\b(del|rm|Remove-Item|Set-Content|Add-Content|Out-File|Move-Item)\\b",
+      "reason": "ERR_PROTECTED_AUDIT_ARTIFACT"
+    },
+    {
+      "regex": "^git\\s+push\\b.*(--force|-f|origin\\s+main|origin\\s+master).*$",
+      "reason": "ERR_GIT_PROTECTED_PUSH"
+    },
+    {
+      "regex": "^git\\s+reset\\s+--hard\\b.*$",
+      "reason": "ERR_GIT_HISTORY_DELETE"
+    },
+    {
+      "regex": "^git\\s+clean\\b.*$",
+      "reason": "ERR_GIT_CLEAN_REFUSED"
+    },
+    {
+      "regex": "^git\\s+branch\\s+-D\\b.*$",
+      "reason": "ERR_GIT_BRANCH_DELETE"
+    }
+  ],
+  "allowed_network_domains": [
+    "api.openai.com",
+    "github.com",
+    "registry.npmjs.org"
+  ]
+}

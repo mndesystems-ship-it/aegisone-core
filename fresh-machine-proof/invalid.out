@@ -1,0 +1,1 @@
+{"event":"mnde.custody.config","decision":"REFUSE","reason_code":"ERR_INVALID_CONFIG","field":"runtime.bind","error":"runtime.bind must be host:port"}

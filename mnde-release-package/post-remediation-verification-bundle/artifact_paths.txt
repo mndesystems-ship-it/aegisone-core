@@ -1,0 +1,5 @@
+C:\Users\Shadow\Desktop\INsol\mnde-release-package\audit-proof-bundle
+C:\Users\Shadow\Desktop\INsol\mnde-release-package\attack-wave-bundle\attack_wave_results.json
+C:\Users\Shadow\Desktop\INsol\mnde-release-package\remediation-wave-bundle\remediation_wave_results.json
+C:\Users\Shadow\Desktop\INsol\mnde-release-package\post-remediation-verification-bundle\post_verification_report.json
+C:\Users\Shadow\Desktop\INsol\mnde-release-package\post-remediation-verification-bundle\produced_receipts.jsonl

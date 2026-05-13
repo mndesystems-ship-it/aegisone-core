@@ -1,0 +1,8 @@
+{
+  "schema_version": "ecs.audit.replay_report.v2",
+  "total_receipts": 800,
+  "exact_matches": 800,
+  "drift_count": 0,
+  "replay_drift_rate": 0,
+  "mismatches": []
+}

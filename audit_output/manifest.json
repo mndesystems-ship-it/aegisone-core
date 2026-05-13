@@ -1,0 +1,21 @@
+{
+  "schema_version": "mnde.independent_audit.manifest.v1",
+  "artifacts": [
+    {
+      "file": "audit_summary.json",
+      "sha256": "2007B0F2656D798AC15188E71D86780291205E0100B6F74E8C384E4BA02DB4A0"
+    },
+    {
+      "file": "environment_receipt.json",
+      "sha256": "6F4CAF123E4599EF320D1079B00CA4520504E88B09FB056C9271EB55893E0289"
+    },
+    {
+      "file": "findings.json",
+      "sha256": "4C014EEE22006E6EABDCD679253797B9F56E676AB3D5A24F2ECE7C8EBF29F3BD"
+    }
+  ],
+  "signing": {
+    "status": "NOT_SIGNED",
+    "reason": "No auditor key material was provided in the workspace."
+  }
+}

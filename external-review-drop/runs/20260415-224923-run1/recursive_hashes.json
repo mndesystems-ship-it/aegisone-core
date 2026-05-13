@@ -1,0 +1,97 @@
+[
+    {
+        "file":  "capture_hashes.json",
+        "sha256":  "EE0AE4AE8AD0A7CADC9D01E3AE3BBB796889ADC83CC378E106FA7EBF0130B61E",
+        "length":  266
+    },
+    {
+        "file":  "stable-proof-bundle/canonical_requests.jsonl",
+        "sha256":  "F9062C9F8AAF98768A70AF647B85E52F7D1714535343A40932BD6ECEFDC9B6EC",
+        "length":  4062
+    },
+    {
+        "file":  "stable-proof-bundle/decisions.jsonl",
+        "sha256":  "47A0A889F6A70E403A254236B52FCF8EF130BEC7302997FACE5D9819DF6F36D3",
+        "length":  400
+    },
+    {
+        "file":  "stable-proof-bundle/decision_hashes.jsonl",
+        "sha256":  "08511027212708A37C7990B27FE5E6AF402BDD17BA599C28ADBAA2042F42235B",
+        "length":  501
+    },
+    {
+        "file":  "stable-proof-bundle/failure_proofs.json",
+        "sha256":  "5C5D0143AD5135D61E489B20FD0195EC517D4434AD55858059ADF6CF95E3AEFE",
+        "length":  1506
+    },
+    {
+        "file":  "stable-proof-bundle/hashes.json",
+        "sha256":  "6A9ECBE4B755B0A25A7DBB2936697723FAB8DBB210AB9D6837FD305A18EA4F76",
+        "length":  186
+    },
+    {
+        "file":  "stable-proof-bundle/manifest.json",
+        "sha256":  "6F62088B0E60F32574E6556A85553E194DC92F2773EFD211E61F3CDB0CC1E8C9",
+        "length":  956
+    },
+    {
+        "file":  "stable-proof-bundle/policies.jsonl",
+        "sha256":  "CD636CCCF74463B0A217C48E69AFCD9B9C7C25F27281192067D7A655F98EE342",
+        "length":  319
+    },
+    {
+        "file":  "stable-proof-bundle/receipts.jsonl",
+        "sha256":  "F134996223A184864622DA8A3D44D774DFE35BEAED0CFB9AE3580CB4CCCE28F8",
+        "length":  7526
+    },
+    {
+        "file":  "stable-proof-bundle/signatures.jsonl",
+        "sha256":  "20E73C7DCFACEEE12147744801C6967F713F7A16518D503D4C85F842819BFA6B",
+        "length":  636
+    },
+    {
+        "file":  "stable-proof-bundle/TEST_MATRIX.md",
+        "sha256":  "7FEFE5D172CAF11FAABA318E8C5C3928E38BC44142F1E03F1AF6F68C5F53E3CE",
+        "length":  2691
+    },
+    {
+        "file":  "volatile-benchmark-bundle/audit-proof-benchmark_report.md",
+        "sha256":  "428925D87F889F5717759C4E114179370A8EA9A04AC3842F53AD134F27AC9C06",
+        "length":  942
+    },
+    {
+        "file":  "volatile-benchmark-bundle/audit-proof-performance_report.json",
+        "sha256":  "07FCFD79386CF6290AEB0A8DF90E45451594B19E593D757A71BE23CEC6749F6E",
+        "length":  6792
+    },
+    {
+        "file":  "volatile-benchmark-bundle/audit-proof-summary.json",
+        "sha256":  "0B280F69F07386271C31E38F84FBF498CA1B425C52F5602ABF1EAB8B181B2F63",
+        "length":  1246
+    },
+    {
+        "file":  "volatile-benchmark-bundle/benchmark_validation.json",
+        "sha256":  "ECC524376BA711283E53025E4BBD716C90A5D50094CDE00CA010CF3017DFB12A",
+        "length":  1139
+    },
+    {
+        "file":  "volatile-benchmark-bundle/manifest.json",
+        "sha256":  "9B987DAC97D9EEDEE8526F6D0084D3646CE462CBDCB3B985963879715905D1A2",
+        "length":  1195
+    },
+    {
+        "file":  "volatile-benchmark-bundle/mnde-controlled-benchmark-latency_real_validation.json",
+        "sha256":  "852AD983F0F487D2821E72E1818C0E872FDB426EF1F8DA7CC1BBCA504043B9B7",
+        "length":  2425
+    },
+    {
+        "file":  "volatile-benchmark-bundle/mnde-controlled-benchmark-latency_report.json",
+        "sha256":  "4B870BDD9E146BD26DD6B1CEFB768C7E7EA01919CB4E6FB052793B096B84A47C",
+        "length":  1106
+    },
+    {
+        "file":  "volatile-benchmark-bundle/mnde-controlled-benchmark-summary.json",
+        "sha256":  "21F17928D623B0DBDEFC62CE9A633DA0A4C2AE990ABB55145E19B4DC10845A2B",
+        "length":  848
+    }
+]

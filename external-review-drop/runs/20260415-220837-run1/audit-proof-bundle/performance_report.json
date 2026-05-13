@@ -1,0 +1,255 @@
+{
+  "schema_version": "ecs.audit.performance_report.v1",
+  "profiles": [
+    {
+      "profile": "allow_burst",
+      "sut": {
+        "name": "allow_burst",
+        "runs": 1000,
+        "throughput_rps": 5892.265812,
+        "latency_ms": {
+          "p50": 0.1487,
+          "p95": 0.3204,
+          "p99": 0.5041
+        },
+        "cpu_usage": {
+          "user_microseconds": 125000,
+          "system_microseconds": 0,
+          "normalized_percent": 73.653323
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275628032,
+          "peak_heap_used_bytes": 90828144
+        }
+      },
+      "baseline": {
+        "name": "allow_burst_baseline",
+        "runs": 1000,
+        "throughput_rps": 38590.07309,
+        "latency_ms": {
+          "p50": 0.0219,
+          "p95": 0.0481,
+          "p99": 0.0902
+        },
+        "cpu_usage": {
+          "user_microseconds": 31000,
+          "system_microseconds": 0,
+          "normalized_percent": 119.629227
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275578880,
+          "peak_heap_used_bytes": 86259320
+        }
+      },
+      "delta_percent": {
+        "throughput_rps": -84.731136,
+        "p50_latency_ms": 578.995434,
+        "p95_latency_ms": 566.112266,
+        "p99_latency_ms": 458.86918,
+        "peak_rss_bytes": 0.017836,
+        "cpu_percent": -38.432
+      },
+      "neutrality_band_percent": 3
+    },
+    {
+      "profile": "refuse_burst",
+      "sut": {
+        "name": "refuse_burst",
+        "runs": 1000,
+        "throughput_rps": 5805.286061,
+        "latency_ms": {
+          "p50": 0.1512,
+          "p95": 0.3486,
+          "p99": 0.4931
+        },
+        "cpu_usage": {
+          "user_microseconds": 188000,
+          "system_microseconds": 0,
+          "normalized_percent": 109.139378
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275587072,
+          "peak_heap_used_bytes": 90631912
+        }
+      },
+      "baseline": {
+        "name": "refuse_burst_baseline",
+        "runs": 1000,
+        "throughput_rps": 37021.268719,
+        "latency_ms": {
+          "p50": 0.0219,
+          "p95": 0.0574,
+          "p99": 0.0929
+        },
+        "cpu_usage": {
+          "user_microseconds": 47000,
+          "system_microseconds": 0,
+          "normalized_percent": 173.999963
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275779584,
+          "peak_heap_used_bytes": 40046056
+        }
+      },
+      "delta_percent": {
+        "throughput_rps": -84.319052,
+        "p50_latency_ms": 590.410959,
+        "p95_latency_ms": 507.317073,
+        "p99_latency_ms": 430.785791,
+        "peak_rss_bytes": -0.069806,
+        "cpu_percent": -37.276206
+      },
+      "neutrality_band_percent": 3
+    },
+    {
+      "profile": "mixed_50_50",
+      "sut": {
+        "name": "mixed_50_50",
+        "runs": 1000,
+        "throughput_rps": 5538.561403,
+        "latency_ms": {
+          "p50": 0.1569,
+          "p95": 0.348,
+          "p99": 0.4938
+        },
+        "cpu_usage": {
+          "user_microseconds": 156000,
+          "system_microseconds": 0,
+          "normalized_percent": 86.401558
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275861504,
+          "peak_heap_used_bytes": 92094960
+        }
+      },
+      "baseline": {
+        "name": "mixed_50_50_baseline",
+        "runs": 1000,
+        "throughput_rps": 44281.292482,
+        "latency_ms": {
+          "p50": 0.0206,
+          "p95": 0.0372,
+          "p99": 0.0561
+        },
+        "cpu_usage": {
+          "user_microseconds": 31000,
+          "system_microseconds": 0,
+          "normalized_percent": 137.272007
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275861504,
+          "peak_heap_used_bytes": 60715832
+        }
+      },
+      "delta_percent": {
+        "throughput_rps": -87.492322,
+        "p50_latency_ms": 661.650485,
+        "p95_latency_ms": 835.483871,
+        "p99_latency_ms": 780.213904,
+        "peak_rss_bytes": 0,
+        "cpu_percent": -37.058137
+      },
+      "neutrality_band_percent": 3
+    },
+    {
+      "profile": "adversarial_malformed",
+      "sut": {
+        "name": "adversarial_malformed",
+        "runs": 1000,
+        "throughput_rps": 9431.168503,
+        "latency_ms": {
+          "p50": 0.0875,
+          "p95": 0.2935,
+          "p99": 0.4119
+        },
+        "cpu_usage": {
+          "user_microseconds": 63000,
+          "system_microseconds": 0,
+          "normalized_percent": 59.416362
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275931136,
+          "peak_heap_used_bytes": 92903872
+        }
+      },
+      "baseline": {
+        "name": "adversarial_malformed_baseline",
+        "runs": 1000,
+        "throughput_rps": 44620.945072,
+        "latency_ms": {
+          "p50": 0.0201,
+          "p95": 0.0429,
+          "p99": 0.0744
+        },
+        "cpu_usage": {
+          "user_microseconds": 15000,
+          "system_microseconds": 0,
+          "normalized_percent": 66.931418
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275947520,
+          "peak_heap_used_bytes": 45125496
+        }
+      },
+      "delta_percent": {
+        "throughput_rps": -78.863808,
+        "p50_latency_ms": 335.323383,
+        "p95_latency_ms": 584.149184,
+        "p99_latency_ms": 453.629032,
+        "peak_rss_bytes": -0.005937,
+        "cpu_percent": -11.227995
+      },
+      "neutrality_band_percent": 3
+    },
+    {
+      "profile": "replay_storm",
+      "sut": {
+        "name": "replay_storm",
+        "runs": 1000,
+        "throughput_rps": 5842.961072,
+        "latency_ms": {
+          "p50": 0.1537,
+          "p95": 0.3344,
+          "p99": 0.5024
+        },
+        "cpu_usage": {
+          "user_microseconds": 172000,
+          "system_microseconds": 0,
+          "normalized_percent": 100.49893
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275951616,
+          "peak_heap_used_bytes": 92353000
+        }
+      },
+      "baseline": {
+        "name": "replay_storm_baseline",
+        "runs": 1000,
+        "throughput_rps": 38243.550225,
+        "latency_ms": {
+          "p50": 0.0217,
+          "p95": 0.0533,
+          "p99": 0.0929
+        },
+        "cpu_usage": {
+          "user_microseconds": 0,
+          "system_microseconds": 0,
+          "normalized_percent": 0
+        },
+        "memory_usage": {
+          "peak_rss_bytes": 275951616,
+          "peak_heap_used_bytes": 65068944
+        }
+      },
+      "delta_percent": {
+        "throughput_rps": -84.721709,
+        "p50_latency_ms": 608.294931,
+        "p95_latency_ms": 527.39212,
+        "p99_latency_ms": 440.796555,
+        "peak_rss_bytes": 0,
+        "cpu_percent": 0
+      },
+      "neutrality_band_percent": 3
+    }
+  ]
+}

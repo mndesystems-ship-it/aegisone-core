@@ -1,0 +1,24 @@
+{
+  "schema_version": "ecs.audit.drift_report.v1",
+  "zero_divergence": true,
+  "cases": [
+    {
+      "case_id": "allow",
+      "runs": 1000,
+      "distinct_outputs": 1,
+      "request_hash": "76f2bf7a1ec853d785cc38b317045779d2b0afc4637a99e3b1bbf223bdb8ddbc",
+      "decision_hash": "35b9ac2422e28c9119ed98c1a857f4b14cade44ef69b7787f92ca952734c61be",
+      "receipt_signature": "6f4735dfdc8a603f3b8a985370fc38e2bacf83c29dbcb7aa022fe30caeef1e48",
+      "divergence_count": 0
+    },
+    {
+      "case_id": "refuse",
+      "runs": 1000,
+      "distinct_outputs": 1,
+      "request_hash": "6f6e1c1604a0520a680840d710f841be3e03c1a06062b2619388707e2a6fbfc1",
+      "decision_hash": "ed40952454a38d9ce9a35ae16d1ef3491f7edd3bc2cd1a379ba324621802d477",
+      "receipt_signature": "0fa3e9904ae94024153d0f404331280f931109305fbb75b71fd48ab44f596ad5",
+      "divergence_count": 0
+    }
+  ]
+}

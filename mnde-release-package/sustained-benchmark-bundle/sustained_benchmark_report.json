@@ -1,0 +1,471 @@
+{
+  "schema_version": "mnde.sustained_benchmark.v1",
+  "duration_seconds": 300,
+  "window_seconds": 10,
+  "total_requests": 592509,
+  "dropped_requests": 0,
+  "windows": [
+    {
+      "window_index": 0,
+      "started_at_utc": "2026-04-18T23:09:58.800Z",
+      "ended_at_utc": "2026-04-18T23:10:08.800Z",
+      "duration_seconds": 10,
+      "completed_requests": 19374,
+      "dropped_requests": 0,
+      "throughput_rps": 1937.4,
+      "latency_ms": {
+        "p50": 0.3569,
+        "p95": 0.824,
+        "p99": 4.7648,
+        "p999": 17.2072
+      }
+    },
+    {
+      "window_index": 1,
+      "started_at_utc": "2026-04-18T23:10:08.820Z",
+      "ended_at_utc": "2026-04-18T23:10:18.820Z",
+      "duration_seconds": 10,
+      "completed_requests": 17690,
+      "dropped_requests": 0,
+      "throughput_rps": 1769,
+      "latency_ms": {
+        "p50": 0.3643,
+        "p95": 0.9934,
+        "p99": 4.8686,
+        "p999": 18.4634
+      }
+    },
+    {
+      "window_index": 2,
+      "started_at_utc": "2026-04-18T23:10:18.837Z",
+      "ended_at_utc": "2026-04-18T23:10:28.837Z",
+      "duration_seconds": 10,
+      "completed_requests": 19796,
+      "dropped_requests": 0,
+      "throughput_rps": 1979.6,
+      "latency_ms": {
+        "p50": 0.3453,
+        "p95": 0.8143,
+        "p99": 4.7986,
+        "p999": 17.2994
+      }
+    },
+    {
+      "window_index": 3,
+      "started_at_utc": "2026-04-18T23:10:28.855Z",
+      "ended_at_utc": "2026-04-18T23:10:38.855Z",
+      "duration_seconds": 10,
+      "completed_requests": 19833,
+      "dropped_requests": 0,
+      "throughput_rps": 1983.3,
+      "latency_ms": {
+        "p50": 0.3485,
+        "p95": 0.8072,
+        "p99": 4.6689,
+        "p999": 16.934
+      }
+    },
+    {
+      "window_index": 4,
+      "started_at_utc": "2026-04-18T23:10:38.874Z",
+      "ended_at_utc": "2026-04-18T23:10:48.874Z",
+      "duration_seconds": 10,
+      "completed_requests": 20103,
+      "dropped_requests": 0,
+      "throughput_rps": 2010.3,
+      "latency_ms": {
+        "p50": 0.3451,
+        "p95": 0.7919,
+        "p99": 4.5745,
+        "p999": 16.6002
+      }
+    },
+    {
+      "window_index": 5,
+      "started_at_utc": "2026-04-18T23:10:48.893Z",
+      "ended_at_utc": "2026-04-18T23:10:58.893Z",
+      "duration_seconds": 10,
+      "completed_requests": 19962,
+      "dropped_requests": 0,
+      "throughput_rps": 1996.2,
+      "latency_ms": {
+        "p50": 0.3451,
+        "p95": 0.7887,
+        "p99": 4.6492,
+        "p999": 16.8703
+      }
+    },
+    {
+      "window_index": 6,
+      "started_at_utc": "2026-04-18T23:10:58.912Z",
+      "ended_at_utc": "2026-04-18T23:11:08.912Z",
+      "duration_seconds": 10,
+      "completed_requests": 19998,
+      "dropped_requests": 0,
+      "throughput_rps": 1999.8,
+      "latency_ms": {
+        "p50": 0.3451,
+        "p95": 0.7914,
+        "p99": 4.6353,
+        "p999": 17.2474
+      }
+    },
+    {
+      "window_index": 7,
+      "started_at_utc": "2026-04-18T23:11:08.931Z",
+      "ended_at_utc": "2026-04-18T23:11:18.945Z",
+      "duration_seconds": 10.014,
+      "completed_requests": 20044,
+      "dropped_requests": 0,
+      "throughput_rps": 2001.597763,
+      "latency_ms": {
+        "p50": 0.3481,
+        "p95": 0.7915,
+        "p99": 4.6541,
+        "p999": 16.6107
+      }
+    },
+    {
+      "window_index": 8,
+      "started_at_utc": "2026-04-18T23:11:18.965Z",
+      "ended_at_utc": "2026-04-18T23:11:28.965Z",
+      "duration_seconds": 10,
+      "completed_requests": 20000,
+      "dropped_requests": 0,
+      "throughput_rps": 2000,
+      "latency_ms": {
+        "p50": 0.3468,
+        "p95": 0.7957,
+        "p99": 4.6443,
+        "p999": 17.0098
+      }
+    },
+    {
+      "window_index": 9,
+      "started_at_utc": "2026-04-18T23:11:28.987Z",
+      "ended_at_utc": "2026-04-18T23:11:38.987Z",
+      "duration_seconds": 10,
+      "completed_requests": 19998,
+      "dropped_requests": 0,
+      "throughput_rps": 1999.8,
+      "latency_ms": {
+        "p50": 0.3452,
+        "p95": 0.7996,
+        "p99": 4.6233,
+        "p999": 17.0578
+      }
+    },
+    {
+      "window_index": 10,
+      "started_at_utc": "2026-04-18T23:11:39.007Z",
+      "ended_at_utc": "2026-04-18T23:11:49.013Z",
+      "duration_seconds": 10.006,
+      "completed_requests": 20002,
+      "dropped_requests": 0,
+      "throughput_rps": 1999.0006,
+      "latency_ms": {
+        "p50": 0.347,
+        "p95": 0.7981,
+        "p99": 4.6426,
+        "p999": 16.5106
+      }
+    },
+    {
+      "window_index": 11,
+      "started_at_utc": "2026-04-18T23:11:49.032Z",
+      "ended_at_utc": "2026-04-18T23:11:59.044Z",
+      "duration_seconds": 10.012,
+      "completed_requests": 20000,
+      "dropped_requests": 0,
+      "throughput_rps": 1997.602877,
+      "latency_ms": {
+        "p50": 0.3448,
+        "p95": 0.7982,
+        "p99": 4.6503,
+        "p999": 16.5658
+      }
+    },
+    {
+      "window_index": 12,
+      "started_at_utc": "2026-04-18T23:11:59.064Z",
+      "ended_at_utc": "2026-04-18T23:12:09.064Z",
+      "duration_seconds": 10,
+      "completed_requests": 19944,
+      "dropped_requests": 0,
+      "throughput_rps": 1994.4,
+      "latency_ms": {
+        "p50": 0.3432,
+        "p95": 0.7893,
+        "p99": 4.9687,
+        "p999": 16.7705
+      }
+    },
+    {
+      "window_index": 13,
+      "started_at_utc": "2026-04-18T23:12:09.083Z",
+      "ended_at_utc": "2026-04-18T23:12:19.083Z",
+      "duration_seconds": 10,
+      "completed_requests": 19862,
+      "dropped_requests": 0,
+      "throughput_rps": 1986.2,
+      "latency_ms": {
+        "p50": 0.3447,
+        "p95": 0.7913,
+        "p99": 5.0559,
+        "p999": 16.9036
+      }
+    },
+    {
+      "window_index": 14,
+      "started_at_utc": "2026-04-18T23:12:19.102Z",
+      "ended_at_utc": "2026-04-18T23:12:29.102Z",
+      "duration_seconds": 10,
+      "completed_requests": 19952,
+      "dropped_requests": 0,
+      "throughput_rps": 1995.2,
+      "latency_ms": {
+        "p50": 0.3437,
+        "p95": 0.7909,
+        "p99": 5.0346,
+        "p999": 16.638
+      }
+    },
+    {
+      "window_index": 15,
+      "started_at_utc": "2026-04-18T23:12:29.121Z",
+      "ended_at_utc": "2026-04-18T23:12:39.121Z",
+      "duration_seconds": 10,
+      "completed_requests": 19678,
+      "dropped_requests": 0,
+      "throughput_rps": 1967.8,
+      "latency_ms": {
+        "p50": 0.3462,
+        "p95": 0.8021,
+        "p99": 4.7889,
+        "p999": 16.9838
+      }
+    },
+    {
+      "window_index": 16,
+      "started_at_utc": "2026-04-18T23:12:39.139Z",
+      "ended_at_utc": "2026-04-18T23:12:49.139Z",
+      "duration_seconds": 10,
+      "completed_requests": 19509,
+      "dropped_requests": 0,
+      "throughput_rps": 1950.9,
+      "latency_ms": {
+        "p50": 0.3499,
+        "p95": 0.8293,
+        "p99": 4.9992,
+        "p999": 16.8353
+      }
+    },
+    {
+      "window_index": 17,
+      "started_at_utc": "2026-04-18T23:12:49.161Z",
+      "ended_at_utc": "2026-04-18T23:12:59.161Z",
+      "duration_seconds": 10,
+      "completed_requests": 19575,
+      "dropped_requests": 0,
+      "throughput_rps": 1957.5,
+      "latency_ms": {
+        "p50": 0.3489,
+        "p95": 0.8255,
+        "p99": 4.7423,
+        "p999": 16.634
+      }
+    },
+    {
+      "window_index": 18,
+      "started_at_utc": "2026-04-18T23:12:59.188Z",
+      "ended_at_utc": "2026-04-18T23:13:09.188Z",
+      "duration_seconds": 10,
+      "completed_requests": 19778,
+      "dropped_requests": 0,
+      "throughput_rps": 1977.8,
+      "latency_ms": {
+        "p50": 0.3468,
+        "p95": 0.7902,
+        "p99": 4.8327,
+        "p999": 17.1095
+      }
+    },
+    {
+      "window_index": 19,
+      "started_at_utc": "2026-04-18T23:13:09.207Z",
+      "ended_at_utc": "2026-04-18T23:13:19.207Z",
+      "duration_seconds": 10,
+      "completed_requests": 20102,
+      "dropped_requests": 0,
+      "throughput_rps": 2010.2,
+      "latency_ms": {
+        "p50": 0.3439,
+        "p95": 0.7773,
+        "p99": 4.5832,
+        "p999": 16.7746
+      }
+    },
+    {
+      "window_index": 20,
+      "started_at_utc": "2026-04-18T23:13:19.227Z",
+      "ended_at_utc": "2026-04-18T23:13:29.232Z",
+      "duration_seconds": 10.005,
+      "completed_requests": 19599,
+      "dropped_requests": 0,
+      "throughput_rps": 1958.92054,
+      "latency_ms": {
+        "p50": 0.3481,
+        "p95": 0.8296,
+        "p99": 4.8131,
+        "p999": 16.7254
+      }
+    },
+    {
+      "window_index": 21,
+      "started_at_utc": "2026-04-18T23:13:29.253Z",
+      "ended_at_utc": "2026-04-18T23:13:39.253Z",
+      "duration_seconds": 10,
+      "completed_requests": 19941,
+      "dropped_requests": 0,
+      "throughput_rps": 1994.1,
+      "latency_ms": {
+        "p50": 0.3439,
+        "p95": 0.7984,
+        "p99": 4.8143,
+        "p999": 17.2292
+      }
+    },
+    {
+      "window_index": 22,
+      "started_at_utc": "2026-04-18T23:13:39.273Z",
+      "ended_at_utc": "2026-04-18T23:13:49.273Z",
+      "duration_seconds": 10,
+      "completed_requests": 20012,
+      "dropped_requests": 0,
+      "throughput_rps": 2001.2,
+      "latency_ms": {
+        "p50": 0.3438,
+        "p95": 0.8018,
+        "p99": 4.7816,
+        "p999": 16.6667
+      }
+    },
+    {
+      "window_index": 23,
+      "started_at_utc": "2026-04-18T23:13:49.295Z",
+      "ended_at_utc": "2026-04-18T23:13:59.302Z",
+      "duration_seconds": 10.007,
+      "completed_requests": 20048,
+      "dropped_requests": 0,
+      "throughput_rps": 2003.397622,
+      "latency_ms": {
+        "p50": 0.3428,
+        "p95": 0.7982,
+        "p99": 4.8007,
+        "p999": 16.6257
+      }
+    },
+    {
+      "window_index": 24,
+      "started_at_utc": "2026-04-18T23:13:59.322Z",
+      "ended_at_utc": "2026-04-18T23:14:09.322Z",
+      "duration_seconds": 10,
+      "completed_requests": 19250,
+      "dropped_requests": 0,
+      "throughput_rps": 1925,
+      "latency_ms": {
+        "p50": 0.351,
+        "p95": 0.8501,
+        "p99": 4.8173,
+        "p999": 17.4725
+      }
+    },
+    {
+      "window_index": 25,
+      "started_at_utc": "2026-04-18T23:14:09.341Z",
+      "ended_at_utc": "2026-04-18T23:14:19.341Z",
+      "duration_seconds": 10,
+      "completed_requests": 19949,
+      "dropped_requests": 0,
+      "throughput_rps": 1994.9,
+      "latency_ms": {
+        "p50": 0.343,
+        "p95": 0.804,
+        "p99": 4.7284,
+        "p999": 16.8754
+      }
+    },
+    {
+      "window_index": 26,
+      "started_at_utc": "2026-04-18T23:14:19.364Z",
+      "ended_at_utc": "2026-04-18T23:14:29.367Z",
+      "duration_seconds": 10.003,
+      "completed_requests": 20001,
+      "dropped_requests": 0,
+      "throughput_rps": 1999.50015,
+      "latency_ms": {
+        "p50": 0.3438,
+        "p95": 0.7816,
+        "p99": 4.6615,
+        "p999": 16.8659
+      }
+    },
+    {
+      "window_index": 27,
+      "started_at_utc": "2026-04-18T23:14:29.386Z",
+      "ended_at_utc": "2026-04-18T23:14:39.386Z",
+      "duration_seconds": 10,
+      "completed_requests": 19892,
+      "dropped_requests": 0,
+      "throughput_rps": 1989.2,
+      "latency_ms": {
+        "p50": 0.3472,
+        "p95": 0.7792,
+        "p99": 4.6861,
+        "p999": 16.8961
+      }
+    },
+    {
+      "window_index": 28,
+      "started_at_utc": "2026-04-18T23:14:39.405Z",
+      "ended_at_utc": "2026-04-18T23:14:49.405Z",
+      "duration_seconds": 10,
+      "completed_requests": 19955,
+      "dropped_requests": 0,
+      "throughput_rps": 1995.5,
+      "latency_ms": {
+        "p50": 0.3447,
+        "p95": 0.7797,
+        "p99": 4.8528,
+        "p999": 16.8428
+      }
+    },
+    {
+      "window_index": 29,
+      "started_at_utc": "2026-04-18T23:14:49.424Z",
+      "ended_at_utc": "2026-04-18T23:14:58.800Z",
+      "duration_seconds": 9.376,
+      "completed_requests": 18662,
+      "dropped_requests": 0,
+      "throughput_rps": 1990.401024,
+      "latency_ms": {
+        "p50": 0.3444,
+        "p95": 0.8034,
+        "p99": 4.8828,
+        "p999": 16.7557
+      }
+    }
+  ],
+  "aggregate_latency_ms": {
+    "p50": 0.9934,
+    "p95": 17.1095,
+    "p99": 17.2994,
+    "p999": 17.4725
+  },
+  "success_criteria": {
+    "zero_dropped_requests": true,
+    "every_window_meets_10k_rps": false,
+    "every_window_p99_under_1ms": false,
+    "no_percentile_above_2ms": false
+  }
+}

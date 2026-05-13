@@ -1,0 +1,38 @@
+{
+  "schema_version": "mnde.release.provenance.v1",
+  "release_version": "1.0.0",
+  "release_tag": "v1.0.0",
+  "builder_identity": "SHADOW-4D72POFI\\Shadow",
+  "build_machine": "win32/x64",
+  "build_environment": "local",
+  "git_commit_hash": "6e81e70730b2ea03242d643eb7b4f7fed20e6ebb",
+  "build_timestamp_utc": "2026-04-22T02:45:59.576Z",
+  "build_command": "node app/release/build_manifest.js",
+  "target_platform": "win32",
+  "target_arch": "x64",
+  "toolchain": {
+    "node_version": "v24.14.1",
+    "rust_version": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "cargo_version": "unknown"
+  },
+  "artifacts": {
+    "node_cli": "bin/mnde-node.cmd",
+    "sidecar": "bin/mnde-sidecar.cmd",
+    "sidecar_background": "bin/mnde-sidecar-background.cmd",
+    "example_client": "bin/mnde-example-client.cmd",
+    "verify_release": "bin/verify-release.cmd",
+    "verify_receipt": "bin/verify-receipt.cmd",
+    "audit_runner": "bin/run-audit.cmd",
+    "benchmark_runner": "bin/run-benchmark.cmd",
+    "bundled_node": "bin/node/node.exe",
+    "rust_parity_runner": "bin/rust/parity_runner.exe"
+  },
+  "provenance_status": "complete",
+  "provenance_notes": [],
+  "signature": {
+    "algorithm": "ED25519",
+    "key_id": "release-ed25519-9873a7f3636ae58c",
+    "public_key": "3daeda5811268def257d56e34a94fd7934d8bb4eb3d625e6f83cbc106e556330",
+    "value": "c3ea9c24e591eb58ae08da01730a4af2844c17969dbb3f573935f63b747d5f5862246fb95860058d4c18d7b1586f46848a0cb45fc63a1adc7a3be5271205c504"
+  }
+}

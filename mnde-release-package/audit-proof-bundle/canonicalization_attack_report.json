@@ -1,0 +1,9 @@
+{
+  "schema_version": "ecs.audit.canonicalization_report.v1",
+  "base_case_count": 20,
+  "variants_per_case": 50,
+  "total_variants": 1000,
+  "divergence_count": 0,
+  "divergence_rate": 0,
+  "failures": []
+}

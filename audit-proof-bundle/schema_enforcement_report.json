@@ -1,0 +1,52 @@
+{
+  "schema_version": "ecs.audit.schema_enforcement_report.v1",
+  "total_invalid_inputs": 200,
+  "rejection_rate": 100,
+  "incorrect_accept_rate": 0,
+  "target_full_rejection": true,
+  "categories": [
+    {
+      "category": "duplicate_keys",
+      "total": 34,
+      "rejected": 34,
+      "rejection_rate": 100,
+      "incorrect_accepts": 0
+    },
+    {
+      "category": "unknown_fields",
+      "total": 34,
+      "rejected": 34,
+      "rejection_rate": 100,
+      "incorrect_accepts": 0
+    },
+    {
+      "category": "missing_required_fields",
+      "total": 33,
+      "rejected": 33,
+      "rejection_rate": 100,
+      "incorrect_accepts": 0
+    },
+    {
+      "category": "float_overflow",
+      "total": 33,
+      "rejected": 33,
+      "rejection_rate": 100,
+      "incorrect_accepts": 0
+    },
+    {
+      "category": "invalid_integers",
+      "total": 33,
+      "rejected": 33,
+      "rejection_rate": 100,
+      "incorrect_accepts": 0
+    },
+    {
+      "category": "malformed_json",
+      "total": 33,
+      "rejected": 33,
+      "rejection_rate": 100,
+      "incorrect_accepts": 0
+    }
+  ],
+  "incorrect_accept_cases": []
+}

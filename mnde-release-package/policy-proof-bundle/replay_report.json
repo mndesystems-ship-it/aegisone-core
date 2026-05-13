@@ -1,0 +1,8 @@
+{
+  "schema_version": "mnde.policy_verify_report.v1",
+  "policy_events_verified": 3,
+  "policy_receipts_verified": 3,
+  "decision_receipts_checked": 1,
+  "drift_count": 0,
+  "mismatches": []
+}

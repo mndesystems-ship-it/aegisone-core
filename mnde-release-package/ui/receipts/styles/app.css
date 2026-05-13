@@ -1,0 +1,37 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0d10;
+  --panel: #12161c;
+  --line: #26303a;
+  --text: #e8edf2;
+  --muted: #9ba7b4;
+  --accent: #82d4ff;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+button, input, select { font: inherit; }
+.app { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--line); background: #0f1318; }
+.brand { font-weight: 700; letter-spacing: 0; }
+.nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav a, .mode button, .copy-row button, .graph-list button { border: 1px solid var(--line); color: var(--text); background: #151b22; padding: 8px 10px; text-decoration: none; border-radius: 6px; }
+.mode { display: flex; gap: 8px; }
+.mode .active { border-color: var(--accent); color: var(--accent); }
+.layout { display: grid; grid-template-columns: minmax(320px, 38%) 1fr; gap: 16px; padding: 16px; }
+.panel { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 14px; min-width: 0; }
+.panel-title { color: var(--accent); font-weight: 700; margin-bottom: 12px; }
+.filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+input { width: 100%; background: #0c1117; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; }
+tr { cursor: pointer; }
+code { color: #c7f0ff; word-break: break-all; }
+.status-line { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.copy-row { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding: 8px 0; }
+.json-panel pre { max-height: 420px; overflow: auto; margin: 0; color: #d9e7ef; }
+.workspace.audit { grid-template-columns: 1fr 1fr; }
+.main-stack { display: grid; gap: 16px; }
+.graph-list { display: grid; gap: 8px; }
+@media (max-width: 900px) {
+  .layout, .workspace.audit { grid-template-columns: 1fr; }
+}

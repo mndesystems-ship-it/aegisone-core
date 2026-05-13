@@ -1,0 +1,82 @@
+{
+  "schema_version": "ecs.audit.manifest.v2",
+  "generated_at": "2026-05-13T21:14:35.848Z",
+  "artifacts": [
+    {
+      "file": "summary.json",
+      "sha256": "1de7d1f639d92e3b42b514b993badf28949e1d14569d56ed18c1a62b90191224"
+    },
+    {
+      "file": "test_matrix.json",
+      "sha256": "7b82348dcbe1a835c0e39d9f1d1c5d9130c4ad7ad1a699e6396a1f38be8e2724"
+    },
+    {
+      "file": "determinism_proof.json",
+      "sha256": "fc58ce0f511b35ff51f971454b6f8e3b33dacf3828cd5d30d3d97f394b3ce590"
+    },
+    {
+      "file": "canonicalization_attack_report.json",
+      "sha256": "3f93a149b694dc7612d68380968bc1ed491cb3bbe72eab8182f2405457145442"
+    },
+    {
+      "file": "schema_enforcement_report.json",
+      "sha256": "d75b0d46407c393ffc9029636fd2e0c078475bc2478dc5cdeba8930c0e977159"
+    },
+    {
+      "file": "performance_report.json",
+      "sha256": "6a78b0b466771e3761b684f016457f1d7202d877a652c5effd62d1879be4e35f"
+    },
+    {
+      "file": "failure_mode_report.json",
+      "sha256": "c317f7ec375d8d29303a45b585729665ec8c34b22cb0f95f3162b74c8fc5d692"
+    },
+    {
+      "file": "cost_impact_report.json",
+      "sha256": "21ce75898015162fc439b5da8337fb89e70ef6b8ab34b043e5f5605f3b125c92"
+    },
+    {
+      "file": "benchmark_report.md",
+      "sha256": "0a7b559d042db0c8eb20d4fd806470305e2b303443ce893a6c3d4cb001caf0c9"
+    },
+    {
+      "file": "full_logs/all_failing_cases.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "full_logs/determinism_failures.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "full_logs/canonicalization_failures.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "full_logs/minimal_repro_inputs.json",
+      "sha256": "d1c712a55e0694e887c0d3d633f75195b14a3bfa62d113cfbbf478f9bdafd3fe"
+    },
+    {
+      "file": "full_logs/parity_failures.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "full_logs/replay_failures.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "proof_bundle/signed_receipts.jsonl",
+      "sha256": "e2b76bfbc1cb990e8cc53482d4e4cbb1b2eab3909b6c5377004dd5b767f0ac23"
+    },
+    {
+      "file": "proof_bundle/replay_results.json",
+      "sha256": "a7fc92df1ef99860a22d3eac8b0b4f69d6be04eadf1d378b693d6472adbfb822"
+    },
+    {
+      "file": "proof_bundle/parity_report.json",
+      "sha256": "bfe2c8aadac40bf3b203863f66f17f8430e4fde3f965528cf410a43c24969a78"
+    },
+    {
+      "file": "proof_bundle/parity_vectors.json",
+      "sha256": "5b5c827e910bc382d465a6e4030dff9166b98ce2c41631c18e8a9e176e8c6db0"
+    }
+  ]
+}
