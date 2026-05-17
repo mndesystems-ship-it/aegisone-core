@@ -1,0 +1,63 @@
+{
+  "schema_version": "ecs.audit.summary.v2",
+  "generated_at": "2026-05-16T03:32:22.570Z",
+  "total_runs": 1012080,
+  "determinism_mismatch_rate": 0,
+  "parity_mismatch_rate": 0,
+  "replay_drift_rate": 0,
+  "rejection_accuracy": 100,
+  "throughput": [
+    {
+      "profile": "allow_burst",
+      "throughput_rps": 2607.944111
+    },
+    {
+      "profile": "refuse_burst",
+      "throughput_rps": 2302.584467
+    },
+    {
+      "profile": "mixed_50_50",
+      "throughput_rps": 2617.920293
+    },
+    {
+      "profile": "adversarial_malformed",
+      "throughput_rps": 10379.118045
+    },
+    {
+      "profile": "replay_storm",
+      "throughput_rps": 2521.566962
+    }
+  ],
+  "latency_stats": [
+    {
+      "profile": "allow_burst",
+      "p50": 0.3536,
+      "p95": 0.6355,
+      "p99": 0.9372
+    },
+    {
+      "profile": "refuse_burst",
+      "p50": 0.3687,
+      "p95": 0.7407,
+      "p99": 1.1233
+    },
+    {
+      "profile": "mixed_50_50",
+      "p50": 0.3489,
+      "p95": 0.6111,
+      "p99": 0.9246
+    },
+    {
+      "profile": "adversarial_malformed",
+      "p50": 0.0802,
+      "p95": 0.2607,
+      "p99": 0.4173
+    },
+    {
+      "profile": "replay_storm",
+      "p50": 0.3689,
+      "p95": 0.6559,
+      "p99": 0.9665
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "proof": "custody",
+  "status_source": "artifacts/custody-release-manifest.json",
+  "verification_commands": [
+    "npm run test:custody",
+    "node --experimental-strip-types .\\scripts\\test_custody_audit_hardening.mjs"
+  ],
+  "pass_criteria": [
+    "custody signatures verify",
+    "custody timeout emits deterministic refusal",
+    "rotation evidence remains auditable"
+  ],
+  "preserved_guarantees": [
+    "custody verification",
+    "signed receipt validation",
+    "release custody evidence"
+  ]
+}

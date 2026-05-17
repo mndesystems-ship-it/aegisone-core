@@ -11,6 +11,9 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $reportPath = Join-Path $repoRoot "post-remediation-verification-bundle\post_verification_report.json"
 
 if (-not $SkipGenerate) {
+  Invoke-NpmScript -Name "audit"
+  Invoke-NodeTypeScript -ScriptPath "audit/run_attack_wave.ts"
+  Invoke-NodeTypeScript -ScriptPath "audit/run_remediation_wave.ts"
   Invoke-NodeTypeScript -ScriptPath "audit/run_post_remediation_verification.ts"
 }
 

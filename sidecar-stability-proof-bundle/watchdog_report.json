@@ -1,8 +1,0 @@
-{
-  "schema_version": "mnde.watchdog_report.v1",
-  "interventions": 0,
-  "runtime_degraded": 0,
-  "runtime_fatal": 0,
-  "event_loop_lag_p99_ms": 11,
-  "watchdog_event_loop_lag_ms": 2
-}

@@ -1,0 +1,19 @@
+{
+  "proof": "security",
+  "status_source": "artifacts/adversarial-report.json",
+  "verification_commands": [
+    "npm run test:regression",
+    "npm run test:local:malformed",
+    "npm run test:local:policy"
+  ],
+  "pass_criteria": [
+    "unexpected allows == 0",
+    "schema bypasses == 0",
+    "security remediation checks pass"
+  ],
+  "preserved_guarantees": [
+    "security-sensitive enforcement behavior",
+    "fail-closed malformed input handling",
+    "hostile verifier evidence"
+  ]
+}

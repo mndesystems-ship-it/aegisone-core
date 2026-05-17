@@ -1,7 +1,0 @@
-{
-  "schema_version": "ecs.audit.replay_report.v1",
-  "exact_match": true,
-  "total_receipts": 3,
-  "exact_matches": 3,
-  "mismatches": []
-}

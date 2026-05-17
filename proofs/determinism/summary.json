@@ -1,0 +1,15 @@
+{
+  "proof": "determinism",
+  "status_source": "artifacts/audit-summary.json",
+  "verification_command": "npm run test:local:replay",
+  "pass_criteria": [
+    "determinism_mismatch_rate == 0",
+    "replay_drift_rate == 0",
+    "determinism mismatch_count == 0"
+  ],
+  "preserved_guarantees": [
+    "canonical request stability",
+    "decision hash stability",
+    "receipt replay determinism"
+  ]
+}

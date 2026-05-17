@@ -1,9 +1,0 @@
-[
-  {
-    "event": "signer_late_response",
-    "request_hash": "bb6c65a368926c2f8ef9d643ecbb37b3594840a3a30ae91e74445a4f87717a96",
-    "ignored": true,
-    "attempted_decision": "ALLOW",
-    "retained_decision_hash": "ff96c7c44aeab52c5209d33356f048143c51eccdc0e886792190da397837366b"
-  }
-]

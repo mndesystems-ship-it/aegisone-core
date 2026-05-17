@@ -98,7 +98,7 @@ function parseToolCalls(value: unknown): { ok: true; value: CanonicalExecutionIn
     if (!isRecord(item)) {
       return { ok: false, reason_code: REASON_CODES.SchemaValidation };
     }
-    const unknown = rejectUnknownKeys(item, ["tool", "priority"]);
+    const unknown = rejectUnknownKeys(item, ["tool", "priority", "parameters"]);
     if (unknown) {
       return { ok: false, reason_code: unknown };
     }
@@ -107,7 +107,15 @@ function parseToolCalls(value: unknown): { ok: true; value: CanonicalExecutionIn
     if (!tool || !priority.ok) {
       return { ok: false, reason_code: tool ? priority.reason_code : REASON_CODES.TypeMismatch };
     }
-    parsed.push({ tool, priority: priority.value });
+    const parameters = parseParameters(item.parameters);
+    if (!parameters.ok) {
+      return { ok: false, reason_code: parameters.reason_code };
+    }
+    parsed.push({
+      tool,
+      priority: priority.value,
+      ...(parameters.value === undefined ? {} : { parameters: parameters.value })
+    });
   }
   return { ok: true, value: parsed };
 }

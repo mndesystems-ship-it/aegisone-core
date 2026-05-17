@@ -41,6 +41,7 @@ export type Decision = "ALLOW" | "REFUSE";
 export type ToolCall = {
   tool: string;
   priority: number;
+  parameters?: ParameterObject;
 };
 
 export type ParameterObject = Record<string, JsonValue>;

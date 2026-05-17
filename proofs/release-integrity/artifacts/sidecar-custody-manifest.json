@@ -1,0 +1,73 @@
+{
+  "schema_version": "mnde.sidecar_custody.manifest.v1",
+  "release_version": "1.0.0",
+  "package_type": "sidecar-custody",
+  "immutable_after_publish": true,
+  "artifacts": [
+    {
+      "file": "app/release/verify-custody-receipt.js",
+      "sha256": "09c91161f01e431673802c1b34eee4951bed9cac8ac12e3e113cded034a36077",
+      "bytes": 4810
+    },
+    {
+      "file": "app/release/verify-release.js",
+      "sha256": "2061798f54f63edb720872f03a7951648ff35a5f66485e265ffcf12280c00c9a",
+      "bytes": 4707
+    },
+    {
+      "file": "app/shared/forbidden_content.js",
+      "sha256": "c01d2f433574909fd9fbf19f2ab8ead3917eabebefe5323ddce5843f681c6d67",
+      "bytes": 4683
+    },
+    {
+      "file": "app/sidecar/server.js",
+      "sha256": "3be81b6f602bce244c8023f2a525855b244943e184d8790751e24ac53da322d8",
+      "bytes": 16450
+    },
+    {
+      "file": "bin/mnde-sidecar-custody.cmd",
+      "sha256": "6ac15b4a626747e3c39043278a8c756b0dc45762787af8865920de98d3109a21",
+      "bytes": 78
+    },
+    {
+      "file": "bin/node/node.exe",
+      "sha256": "58e74bf02fc5bbacc41dcb8bef089961cd5bddd37830b87784e4fc624d145d1f",
+      "bytes": 91426304
+    },
+    {
+      "file": "bin/verify-custody-receipt.cmd",
+      "sha256": "53e0ef4404df4665b8533918db97c0092ce50068c4fce43c6df650efd77595c8",
+      "bytes": 94
+    },
+    {
+      "file": "bin/verify-release.cmd",
+      "sha256": "b8d5178509ab03e5222b16d188c50842f026f7802f3369b86a7e680de1cb41a2",
+      "bytes": 86
+    },
+    {
+      "file": "docs/CLEAN_ROOM_TEST.md",
+      "sha256": "29a2fc0516693f3bbf4504ae40e09eb8d60cde7f3317f3ca63811b3558050e14",
+      "bytes": 398
+    },
+    {
+      "file": "docs/FAILURE_BEHAVIOR.md",
+      "sha256": "792be0bf31192bf8efc35d9e4327955e70c313bdb9c1a3366e990cde4885ec79",
+      "bytes": 783
+    },
+    {
+      "file": "docs/INTEGRATION_QUICKSTART.md",
+      "sha256": "1e2b848b4795327fc33f44fdfa7094ea31ae404da44cf9e838a8debcfdac4b1b",
+      "bytes": 926
+    },
+    {
+      "file": "provenance.json",
+      "sha256": "4ccd04a5c15af348bc3729f93e54273e2d1b1cf7ae173f695fde0757c2fe9513",
+      "bytes": 863
+    },
+    {
+      "file": "README.md",
+      "sha256": "83671cd9c80f0bc3fd39d15f959e3955400138a08d17c9bf2ae92b81d5b9beb3",
+      "bytes": 961
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "proof": "release-integrity",
+  "status_source": "artifacts/sidecar-custody-manifest.json",
+  "verification_commands": [
+    "npm run test:release:integrity",
+    "npm run test:release:provenance"
+  ],
+  "pass_criteria": [
+    "missing manifest fails closed",
+    "malformed manifest fails closed",
+    "malformed provenance fails closed",
+    "startup refusal receipt is deterministic"
+  ],
+  "preserved_guarantees": [
+    "release provenance verification",
+    "release manifest verification",
+    "deterministic startup refusal"
+  ]
+}
