@@ -1,6 +1,7 @@
 import { join } from "path";
 import { deriveKeyId, type CanonicalExecutionInput, type SignedReceipt } from "../shared/index.ts";
-import { ensureDir, executeDeterministicPipeline, makeBaseInput, rawJson, resetRuntimeState, seedBudgetToken, simulateConcurrentDuplicate, verifySignedReceipt, writeJsonArtifact } from "./node_runtime.ts";
+import { executeDeterministicPipeline, resetRuntimeState, seedBudgetToken, verifySignedReceipt } from "./node_runtime.ts";
+import { ensureDir, makeBaseInput, rawJson, simulateConcurrentDuplicate, writeJsonArtifact } from "./test_helpers.ts";
 import type { JsonValue } from "../shared/json.ts";
 
 type TestMode = "pipeline" | "double_run" | "receipt_verify";

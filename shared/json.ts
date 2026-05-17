@@ -161,7 +161,12 @@ function parseObject(state: ParserState): ParseResult {
     if (!valueResult.ok) {
       return valueResult;
     }
-    objectValue[keyResult.value] = valueResult.value;
+    Object.defineProperty(objectValue, keyResult.value, {
+      value: valueResult.value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
     skipWhitespace(state);
 
     if (state.source[state.index] === "}") {

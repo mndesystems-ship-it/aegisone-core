@@ -3,7 +3,8 @@ import { join } from "path";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import type { JsonValue } from "../shared/json.ts";
 import { canonicalizeJson } from "../shared/json.ts";
-import { executeDeterministicPipeline, makeBaseInput, rawJson, writeJsonArtifact } from "./node_runtime.ts";
+import { executeDeterministicPipeline } from "./node_runtime.ts";
+import { makeBaseInput, rawJson, writeJsonArtifact } from "./test_helpers.ts";
 import type { SignedReceipt } from "./types.ts";
 
 const OUTPUT_DIR = join(process.cwd(), "controlled-benchmark-bundle");

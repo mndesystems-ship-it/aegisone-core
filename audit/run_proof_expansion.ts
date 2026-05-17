@@ -1,15 +1,17 @@
 import { join } from "path";
 import { deriveKeyId, type CanonicalExecutionInput, type JsonValue } from "../shared/index.ts";
 import {
-  ensureDir,
   executeDeterministicPipeline,
-  makeBaseInput,
-  rawJson,
   resetRuntimeState,
   seedBudgetToken,
+} from "./node_runtime.ts";
+import {
+  ensureDir,
+  makeBaseInput,
+  rawJson,
   simulateConcurrentDuplicate,
   writeJsonArtifact
-} from "./node_runtime.ts";
+} from "./test_helpers.ts";
 
 type TestMode = "pipeline" | "sequence" | "concurrent";
 

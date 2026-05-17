@@ -10,29 +10,52 @@ const FORBIDDEN_CODE_PATTERNS = ["rm -rf", "drop_database", "delete_database", "
 const FORBIDDEN_NETWORK_PATTERNS = ["169.254.169.254", "127.0.0.1", "::1", "localhost", ":2375", ":2376"];
 const FORBIDDEN_QUERY_PATTERNS = ["select * from secrets", "export select", "api_key", "token dump"];
 const FORBIDDEN_PLAN_PATTERNS = ["retry_until_success", "\"limit\":\"none\"", "\"count\":1000", "\"count\":10000"];
-const ACTION_FIELD_NAMES = new Set(["action", "actions", "tool_calls", "execution_targets"]);
-const ACTION_TEXT_PATTERNS = ["deploy_irreversible", "irreversible", "delete", "destroy", "scale_gpu_cluster", "start_training_job", "retry_failed_job"];
+const ACTION_FIELD_NAMES = new Set([
+  "action",
+  "actions",
+  "tool_calls",
+  "execution_targets",
+  "commands",
+  "workflow",
+  "steps",
+  "tasks",
+  "operations",
+  "pipeline",
+  "run",
+  "exec",
+  "spawn",
+  "shell"
+]);
+const ACTION_TEXT_PATTERNS = ["deploy_irreversible", "irreversible", "delete", "destroy", "scale_gpu_cluster", "start_training_job", "retry_failed_job", "run", "exec", "spawn", "shell"];
+
+function normalizeSuspiciousText(value: string): string {
+  return value.normalize("NFKC").toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+function normalizedPattern(pattern: string): string {
+  return normalizeSuspiciousText(pattern);
+}
 
 function parameterText(parameters: Record<string, JsonValue>): string {
-  return normalizeOrbitText(canonicalizeJson(parameters as unknown as JsonValue).toLowerCase());
+  return normalizeOrbitText(normalizeSuspiciousText(canonicalizeJson(parameters as unknown as JsonValue)));
 }
 
 const RULES: PatternRule[] = [
   {
     id: "destructive_code",
-    matcher: (parameters) => FORBIDDEN_CODE_PATTERNS.some((pattern) => parameterText(parameters).includes(pattern))
+    matcher: (parameters) => FORBIDDEN_CODE_PATTERNS.some((pattern) => parameterText(parameters).includes(normalizedPattern(pattern)))
   },
   {
     id: "internal_network",
-    matcher: (parameters) => FORBIDDEN_NETWORK_PATTERNS.some((pattern) => parameterText(parameters).includes(pattern))
+    matcher: (parameters) => FORBIDDEN_NETWORK_PATTERNS.some((pattern) => parameterText(parameters).includes(normalizedPattern(pattern)))
   },
   {
     id: "data_exfiltration",
-    matcher: (parameters) => FORBIDDEN_QUERY_PATTERNS.some((pattern) => parameterText(parameters).includes(pattern))
+    matcher: (parameters) => FORBIDDEN_QUERY_PATTERNS.some((pattern) => parameterText(parameters).includes(normalizedPattern(pattern)))
   },
   {
     id: "recursive_or_fanout",
-    matcher: (parameters) => FORBIDDEN_PLAN_PATTERNS.some((pattern) => parameterText(parameters).includes(pattern))
+    matcher: (parameters) => FORBIDDEN_PLAN_PATTERNS.some((pattern) => parameterText(parameters).includes(normalizedPattern(pattern)))
   }
 ];
 
@@ -54,7 +77,7 @@ function ipv4FromNumber(value: number): string | null {
 }
 
 function parseIpToken(token: string): string | null {
-  const trimmed = token.toLowerCase();
+  const trimmed = normalizeSuspiciousText(token);
   const mapped = trimmed.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
   if (mapped) return mapped[1];
   if (trimmed === "0:0:0:0:0:0:0:1" || trimmed === "::1") return "::1";
@@ -75,8 +98,8 @@ function countNestedActionMarkers(value: JsonValue): number {
     return value.reduce((sum, item) => sum + countNestedActionMarkers(item), 0);
   }
   if (typeof value === "string") {
-    const lower = value.toLowerCase();
-    return ACTION_TEXT_PATTERNS.some((pattern) => lower.includes(pattern)) && lower.includes("action") ? 1 : 0;
+    const lower = normalizeSuspiciousText(value);
+    return ACTION_TEXT_PATTERNS.some((pattern) => lower.includes(normalizedPattern(pattern))) && (lower.includes("action") || lower.includes("task") || lower.includes("step")) ? 1 : 0;
   }
   if (typeof value !== "object" || value === null) {
     return 0;
@@ -84,7 +107,7 @@ function countNestedActionMarkers(value: JsonValue): number {
 
   let markers = 0;
   for (const [key, nested] of Object.entries(value)) {
-    const lowerKey = key.toLowerCase();
+    const lowerKey = normalizeSuspiciousText(key);
     if (ACTION_FIELD_NAMES.has(lowerKey)) {
       markers += Array.isArray(nested) ? nested.length : 1;
     }

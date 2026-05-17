@@ -1,6 +1,6 @@
 import type { JsonValue } from "../shared/json.ts";
 import { canonicalizeJson } from "../shared/json.ts";
-import { ensureDir, makeBaseInput, rawJson, writeRustParityVectors } from "./node_runtime.ts";
+import { ensureDir, makeBaseInput, rawJson, writeRustParityVectors } from "./test_helpers.ts";
 import type { CanonicalExecutionInput } from "./types.ts";
 
 export const OUTPUT_DIR = "audit-proof-bundle";

@@ -4,18 +4,20 @@ import type { JsonValue, SignedReceipt } from "../shared/index.ts";
 import { canonicalizeJson } from "../shared/index.ts";
 import { buildRemediationCases } from "./run_remediation_wave.ts";
 import {
-  appendReceipts,
-  ensureDir,
   executeDeterministicPipeline,
-  makeBaseInput,
-  rawJson,
   replayReceiptStore,
   resetRuntimeState,
   seedBudgetToken,
-  simulateConcurrentDuplicate,
-  verifySignedReceipt,
-  writeJsonArtifact
+  verifySignedReceipt
 } from "./node_runtime.ts";
+import {
+  appendReceipts,
+  ensureDir,
+  makeBaseInput,
+  rawJson,
+  simulateConcurrentDuplicate,
+  writeJsonArtifact
+} from "./test_helpers.ts";
 
 type CaseResult = {
   decision: "ALLOW" | "REFUSE";

@@ -14,7 +14,24 @@ import {
 } from "../shared/index.ts";
 
 const PINNED_POLICY_VERSION = "policy.v1";
-const RESERVED_UNSAFE_FIELDS = new Set(["timestamp", "nonce", "session_id", "depends_on", "previous_step_id"]);
+const RESERVED_UNSAFE_FIELDS = new Set([
+  "timestamp",
+  "time",
+  "now",
+  "random",
+  "eval",
+  "exec",
+  "shell",
+  "command",
+  "commands",
+  "__proto__",
+  "constructor",
+  "prototype",
+  "nonce",
+  "session_id",
+  "depends_on",
+  "previous_step_id"
+]);
 
 function decisionHashFromFailure(requestHash: string, reasonCode: string): string {
   return createHash("sha256")
@@ -51,6 +68,27 @@ function rejectUnknownKeys(root: Record<string, unknown>, allowedKeys: string[])
       }
       return REASON_CODES.SchemaValidation;
     }
+  }
+  return null;
+}
+
+function rejectReservedFieldsRecursive(value: unknown): string | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const nested = rejectReservedFieldsRecursive(item);
+      if (nested) return nested;
+    }
+    return null;
+  }
+  if (!isRecord(value)) {
+    return null;
+  }
+  for (const [key, nested] of Object.entries(value)) {
+    if (RESERVED_UNSAFE_FIELDS.has(key)) {
+      return REASON_CODES.NonDeterministicInput;
+    }
+    const nestedResult = rejectReservedFieldsRecursive(nested);
+    if (nestedResult) return nestedResult;
   }
   return null;
 }
@@ -94,6 +132,7 @@ function parseToolCalls(value: unknown): { ok: true; value: CanonicalExecutionIn
     return { ok: false, reason_code: REASON_CODES.SchemaValidation };
   }
   const parsed: CanonicalExecutionInput["execution_request"]["tool_calls"] = [];
+  const seenTools = new Set<string>();
   for (const item of value) {
     if (!isRecord(item)) {
       return { ok: false, reason_code: REASON_CODES.SchemaValidation };
@@ -107,6 +146,10 @@ function parseToolCalls(value: unknown): { ok: true; value: CanonicalExecutionIn
     if (!tool || !priority.ok) {
       return { ok: false, reason_code: tool ? priority.reason_code : REASON_CODES.TypeMismatch };
     }
+    if (seenTools.has(tool)) {
+      return { ok: false, reason_code: REASON_CODES.SchemaValidation };
+    }
+    seenTools.add(tool);
     const parameters = parseParameters(item.parameters);
     if (!parameters.ok) {
       return { ok: false, reason_code: parameters.reason_code };
@@ -127,10 +170,9 @@ function parseParameters(value: unknown): { ok: true; value: Record<string, Json
   if (!isRecord(value)) {
     return { ok: false, reason_code: REASON_CODES.SchemaValidation };
   }
-  for (const key of Object.keys(value)) {
-    if (RESERVED_UNSAFE_FIELDS.has(key)) {
-      return { ok: false, reason_code: REASON_CODES.NonDeterministicInput };
-    }
+  const reserved = rejectReservedFieldsRecursive(value);
+  if (reserved) {
+    return { ok: false, reason_code: reserved };
   }
   return { ok: true, value: value as Record<string, JsonValue> };
 }
@@ -284,6 +326,10 @@ export function runStrictPreflight(rawInput: string): ParsedEnvelope | TypedFail
   const orbitPayload = orbitIntent.payload;
   if (!isRecord(orbitPayload)) {
     return typedFailure(requestHash, REASON_CODES.SchemaValidation);
+  }
+  const orbitPayloadReserved = rejectReservedFieldsRecursive(orbitPayload);
+  if (orbitPayloadReserved) {
+    return typedFailure(requestHash, orbitPayloadReserved);
   }
   const orbitPayloadUnknown = rejectUnknownKeys(orbitPayload, ["tool_calls"]);
   if (orbitPayloadUnknown) {
