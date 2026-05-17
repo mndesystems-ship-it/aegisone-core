@@ -29,6 +29,12 @@ import {
   parseL0LimitConfig
 } from "./sidecar/http_admission.mjs";
 import { buildSidecarRefusalReceipt } from "./sidecar/refusal_receipt.mjs";
+import {
+  ERR_UNAUTHORIZED_ORIGIN,
+  corsHeadersForOrigin,
+  createRuntimeInput,
+  isAllowedCorsOrigin
+} from "./sidecar/runtime_request.mjs";
 import { SocketRegistry } from "./sidecar/socket_registry.mjs";
 import { ERR_RUNTIME_DEGRADED, ERR_RUNTIME_FATAL, RuntimeWatchdog } from "./sidecar/runtime_watchdog.mjs";
 
@@ -48,6 +54,7 @@ const WORKER_POOL_SIZE = Number.parseInt(process.env.MNDE_WORKER_POOL_SIZE ?? St
 const WORKER_QUEUE_MAX_DEPTH = Number.parseInt(process.env.MNDE_WORKER_QUEUE_MAX_DEPTH ?? String(Math.max(1, WORKER_POOL_SIZE)), 10);
 const WORKER_TASK_TIMEOUT_MS = Number.parseInt(process.env.MNDE_WORKER_TASK_TIMEOUT_MS ?? String(Math.max(100, HTTP_LIMITS.request_timeout_ms - 100)), 10);
 const INLINE_REFUSAL_RECEIPTS = process.env.MNDE_INLINE_REFUSAL_RECEIPTS === "1";
+const TEST_HARNESS_ENABLED = process.env.MNDE_TEST_HARNESS === "1";
 const RECEIPT_DURABILITY_MODE = process.env.MNDE_RECEIPT_DURABILITY_MODE ?? "throughput";
 const RECEIPT_QUEUE_CONFIG = validateReceiptPersistenceConfig({
   path: receiptPathForWorker(RECEIPT_LOG_PATH),
@@ -216,7 +223,7 @@ if (cluster.isPrimary && CLUSTER_MODE) {
 }
 
 function testTimingHeaders(timings) {
-  if (process.env.NODE_ENV === "production") return {};
+  if (!TEST_HARNESS_ENABLED) return {};
   return {
     "x-mnde-server-ms": String(Math.max(0, timings?.total_server_ms ?? 0)),
     "x-mnde-admission-ms": String(Math.max(0, timings?.request_admission_wait_ms ?? 0)),
@@ -275,7 +282,7 @@ function response(res, status, body, timings) {
   const bytes = Buffer.from(`${canonicalizeJson(body)}\n`, "utf8");
   if (timings) timings.response_serialize_ms = Math.max(0, Math.round(performance.now() - serializationStarted));
   res.writeHead(status, {
-    "access-control-allow-origin": "*",
+    ...corsHeadersForOrigin(res.req?.headers?.origin),
     "access-control-allow-methods": "GET,POST,OPTIONS",
     "access-control-allow-headers": "content-type",
     "cache-control": "no-store",
@@ -493,7 +500,7 @@ async function handleDecide(req, res) {
   }
   inflight += 1;
   try {
-    if (req.headers["x-mnde-custody-mode"] === "timeout") {
+    if (TEST_HARNESS_ENABLED && req.headers["x-mnde-custody-mode"] === "timeout") {
       const custodyStarted = performance.now();
       timings.custody_ms = Math.max(0, Math.round(performance.now() - custodyStarted));
       timings.total_server_ms = Math.max(0, Math.round(performance.now() - totalStarted));
@@ -503,7 +510,7 @@ async function handleDecide(req, res) {
     }
     const { value: request, raw } = await readStrictObject(req, timings);
     timings.body_read_complete_ms = ms();
-    const runtimeInput = { ...request, policy_document: request.policy_document ?? policy };
+    const runtimeInput = createRuntimeInput(request, policy);
     timings.execution_start_ms = ms();
     const submitted = workerPool.submit(canonicalizeJson(runtimeInput));
     if (!submitted.ok) {
@@ -682,6 +689,17 @@ const server = http.createServer(async (req, res) => {
   watchdog.heartbeat("request");
   socketRegistry.markRequest(req.socket);
   const pathname = new URL(req.url, `http://${HOST}:${PORT}`).pathname;
+  if (!isAllowedCorsOrigin(req.headers.origin)) {
+    response(res, 403, {
+      schema_version: "mnde.api.response.v1",
+      decision: "REFUSE",
+      reason_code: ERR_UNAUTHORIZED_ORIGIN,
+      request_hash: null,
+      decision_hash: null,
+      receipt: null
+    });
+    return;
+  }
   if (req.method === "OPTIONS") {
     response(res, 204, {});
     return;
@@ -726,7 +744,7 @@ const server = http.createServer(async (req, res) => {
     const workerMetrics = workerPool.metrics();
     const body = Buffer.from(metricsText(queueMetrics, workerMetrics), "utf8");
     res.writeHead(200, {
-      "access-control-allow-origin": "*",
+      ...corsHeadersForOrigin(req.headers.origin),
       "cache-control": "no-store",
       "connection": "close",
       "content-length": body.byteLength,
@@ -755,6 +773,13 @@ const server = http.createServer(async (req, res) => {
 });
 server.on("connection", (socket) => {
   socket.on("error", () => {});
+  const socketAdmission = admission.tryAcquireSocket(socket);
+  if (!socketAdmission.ok) {
+    counters.admission_refusals += 1;
+    counters.refused_overload += 1;
+    socket.destroy();
+    return;
+  }
   const socketState = socketRegistry.track(socket);
   l0ActiveConnections += 1;
   let l0Closed = false;
@@ -763,6 +788,7 @@ server.on("connection", (socket) => {
     l0Closed = true;
     l0ActiveConnections = Math.max(0, l0ActiveConnections - 1);
     counters.l0_connections_closed_total += 1;
+    socketAdmission.release();
     const state = socketTimings.get(socket);
     if (state) state.close_at_ms = performance.now();
   };
