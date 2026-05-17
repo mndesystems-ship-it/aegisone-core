@@ -1,97 +1,95 @@
-# AegisOne Safety Check UI
+# AegisOne Core
 
-No-code local UI for checking deterministic execution decisions against a local sidecar at `127.0.0.1:8787`.
+AegisOne Core is deterministic execution control infrastructure. It evaluates high-risk execution requests before work begins, returns a deterministic `ALLOW` or `REFUSE`, and emits signed receipts that can be replayed, verified, and audited.
 
-## Product Surface
+Deterministic execution control matters because infrastructure decisions are only trustworthy when the same request, policy, pricing data, and runtime observation always produce the same decision and receipt. AegisOne makes policy drift, replay mismatch, unsigned allows, release tampering, and concurrency double-allows explicit verification failures.
 
-Public launch API:
-
-- `POST /v1/decisions` - submit an execution request and receive an `ALLOW` or `REFUSE` decision with a signed receipt.
-- `GET /healthz` - process health.
-- `GET /readyz` - readiness, active policy version, and policy hash.
-- `GET /metrics` - runtime counters or local demo metrics.
-
-Local UI helper routes:
-
-- `POST /verify` - demo-only receipt signature check used by this UI.
-- `POST /replay` - demo-only receipt replay/drift check used by this UI.
-- `POST /decide` - legacy alias for `POST /v1/decisions`; retained only for older local demos.
-
-Launch docs and customer integrations should point to `POST /v1/decisions`, not `/decide`.
-
-## Files
-
-- `index.html` - single page layout
-- `main.js` - no-code controls, strict JSON parsing, canonicalization, fetch calls, receipt actions
-- `request-builder.js` - maps UI controls to the strict decision request JSON
-- `styles.css` - local styles
-- `mnde-local-sidecar.mjs` - local endpoint adapter for the public decision route and demo receipt helpers; retained as a compatibility filename
-- `mnde-ui-static-server.mjs` - static local UI server; retained as a compatibility filename
-- `start-mnde-ui.cmd` - one-command Windows launcher
-- `requests/allow-request.json` - valid request payload
-- `requests/refuse-request.json` - refusal request payload
-
-## Run
-
-Run one command:
+## 5-Minute Demo
 
 ```powershell
-cd C:\Users\Shadow\Downloads\INsol\INsol
-.\start-mnde-ui.cmd
-```
-
-Open:
-
-```text
-http://127.0.0.1:8080/
-```
-
-The launcher starts the local decision endpoint on `127.0.0.1:8787` if it is not already running, then starts the UI server on `127.0.0.1:8080`.
-
-## Routes
-
-The local decision endpoint provides:
-
-- `GET /healthz`
-- `GET /readyz`
-- `GET /metrics`
-- `POST /v1/decisions`
-- `POST /verify` for local receipt checks
-- `POST /replay` for local receipt replay
-
-Manual endpoint start:
-
-```powershell
-cd C:\Users\Shadow\Downloads\INsol\INsol
+npm run test:release:integrity
+npm run test:local:replay
+npm run test:local:proof
 node --experimental-strip-types .\mnde-local-sidecar.mjs
 ```
 
-Manual UI server start:
+In another shell:
 
 ```powershell
-cd C:\Users\Shadow\Downloads\INsol\INsol
-node .\mnde-ui-static-server.mjs
+Invoke-RestMethod http://127.0.0.1:8787/healthz
+Invoke-RestMethod http://127.0.0.1:8787/readyz
+Invoke-RestMethod -Method Post -ContentType application/json -InFile .\requests\allow-request.json http://127.0.0.1:8787/v1/decisions
 ```
 
-## If The UI Says `ERR_MNDE_UNREACHABLE_OR_CORS`
+## Minimal Integration
 
-Check that the local decision endpoint is listening:
+```js
+const response = await fetch("http://127.0.0.1:8787/v1/decisions", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    execution_request: {
+      request_id: "example-001",
+      submitted_region: "us-west-2",
+      actor: { user_id: "operator" },
+      resources: { gpu_type: "a10g", gpu_count: 2, hours: 4 },
+      execution: { auto_scale: false, max_scale_multiplier: 1, retry_on_fail: false, max_retries: 0 },
+      tool_calls: [{ tool: "provision-gpu-job", priority: 1 }],
+      orbit_intent: {
+        orbit_version: "2.0",
+        action: "execute",
+        boundary: "production",
+        payload: { tool_calls: [{ tool: "provision-gpu-job", priority: 1 }] },
+        lifecycle_state: "ARMED",
+        signatures: [{ alg: "ed25519.v1", sig: "operator-approved" }]
+      },
+      release_request: { execution_id: "example-001", hold_state: "APPROVED", already_consumed: false },
+      runtime_observation: {
+        kill_switch_active: false,
+        actual_gpu_count: 2,
+        actual_hours: 4,
+        actual_total_cost_cents: 4000
+      }
+    },
+    pricing_data: { gpu_hour_cents: 500 }
+  })
+});
+
+const decision = await response.json();
+if (decision.decision !== "ALLOW") throw new Error(decision.reason_code);
+```
+
+## Verification Commands
 
 ```powershell
-Invoke-WebRequest http://127.0.0.1:8787/healthz
+npm run test:local:replay
+npm run test:release:integrity
+npm run test:sidecar-browser-torture
+npm run test:local:proof
+npm run test:local:concurrency
 ```
 
-If that cannot connect, start `mnde-local-sidecar.mjs`. If it connects in PowerShell but the browser still fails, use `python -m http.server 8080` and open `http://127.0.0.1:8080/` instead of opening `index.html` through `file://`.
+Use `npm run proof:full` for the broader local proof pack.
 
-## Behavior
+## Proof Model
 
-- Use the form controls or presets to generate a strict decision request.
-- Advanced JSON can be inspected or imported, but it is not the main workflow.
-- Upload or drop a receipt JSON file to load it for replay or signature verification.
-- Drag the receipt viewer content to another app to transfer the canonical receipt JSON as text.
-- The UI rejects invalid JSON before sending.
-- JSON is canonicalized with sorted object keys and safe-integer-only numbers.
-- Any parse, network, response, replay, verify, copy, or export error sets the visible decision to `REFUSE`.
-- Protocol `reason_code`, `request_hash`, and `decision_hash` are displayed without remapping.
-- Receipt views include raw canonical JSON, pretty JSON, and hash input fields.
-- Replay and verify send the current receipt as `{ "receipt": ... }`.
+Active, auditor-facing proof evidence lives in `proofs/`:
+
+- `proofs/determinism`: zero drift for canonical decisions.
+- `proofs/replay`: receipt replay and drift checks.
+- `proofs/parity`: Node and Rust parity vectors and reports.
+- `proofs/throughput`: controlled benchmark summaries without raw dumps.
+- `proofs/browser-torture`: browser-origin torture and replay evidence.
+- `proofs/security`: hostile inputs, schema enforcement, and remediation evidence.
+- `proofs/release-integrity`: manifests, provenance, and release integrity checks.
+- `proofs/custody`: custody rotation, timeout, and signed receipt evidence.
+
+Generated logs, JSONL receipt streams, ZIP packages, latency CSVs, and benchmark work folders are ignored. They can be regenerated by the scripts in `scripts/` and the proof runbooks.
+
+## Release Verification Flow
+
+1. Build release material with `npm run release:build` or `npm run release:build:sidecar-custody`.
+2. Verify deterministic release integrity with `npm run test:release:integrity`.
+3. Verify provenance with `npm run test:release:provenance`.
+4. Compare retained manifests and signatures under `releases/` and `proofs/release-integrity/artifacts/`.
+5. Treat missing manifest, malformed manifest, malformed provenance, or signature drift as release blockers.

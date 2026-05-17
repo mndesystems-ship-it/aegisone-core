@@ -1,0 +1,17 @@
+{
+  "proof": "browser-torture",
+  "status_source": "artifacts/sidecar-torture-summary.json",
+  "verification_command": "npm run test:sidecar-browser-torture",
+  "pass_criteria": [
+    "unsigned_allows == 0",
+    "replay_mismatches == 0",
+    "signature_failures == 0",
+    "receipt_count_mismatch == 0",
+    "health failures == 0"
+  ],
+  "preserved_guarantees": [
+    "browser-origin torture verification",
+    "overload refusal",
+    "receipt persistence integrity"
+  ]
+}

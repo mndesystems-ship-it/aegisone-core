@@ -5,13 +5,12 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  makeBaseInput,
-  rawJson,
   replayReceiptStore,
   resetRuntimeState,
   executeDeterministicPipeline
 } from "../audit/node_runtime.ts";
-import { verifyReceiptPublicSignature, verifyReceiptSignature } from "../ramona/engine.ts";
+import { makeBaseInput, rawJson } from "../audit/test_helpers.ts";
+import { verifyReceiptPublicSignature, verifyReceiptSignature } from "../ram0na/engine.ts";
 import { canonicalizeJson } from "../shared/index.ts";
 import { runCustodyTimeoutHarness } from "./custody_timeout_harness.mjs";
 import { signInternally } from "../custody/runtime.ts";
@@ -116,8 +115,39 @@ function resultKey(outcome) {
 function phase1() {
   const valid = strictAllowInput("phase1-valid");
   const canonical = rawJson(valid);
-  const reordered =
-    `{"pricing_data":{"gpu_hour_cents":500},"policy_document":{"rules":{"max_retry_count":1,"require_manual_approval_above_cents":5000,"max_hours":8,"max_gpu_count":4,"allow_auto_scale":false,"max_total_cost_cents":10000},"policy_version":"policy.v1","schema_version":"ecs.policy.v1"},"execution_request":{"runtime_observation":{"actual_total_cost_cents":4000,"actual_hours":4,"actual_gpu_count":2,"kill_switch_active":false},"release_request":{"already_consumed":false,"hold_state":"APPROVED","execution_id":"phase1-valid"},"orbit_intent":{"signatures":[{"sig":"orbit-signature-v1","alg":"hmac-sha256"}],"lifecycle_state":"ARMED","payload":{"tool_calls":[{"priority":1,"tool":"deploy_irreversible"}]},"boundary":"gpu-batch","action":"execute","orbit_version":"2.0"},"tool_calls":[{"priority":1,"tool":"deploy_irreversible"}],"execution":{"max_retries":0,"retry_on_fail":false,"max_scale_multiplier":1,"auto_scale":false},"resources":{"hours":4,"gpu_count":2,"gpu_type":"a10g"},"actor":{"user_id":"user-001"},"submitted_region":"us-west-2","request_id":"phase1-valid"}}`;
+  const reordered = JSON.stringify({
+    pricing_data: valid.pricing_data,
+    policy_document: {
+      rules: {
+        max_retry_count: valid.policy_document.rules.max_retry_count,
+        require_manual_approval_above_cents: valid.policy_document.rules.require_manual_approval_above_cents,
+        max_hours: valid.policy_document.rules.max_hours,
+        max_gpu_count: valid.policy_document.rules.max_gpu_count,
+        allow_auto_scale: valid.policy_document.rules.allow_auto_scale,
+        max_total_cost_cents: valid.policy_document.rules.max_total_cost_cents
+      },
+      policy_version: valid.policy_document.policy_version,
+      schema_version: valid.policy_document.schema_version
+    },
+    execution_request: {
+      runtime_observation: valid.execution_request.runtime_observation,
+      release_request: valid.execution_request.release_request,
+      orbit_intent: {
+        signatures: valid.execution_request.orbit_intent.signatures.map((signature) => ({ sig: signature.sig, alg: signature.alg })),
+        lifecycle_state: valid.execution_request.orbit_intent.lifecycle_state,
+        payload: { tool_calls: valid.execution_request.orbit_intent.payload.tool_calls.map((call) => ({ priority: call.priority, tool: call.tool })) },
+        boundary: valid.execution_request.orbit_intent.boundary,
+        action: valid.execution_request.orbit_intent.action,
+        orbit_version: valid.execution_request.orbit_intent.orbit_version
+      },
+      tool_calls: valid.execution_request.tool_calls.map((call) => ({ priority: call.priority, tool: call.tool })),
+      execution: valid.execution_request.execution,
+      resources: valid.execution_request.resources,
+      actor: valid.execution_request.actor,
+      submitted_region: valid.execution_request.submitted_region,
+      request_id: valid.execution_request.request_id
+    }
+  });
   const whitespace = JSON.stringify(valid, null, 4);
   const escaped = canonical.replace("user-001", "\\u0075ser-001").replace("gpu-batch", "gpu-\\u0062atch");
   const malformed = [

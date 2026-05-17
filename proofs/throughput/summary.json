@@ -1,0 +1,15 @@
+{
+  "proof": "throughput",
+  "status_source": "artifacts/controlled-benchmark-summary.json",
+  "verification_command": "npm run benchmark:mnde",
+  "pass_criteria": [
+    "reproducibility.zero_drift == true",
+    "reproducibility.zero_replay_mismatch == true",
+    "cost reduction benchmark remains at expected value"
+  ],
+  "preserved_guarantees": [
+    "hostile benchmark summaries",
+    "throughput summary evidence",
+    "latency validation summary"
+  ]
+}

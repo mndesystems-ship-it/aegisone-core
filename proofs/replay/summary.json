@@ -1,0 +1,14 @@
+{
+  "proof": "replay",
+  "status_source": "artifacts/replay-results.json",
+  "verification_command": "npm run test:local:replay",
+  "pass_criteria": [
+    "replay drift_count == 0",
+    "replay_drift_rate == 0"
+  ],
+  "preserved_guarantees": [
+    "receipt replay evidence",
+    "drift detection",
+    "signed receipt compatibility"
+  ]
+}

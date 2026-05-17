@@ -1,1 +1,0 @@
-{"benchmark_version":"mnde.controlled_benchmark.v2","drift_mismatches":0,"identical_input_runs":100000,"probes":[{"baseline_decision":"ALLOW","id":"cost-00000","kind":"cost"},{"baseline_decision":"ALLOW","id":"agent-00000","kind":"agent"}],"zero_drift":true}

@@ -3,7 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { join, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { executeDeterministicPipeline, resetRuntimeState, verifySignedReceipt } from "../audit/node_runtime.ts";
-import { verifyReceiptReplay } from "../ramona/engine.ts";
+import { verifyReceiptReplay } from "../ram0na/engine.ts";
 
 const ROOT = process.cwd();
 const SOURCE_DIR = join(ROOT, "sidecar-scaling-output", "browser-origin-runtime-torture");

@@ -1,0 +1,15 @@
+{
+  "proof": "parity",
+  "status_source": "artifacts/parity-report.json",
+  "verification_command": "npm run test:local:proof",
+  "pass_criteria": [
+    "parity mismatch_count == 0",
+    "controlled benchmark zero_drift == true",
+    "controlled benchmark zero_replay_mismatch == true"
+  ],
+  "preserved_guarantees": [
+    "Node runtime parity",
+    "Rust parity evidence",
+    "proof bundle reproducibility"
+  ]
+}
