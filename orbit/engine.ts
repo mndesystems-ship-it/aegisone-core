@@ -100,11 +100,29 @@ function hasMultipleActions(input: CanonicalExecutionInput): boolean {
   ) {
     return true;
   }
-  const parameters = input.execution_request.parameters;
-  if (!parameters) {
-    return false;
+  return intentParameterObjects(input).some((parameters) => countNestedActionMarkers(parameters as unknown as JsonValue) > 0);
+}
+
+function intentParameterObjects(input: CanonicalExecutionInput): Array<Record<string, JsonValue>> {
+  const parameters: Array<Record<string, JsonValue>> = [];
+  if (input.execution_request.parameters) {
+    parameters.push(input.execution_request.parameters);
   }
-  return countNestedActionMarkers(parameters as unknown as JsonValue) > 0;
+  for (const call of input.execution_request.tool_calls) {
+    if (call.parameters) {
+      parameters.push(call.parameters);
+    }
+  }
+  for (const call of input.execution_request.orbit_intent.payload.tool_calls) {
+    if (call.parameters) {
+      parameters.push(call.parameters);
+    }
+  }
+  return parameters;
+}
+
+function hasUnsafeParameters(input: CanonicalExecutionInput): boolean {
+  return intentParameterObjects(input).some((parameters) => RULES.some((rule) => rule.matcher(parameters)));
 }
 
 export function runStrictOrbit(input: CanonicalExecutionInput): OrbitTrace {
@@ -113,15 +131,6 @@ export function runStrictOrbit(input: CanonicalExecutionInput): OrbitTrace {
     .digest("hex");
 
   if (input.execution_request.orbit_intent.orbit_version !== "2.0" || input.execution_request.orbit_intent.lifecycle_state !== "ARMED") {
-    return {
-      layer: "orbit",
-      decision: "REFUSE",
-      reason_code: REASON_CODES.ToolCallSequence,
-      validation_hash: validationHash
-    };
-  }
-
-  if (!toolCallsEqual(input.execution_request.tool_calls, input.execution_request.orbit_intent.payload.tool_calls)) {
     return {
       layer: "orbit",
       decision: "REFUSE",
@@ -139,18 +148,22 @@ export function runStrictOrbit(input: CanonicalExecutionInput): OrbitTrace {
     };
   }
 
-  const parameters = input.execution_request.parameters;
-  if (parameters) {
-    for (const rule of RULES) {
-      if (rule.matcher(parameters)) {
-        return {
-          layer: "orbit",
-          decision: "REFUSE",
-          reason_code: REASON_CODES.ForbiddenActionInParameters,
-          validation_hash: validationHash
-        };
-      }
-    }
+  if (hasUnsafeParameters(input)) {
+    return {
+      layer: "orbit",
+      decision: "REFUSE",
+      reason_code: REASON_CODES.ForbiddenActionInParameters,
+      validation_hash: validationHash
+    };
+  }
+
+  if (!toolCallsEqual(input.execution_request.tool_calls, input.execution_request.orbit_intent.payload.tool_calls)) {
+    return {
+      layer: "orbit",
+      decision: "REFUSE",
+      reason_code: REASON_CODES.ToolCallSequence,
+      validation_hash: validationHash
+    };
   }
 
   return {

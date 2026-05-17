@@ -64,6 +64,86 @@ function testDeepToolCallEquality() {
   assert.equal(result.receipt.decision_output.reason_code, REASON_CODES.ToolCallSequence);
 }
 
+function testUnsafeToolCallParametersRefuse() {
+  const cases = [
+    {
+      name: "metadata-url",
+      parameters: { url: "http://169.254.169.254/latest/meta-data" }
+    },
+    {
+      name: "destructive-command",
+      parameters: { command: "rm -rf /tmp/workspace" }
+    },
+    {
+      name: "mirrored-orbit-metadata-url",
+      parameters: { endpoint: "curl http://2130706433/admin" }
+    }
+  ];
+
+  for (const item of cases) {
+    const input = makeBaseInput({
+      execution_request: {
+        request_id: `unsafe-tool-call-${item.name}`,
+        release_request: { execution_id: `unsafe-tool-call-${item.name}` },
+        tool_calls: [{ tool: "fetch", priority: 1, parameters: item.parameters }],
+        orbit_intent: {
+          payload: {
+            tool_calls: [{ tool: "fetch", priority: 1, parameters: item.parameters }]
+          }
+        }
+      }
+    });
+
+    resetRuntimeState();
+    const result = executeDeterministicPipeline(rawJson(input));
+    assert.ok(!("parse_boundary" in result));
+    assert.equal(result.receipt.decision_output.decision, "REFUSE", item.name);
+    assert.equal(result.receipt.decision_output.reason_code, REASON_CODES.ForbiddenActionInParameters, item.name);
+  }
+}
+
+function testUnsafeOrbitPayloadToolCallParametersRefuse() {
+  const input = makeBaseInput({
+    execution_request: {
+      request_id: "unsafe-orbit-payload-tool-call",
+      release_request: { execution_id: "unsafe-orbit-payload-tool-call" },
+      tool_calls: [{ tool: "fetch", priority: 1 }],
+      orbit_intent: {
+        payload: {
+          tool_calls: [{ tool: "fetch", priority: 1, parameters: { command: "drop_database production" } }]
+        }
+      }
+    }
+  });
+
+  resetRuntimeState();
+  const result = executeDeterministicPipeline(rawJson(input));
+  assert.ok(!("parse_boundary" in result));
+  assert.equal(result.receipt.decision_output.decision, "REFUSE");
+  assert.equal(result.receipt.decision_output.reason_code, REASON_CODES.ForbiddenActionInParameters);
+}
+
+function testLegacyToolCallsWithoutParametersAllow() {
+  const input = makeBaseInput({
+    execution_request: {
+      request_id: "legacy-tool-call-no-parameters",
+      release_request: { execution_id: "legacy-tool-call-no-parameters" },
+      tool_calls: [{ tool: "deploy", priority: 1 }],
+      orbit_intent: {
+        payload: {
+          tool_calls: [{ tool: "deploy", priority: 1 }]
+        }
+      }
+    }
+  });
+
+  resetRuntimeState();
+  const result = executeDeterministicPipeline(rawJson(input));
+  assert.ok(!("parse_boundary" in result));
+  assert.equal(result.receipt.decision_output.decision, "ALLOW");
+  assert.equal(result.receipt.decision_output.reason_code, REASON_CODES.OkAllow);
+}
+
 function testOrbitIpNormalization() {
   const equivalents = ["0x7f000001", "2130706433", "::ffff:127.0.0.1", "0xa9fea9fe", "2852039166"];
   for (const value of equivalents) {
@@ -96,6 +176,9 @@ function testSocketAdmissionTracksActualAcquisition() {
 testPolicyDocumentIsServerAuthoritative();
 testCorsAllowlist();
 testDeepToolCallEquality();
+testUnsafeToolCallParametersRefuse();
+testUnsafeOrbitPayloadToolCallParametersRefuse();
+testLegacyToolCallsWithoutParametersAllow();
 testOrbitIpNormalization();
 testSocketAdmissionTracksActualAcquisition();
 process.stdout.write("PASS runtime security correction tests\n");
