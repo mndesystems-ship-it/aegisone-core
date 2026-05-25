@@ -1,0 +1,20 @@
+{
+  "provider": "entra",
+  "entra": {
+    "issuer": "",
+    "client_id": "",
+    "tenant_id": "",
+    "redirect_uri": "",
+    "scopes": [],
+    "audience": "",
+    "group_role_map": {}
+  },
+  "okta": {
+    "issuer": "",
+    "client_id": "",
+    "redirect_uri": "",
+    "scopes": [],
+    "audience": "",
+    "group_role_map": {}
+  }
+}

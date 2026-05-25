@@ -1,0 +1,7 @@
+auth-config.local.json
+rbac-policy.local.json
+auth-smoke-artifacts/
+.chrome-profile/
+*.log
+src-tauri/target/
+dist/
