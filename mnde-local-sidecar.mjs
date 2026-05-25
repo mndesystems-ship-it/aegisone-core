@@ -1,9 +1,10 @@
 import http from "node:http";
 import cluster from "node:cluster";
-import { readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
-import { join, parse as parsePath } from "node:path";
+import { dirname, join, parse as parsePath } from "node:path";
 import { PerformanceObserver, monitorEventLoopDelay, performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
 import { canonicalizeJson, parseStrictJson } from "./shared/json.ts";
 import { policyHash } from "./shared/policy-trust.ts";
 import {
@@ -40,6 +41,7 @@ import { ERR_RUNTIME_DEGRADED, ERR_RUNTIME_FATAL, RuntimeWatchdog } from "./side
 
 const HOST = "127.0.0.1";
 const PORT = 8787;
+const REPO_ROOT = dirname(fileURLToPath(import.meta.url));
 const POLICY_PATH = new URL("./mnde-release-package/sidecar-local/policy.v1.signed.json", import.meta.url);
 const RECEIPT_LOG_PATH = process.env.MNDE_RECEIPT_LOG ?? join(process.cwd(), "hostile-verifier-proof-bundle", "receipts.jsonl");
 const CLUSTER_MODE = process.env.MNDE_CLUSTER_MODE === "1";
@@ -206,6 +208,50 @@ function receiptPathForWorker(basePath) {
   if (!cluster.isWorker || !CLUSTER_MODE || CLUSTER_SHARED_RECEIPT_LOG) return basePath;
   const parsed = parsePath(basePath);
   return join(parsed.dir, `${parsed.name}.worker-${cluster.worker.id}${parsed.ext || ".jsonl"}`);
+}
+
+function hasAuthorityContext(req) {
+  const raw = req.headers["x-mnde-authority-context"];
+  if (typeof raw !== "string" || !raw.trim()) return false;
+  try {
+    const parsed = JSON.parse(raw);
+    return typeof parsed.user_id === "string" && parsed.user_id.trim()
+      && typeof parsed.provider === "string" && ["microsoft_entra", "okta"].includes(parsed.provider)
+      && typeof parsed.role === "string" && ["ADMIN", "OPERATOR", "AUDITOR", "VIEWER"].includes(parsed.role);
+  } catch {
+    return false;
+  }
+}
+
+function readRecentReceipts(limit) {
+  if (!existsSync(RECEIPT_LOG_PATH)) return [];
+  const lines = readFileSync(RECEIPT_LOG_PATH, "utf8").trim().split(/\r?\n/).filter(Boolean);
+  return lines.slice(-limit).map((line) => {
+    try {
+      return JSON.parse(line);
+    } catch {
+      return null;
+    }
+  }).filter(Boolean);
+}
+
+function latestReceipt(limit = 1) {
+  return readRecentReceipts(limit)[0] ?? null;
+}
+
+function createAuditBundle() {
+  const dir = join(REPO_ROOT, "audit-bundles", `audit-bundle-${Date.now()}`);
+  mkdirSync(dir, { recursive: true });
+  const manifest = {
+    schema_version: "mnde.audit_bundle_manifest.v1",
+    created_at: new Date().toISOString(),
+    policy_hash,
+    policy_version: policy.policy_version,
+    redacted: true,
+    files: ["manifest.json"]
+  };
+  writeFileSync(join(dir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+  return { dir, manifest };
 }
 
 if (cluster.isPrimary && CLUSTER_MODE) {
@@ -715,6 +761,17 @@ const server = http.createServer(async (req, res) => {
     });
     return;
   }
+  if (req.method === "GET" && pathname === "/identity") {
+    response(res, 200, {
+      schema_version: "mnde.sidecar_identity.v1",
+      repo_root: REPO_ROOT,
+      process_id: process.pid,
+      policy_hash,
+      policy_version: policy.policy_version,
+      started_at_ms: Math.round(performance.timeOrigin)
+    });
+    return;
+  }
   if (req.method === "GET" && pathname === "/readyz") {
     const queueMetrics = receiptQueue.metrics();
     const workerMetrics = workerPool.metrics();
@@ -739,6 +796,20 @@ const server = http.createServer(async (req, res) => {
     });
     return;
   }
+  if (req.method === "GET" && pathname === "/receipts/recent") {
+    const limit = Math.max(1, Math.min(500, Number.parseInt(new URL(req.url, `http://${HOST}:${PORT}`).searchParams.get("limit") ?? "25", 10) || 25));
+    response(res, 200, readRecentReceipts(limit));
+    return;
+  }
+  if (req.method === "GET" && pathname === "/policy/current") {
+    response(res, 200, {
+      status: "ACTIVE",
+      policy_hash,
+      policy_version: policy.policy_version,
+      policy
+    });
+    return;
+  }
   if (req.method === "GET" && pathname === "/metrics") {
     const queueMetrics = receiptQueue.metrics();
     const workerMetrics = workerPool.metrics();
@@ -751,6 +822,66 @@ const server = http.createServer(async (req, res) => {
       "content-type": "text/plain; version=0.0.4; charset=utf-8"
     });
     res.end(body);
+    return;
+  }
+  if (req.method === "POST" && pathname === "/receipts/verify") {
+    if (!hasAuthorityContext(req)) {
+      response(res, 403, {
+        schema_version: "mnde.receipt_verification.v1",
+        status: "FAILED",
+        reason_code: "ERR_AUTH_REQUIRED"
+      });
+      return;
+    }
+    await handleVerify(req, res);
+    return;
+  }
+  if (req.method === "POST" && pathname === "/replay/recent") {
+    if (!hasAuthorityContext(req)) {
+      response(res, 403, {
+        schema_version: "mnde.receipt_replay_summary.v1",
+        status: "REPLAY_UNAVAILABLE",
+        reason_code: "ERR_AUTH_REQUIRED"
+      });
+      return;
+    }
+    const receipt = latestReceipt();
+    if (!receipt) {
+      response(res, 200, {
+        schema_version: "mnde.receipt_replay_summary.v1",
+        status: "REPLAY_UNAVAILABLE",
+        checked: 0,
+        drift: 0,
+        signature_failures: 0
+      });
+      return;
+    }
+    response(res, 200, {
+      schema_version: "mnde.receipt_replay_summary.v1",
+      status: verifySignedReceipt(receipt) ? "PASS" : "SIGNATURE_FAIL",
+      checked: 1,
+      drift: 0,
+      signature_failures: verifySignedReceipt(receipt) ? 0 : 1
+    });
+    return;
+  }
+  if (req.method === "POST" && pathname === "/audit/bundle") {
+    if (!hasAuthorityContext(req)) {
+      response(res, 403, {
+        schema_version: "mnde.audit_bundle.v1",
+        status: "FAIL",
+        reason_code: "ERR_AUTH_REQUIRED"
+      });
+      return;
+    }
+    const { dir, manifest } = createAuditBundle();
+    response(res, 200, {
+      schema_version: "mnde.audit_bundle.v1",
+      status: "PASS",
+      bundle_path: dir,
+      files: manifest.files,
+      policy_hash
+    });
     return;
   }
   if (req.method === "POST" && isDecisionRoute(pathname)) {

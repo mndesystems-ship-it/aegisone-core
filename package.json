@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "bootstrap:dev": "node ./scripts/bootstrap_dev_receipt_keys.mjs",
+    "test:bootstrap:dev": "node --experimental-strip-types ./scripts/test_bootstrap_dev_receipt_keys.mjs",
     "smoke": "node --experimental-strip-types ./mnde-core/index.ts",
     "audit": "powershell -ExecutionPolicy Bypass -File ./audit/run_bundle.ps1",
     "benchmark:mnde": "node --experimental-strip-types ./benchmark/run_mnde_controlled_benchmark.ts",

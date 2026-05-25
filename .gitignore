@@ -13,6 +13,7 @@ results/
 
 # Generated proof and benchmark output. Canonical retained evidence lives under proofs/.
 audit-proof-bundle/
+audit-bundles/
 attack-wave-bundle/
 codex-mnde-proof-bundle/
 controlled-benchmark-bundle/

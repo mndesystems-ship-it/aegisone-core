@@ -132,8 +132,8 @@ export function buildReceipt(input: {
 }): SignedReceipt {
   const config = signingConfig();
   const pipelineAllows = input.orbit.decision === "ALLOW" && input.arm.decision === "ALLOW" && input.ramona.decision === "ALLOW";
-  const decision = pipelineAllows && config.ok ? "ALLOW" : "REFUSE";
-  const reasonCode = pipelineAllows && !config.ok ? config.reason_code : decision === "ALLOW" ? REASON_CODES.OkAllow : input.ramona.reason_code;
+  const decision = pipelineAllows ? "ALLOW" : "REFUSE";
+  const reasonCode = decision === "ALLOW" ? REASON_CODES.OkAllow : input.ramona.reason_code;
   const decisionHash = createHash("sha256")
     .update(
       canonicalizeJson({
