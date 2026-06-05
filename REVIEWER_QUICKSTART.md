@@ -22,7 +22,7 @@ reviewer-kit\artifacts\receipts\refuse-receipt.json
 Verify one receipt independently with no sidecar:
 
 ```powershell
-npm run verify-receipt .\reviewer-kit\artifacts\receipts\allow-receipt.json
+node .\tools\verify-receipt.mjs .\reviewer-kit\artifacts\receipts\allow-receipt.json
 ```
 
 Expected final line:

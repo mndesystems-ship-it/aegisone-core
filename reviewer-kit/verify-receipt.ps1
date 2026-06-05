@@ -53,6 +53,19 @@ function Post-Json([string]$Path, [object]$Body, [hashtable]$Headers = @{}) {
   return Invoke-RestMethod -Method Post -Uri "$SidecarUrl$Path" -Body $json -ContentType "application/json" -Headers $Headers -TimeoutSec 10
 }
 
+function Convert-ToRepoRelativePath([string]$Path) {
+  $repoRoot = Split-Path -Parent $KitRoot
+  $fullPath = [System.IO.Path]::GetFullPath($Path)
+  $root = [System.IO.Path]::GetFullPath($repoRoot)
+  if (-not $root.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+    $root = "$root$([System.IO.Path]::DirectorySeparatorChar)"
+  }
+  if ($fullPath.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {
+    return $fullPath.Substring($root.Length).Replace("\", "/")
+  }
+  return [System.IO.Path]::GetFileName($fullPath)
+}
+
 function Test-ReceiptSchema([object]$Receipt) {
   if ($Receipt.schema_version -ne "ecs.receipt.v2") { return $false }
   if ([string]::IsNullOrWhiteSpace($Receipt.request_hash)) { return $false }
@@ -102,7 +115,7 @@ try {
   $name = [System.IO.Path]::GetFileNameWithoutExtension($resolved.Path)
   $proof = @{
     checked_at = (Get-Date).ToUniversalTime().ToString("o")
-    receipt_path = $resolved.Path
+    receipt_path = (Convert-ToRepoRelativePath $resolved.Path)
     verify = $verify
     replay = $replay
     verdict = "PASS"

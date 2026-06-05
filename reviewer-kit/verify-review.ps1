@@ -44,6 +44,18 @@ function Post-Json([string]$Path, [object]$Body) {
   return Invoke-RestMethod -Method Post -Uri "$SidecarUrl$Path" -Body $json -ContentType "application/json" -TimeoutSec 10
 }
 
+function Remove-ReceiptProbes([string]$ReceiptDir) {
+  if (-not (Test-Path -LiteralPath $ReceiptDir)) { return }
+  Get-ChildItem -LiteralPath $ReceiptDir -Filter "write-probe-*.tmp" -File -ErrorAction SilentlyContinue | ForEach-Object {
+    try {
+      $_.Attributes = "Normal"
+      Remove-Item -LiteralPath $_.FullName -Force -ErrorAction Stop
+    } catch {
+      # Probe cleanup is best-effort; receipt writes below remain the authoritative storage check.
+    }
+  }
+}
+
 try {
   $health = Invoke-RestMethod -Method Get -Uri "$SidecarUrl/healthz" -TimeoutSec 5
   if ($health.ok -ne $true) { Fail "healthz" }
@@ -63,10 +75,11 @@ try {
 
   $receiptDir = Join-Path $ArtifactsRoot "receipts"
   New-Item -ItemType Directory -Force -Path $receiptDir | Out-Null
+  Remove-ReceiptProbes $receiptDir
   $probe = Join-Path $receiptDir ("write-probe-{0}.tmp" -f ([guid]::NewGuid().ToString("N")))
   Set-Content -LiteralPath $probe -Value "probe" -Encoding ASCII
   if (-not (Test-Path -LiteralPath $probe)) { Fail "receipt storage" }
-  Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue
+  Remove-ReceiptProbes $receiptDir
   Write-Host "[PASS] receipt storage"
 
   $proof = @{

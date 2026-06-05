@@ -7,11 +7,10 @@ This guide validates MNDe from a fresh clone without relying on local generated 
 ```powershell
 git clone https://github.com/mndesystems-ship-it/aegisone-core.git
 cd aegisone-core
-git checkout private/aegisone-clean
 git rev-parse HEAD
 ```
 
-Record the returned commit hash and compare it to the release commit supplied with the validation report.
+Record the returned commit hash and compare it to the release commit supplied with the validation report. Public clean-room reviews should use the default branch unless the reviewer has been explicitly asked to validate a specific commit or branch.
 
 ## Install
 

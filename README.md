@@ -2,6 +2,8 @@
 
 MNDe is a pre-execution authority layer for risky automation. Before an action runs, the action is sent to MNDe. MNDe returns a deterministic `ALLOW` or `REFUSE`, then writes a signed receipt that can be verified and replayed later.
 
+The GitHub repository is named `aegisone-core` for historical continuity. The public product and evaluator-facing name is MNDe.
+
 The shortest proof is the reviewer kit:
 
 ```powershell

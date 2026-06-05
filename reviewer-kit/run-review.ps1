@@ -151,6 +151,15 @@ function Run-FullReview {
   Write-Host "Replay Verification: PASS"
   Write-Host ""
   Write-Host "FINAL VERDICT: PASS"
+  Write-Host ""
+  Write-Host "Artifacts:"
+  Write-Host "reviewer-kit/artifacts/receipts/allow-receipt.json"
+  Write-Host "reviewer-kit/artifacts/receipts/refuse-receipt.json"
+  Write-Host "reviewer-kit/artifacts/proofs/security/environment-verification.json"
+  Write-Host "reviewer-kit/artifacts/proofs/determinism/allow-response.json"
+  Write-Host "reviewer-kit/artifacts/proofs/security/refuse-response.json"
+  Write-Host "reviewer-kit/artifacts/proofs/replay/allow-receipt-verification.json"
+  Write-Host "reviewer-kit/artifacts/proofs/replay/refuse-receipt-verification.json"
 }
 
 try {
