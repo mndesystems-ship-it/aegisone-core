@@ -1,12 +1,12 @@
 import http from "node:http";
 import cluster from "node:cluster";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { dirname, join, parse as parsePath } from "node:path";
 import { PerformanceObserver, monitorEventLoopDelay, performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { canonicalizeJson, parseStrictJson } from "./shared/json.ts";
-import { policyHash } from "./shared/policy-trust.ts";
+import { canonicalPolicyPayload, policyHash, verifyPolicySignature } from "./shared/policy-trust.ts";
 import {
   verifySignedReceipt
 } from "./audit/node_runtime.ts";
@@ -38,12 +38,29 @@ import {
 } from "./sidecar/runtime_request.mjs";
 import { SocketRegistry } from "./sidecar/socket_registry.mjs";
 import { ERR_RUNTIME_DEGRADED, ERR_RUNTIME_FATAL, RuntimeWatchdog } from "./sidecar/runtime_watchdog.mjs";
+import {
+  buildCapabilityObject,
+  clampReceiptLimit,
+  createAuditBundle,
+  readRecentReceipts,
+  replayRecentReceipts,
+  validatePolicyDocument,
+  verifyReceiptContract
+} from "./sidecar/production_api.mjs";
+import {
+  appendAuthAuditEvent,
+  authorizeAuthorityAction,
+  parseAuthorityAssertion,
+  refusalBody
+} from "./sidecar/auth_authority.mjs";
+import { replayReceiptDeterministically } from "./sidecar/replay_engine.mjs";
 
 const HOST = "127.0.0.1";
-const PORT = 8787;
+const PORT = parseBindPort(process.env.MNDE_BIND_PORT, 8787);
 const REPO_ROOT = dirname(fileURLToPath(import.meta.url));
-const POLICY_PATH = new URL("./mnde-release-package/sidecar-local/policy.v1.signed.json", import.meta.url);
+let activePolicyPath = new URL("./mnde-release-package/sidecar-local/policy.v1.signed.json", import.meta.url);
 const RECEIPT_LOG_PATH = process.env.MNDE_RECEIPT_LOG ?? join(process.cwd(), "hostile-verifier-proof-bundle", "receipts.jsonl");
+const AUTH_AUDIT_LOG_PATH = process.env.MNDE_AUTH_AUDIT_LOG ?? join(process.cwd(), "auth-audit", "auth-events.jsonl");
 const CLUSTER_MODE = process.env.MNDE_CLUSTER_MODE === "1";
 const CLUSTER_SHARED_RECEIPT_LOG = process.env.MNDE_CLUSTER_SHARED_RECEIPT_LOG === "1";
 const CLUSTER_WORKERS = Number.parseInt(process.env.MNDE_CLUSTER_WORKERS ?? String(availableParallelism()), 10);
@@ -67,8 +84,8 @@ const RECEIPT_QUEUE_CONFIG = validateReceiptPersistenceConfig({
   max_batch_age_ms: Number.parseInt(process.env.MNDE_RECEIPT_BATCH_MAX_AGE_MS ?? "10", 10),
   flush_timeout_ms: Number.parseInt(process.env.MNDE_RECEIPT_FLUSH_TIMEOUT_MS ?? "2000", 10)
 });
-const policy = JSON.parse(readFileSync(POLICY_PATH, "utf8"));
-const policy_hash = policyHash(policy);
+let policy = JSON.parse(readFileSync(activePolicyPath, "utf8"));
+let policy_hash = policyHash(policy);
 const receiptQueue = new ReceiptPersistenceQueue(RECEIPT_QUEUE_CONFIG);
 const workerPool = new DeterministicWorkerPool({
   worker_count: WORKER_POOL_SIZE,
@@ -76,6 +93,12 @@ const workerPool = new DeterministicWorkerPool({
   task_timeout_ms: WORKER_TASK_TIMEOUT_MS,
   worker_url: new URL("./sidecar/deterministic_worker.mjs", import.meta.url)
 });
+
+function parseBindPort(value, fallback) {
+  const port = Number.parseInt(value ?? String(fallback), 10);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) return fallback;
+  return port;
+}
 const saturationController = new SystemSaturationController({
   max_inflight: MAX_INFLIGHT,
   inflight_shed_threshold: Math.min(SHED_INFLIGHT, MAX_INFLIGHT),
@@ -139,7 +162,8 @@ const counters = {
   saturation_receipt_queue_bytes: 0,
   request_timeout_refusals: 0,
   browser_origin_requests: 0,
-  watchdog_interventions: 0
+  watchdog_interventions: 0,
+  malformed_receipt_lines: 0
 };
 const latencyTotals = {
   parse_ms: 0,
@@ -208,50 +232,6 @@ function receiptPathForWorker(basePath) {
   if (!cluster.isWorker || !CLUSTER_MODE || CLUSTER_SHARED_RECEIPT_LOG) return basePath;
   const parsed = parsePath(basePath);
   return join(parsed.dir, `${parsed.name}.worker-${cluster.worker.id}${parsed.ext || ".jsonl"}`);
-}
-
-function hasAuthorityContext(req) {
-  const raw = req.headers["x-mnde-authority-context"];
-  if (typeof raw !== "string" || !raw.trim()) return false;
-  try {
-    const parsed = JSON.parse(raw);
-    return typeof parsed.user_id === "string" && parsed.user_id.trim()
-      && typeof parsed.provider === "string" && ["microsoft_entra", "okta"].includes(parsed.provider)
-      && typeof parsed.role === "string" && ["ADMIN", "OPERATOR", "AUDITOR", "VIEWER"].includes(parsed.role);
-  } catch {
-    return false;
-  }
-}
-
-function readRecentReceipts(limit) {
-  if (!existsSync(RECEIPT_LOG_PATH)) return [];
-  const lines = readFileSync(RECEIPT_LOG_PATH, "utf8").trim().split(/\r?\n/).filter(Boolean);
-  return lines.slice(-limit).map((line) => {
-    try {
-      return JSON.parse(line);
-    } catch {
-      return null;
-    }
-  }).filter(Boolean);
-}
-
-function latestReceipt(limit = 1) {
-  return readRecentReceipts(limit)[0] ?? null;
-}
-
-function createAuditBundle() {
-  const dir = join(REPO_ROOT, "audit-bundles", `audit-bundle-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
-  const manifest = {
-    schema_version: "mnde.audit_bundle_manifest.v1",
-    created_at: new Date().toISOString(),
-    policy_hash,
-    policy_version: policy.policy_version,
-    redacted: true,
-    files: ["manifest.json"]
-  };
-  writeFileSync(join(dir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-  return { dir, manifest };
 }
 
 if (cluster.isPrimary && CLUSTER_MODE) {
@@ -463,6 +443,35 @@ function isDecisionRoute(pathname) {
   return pathname === "/v1/decisions" || pathname === "/decide";
 }
 
+function authorityActionName(pathname) {
+  if (pathname === "/policy/activate") return "policy.activate";
+  if (pathname === "/audit/bundle") return "audit.bundle";
+  if (pathname === "/replay/recent") return "replay.recent";
+  if (pathname === "/receipts/verify" || pathname === "/verify") return "receipt.verify";
+  return pathname;
+}
+
+function auditAuthority(pathname, authz, result, target = null, decision_hash = null, reason = null) {
+  try {
+    appendAuthAuditEvent(AUTH_AUDIT_LOG_PATH, {
+      actor: authz.actor,
+      action: authorityActionName(pathname),
+      target,
+      result,
+      decision_hash,
+      reason
+    });
+  } catch (error) {
+    process.stderr.write(`${JSON.stringify({ ts: new Date().toISOString(), event: "mnde.auth_audit_write_failed", error: error instanceof Error ? error.message : String(error) })}\n`);
+  }
+}
+
+function authorizeRequest(req, pathname, target = null) {
+  const authz = authorizeAuthorityAction(pathname, parseAuthorityAssertion(req.headers));
+  if (!authz.ok) auditAuthority(pathname, authz, "REFUSE", target, null, authz.reason);
+  return authz;
+}
+
 async function handleDecide(req, res) {
   const totalStarted = performance.now();
   const timings = {
@@ -634,33 +643,130 @@ async function handleDecide(req, res) {
 }
 
 async function handleVerify(req, res) {
+  const authz = authorizeRequest(req, new URL(req.url, `http://${HOST}:${PORT}`).pathname);
+  if (!authz.ok) {
+    response(res, 403, refusalBody(authz.reason, authz.actor, "receipt.verify"));
+    return;
+  }
   try {
     const input = await readStrictObject(req, {});
-    const receipt = receiptFromInput(input);
-    const ok = verifySignedReceipt(receipt);
-    response(res, 200, {
-      schema_version: "mnde.receipt_verification.v1",
-      status: ok ? "VERIFIED" : "FAILED",
-      reason_code: ok ? "OK_VERIFIED" : "ERR_RECEIPT_SIGNATURE_INVALID",
-      receipt_signature_valid: ok,
-      request_hash: receipt?.request_hash ?? null,
-      decision_hash: receipt?.decision_output?.decision_hash ?? null,
-      decision: receipt?.decision_output?.decision ?? null,
-      decision_reason_code: receipt?.decision_output?.reason_code ?? null
-    });
+    const result = verifyReceiptContract(input.value, verifySignedReceipt);
+    auditAuthority(new URL(req.url, `http://${HOST}:${PORT}`).pathname, authz, result.status === "VALID" ? "ALLOW" : "REFUSE", result.receipt_id, result.decision_hash, result.reason);
+    response(res, 200, result);
   } catch (error) {
-    response(res, 400, {
-      schema_version: "mnde.receipt_verification.v1",
-      status: "FAILED",
-      reason_code: error.message?.startsWith("ERR_") ? error.message : "ERR_RECEIPT_VERIFY_FAILED"
+    auditAuthority(new URL(req.url, `http://${HOST}:${PORT}`).pathname, authz, "REFUSE", "receipt.verify", null, "ERR_RECEIPT_VERIFY_FAILED");
+    response(res, 200, {
+      status: "INVALID",
+      receipt_id: null,
+      request_hash: null,
+      decision_hash: null,
+      policy_hash: null,
+      reason: error.message?.startsWith("ERR_") ? error.message : "ERR_RECEIPT_VERIFY_FAILED"
     });
   }
+}
+
+function currentPolicyResponse() {
+  return {
+    status: "ACTIVE",
+    policy: policy.policy_version,
+    policy_hash,
+    reason: null
+  };
+}
+
+function verifyPolicyTrust(publicKeyHex, policyDocument, signatureHex) {
+  return verifyPolicySignature(publicKeyHex, canonicalPolicyPayload(policyDocument), signatureHex);
+}
+
+async function handlePolicyActivate(req, res) {
+  const authz = authorizeRequest(req, "/policy/activate");
+  if (!authz.ok) {
+    response(res, 403, refusalBody(authz.reason, authz.actor, "policy.activate"));
+    return;
+  }
+  try {
+    const input = await readStrictObject(req, {});
+    const policyPath = input.value?.policy_path;
+    if (typeof policyPath !== "string" || !policyPath.trim()) {
+      auditAuthority("/policy/activate", authz, "REFUSE", "missing policy path", null, "policy_path is required");
+      response(res, 200, { status: "REFUSED", policy: policy.policy_version, policy_hash, reason: "policy_path is required" });
+      return;
+    }
+    if (!existsSync(policyPath)) {
+      auditAuthority("/policy/activate", authz, "REFUSE", policyPath, null, "policy file does not exist");
+      response(res, 200, { status: "REFUSED", policy: policy.policy_version, policy_hash, reason: "policy file does not exist" });
+      return;
+    }
+    const candidate = JSON.parse(readFileSync(policyPath, "utf8"));
+    const validation = validatePolicyDocument(candidate, verifyPolicyTrust);
+    if (!validation.ok) {
+      auditAuthority("/policy/activate", authz, "REFUSE", policyPath, null, validation.reason);
+      response(res, 200, { status: "REFUSED", policy: policy.policy_version, policy_hash, reason: validation.reason });
+      return;
+    }
+    policy = candidate;
+    policy_hash = policyHash(policy);
+    activePolicyPath = policyPath;
+    auditAuthority("/policy/activate", authz, "ALLOW", policyPath, policy_hash, null);
+    response(res, 200, currentPolicyResponse());
+  } catch (error) {
+    auditAuthority("/policy/activate", authz, "REFUSE", "policy.activate", null, error instanceof Error ? error.message : "policy activation failed");
+    response(res, 200, { status: "REFUSED", policy: policy.policy_version, policy_hash, reason: error instanceof Error ? error.message : "policy activation failed" });
+  }
+}
+
+function recentReceiptsForApi(url) {
+  const limit = clampReceiptLimit(url.searchParams.get("limit"));
+  return readRecentReceipts(RECEIPT_LOG_PATH, limit, (warning) => {
+    counters.malformed_receipt_lines += 1;
+    process.stderr.write(`${JSON.stringify({ ts: new Date().toISOString(), event: "mnde.receipt_history_malformed", ...warning })}\n`);
+  });
+}
+
+function replayRecentForApi(limit) {
+  return replayRecentReceipts(RECEIPT_LOG_PATH, limit, verifySignedReceipt, replayReceiptDeterministically);
+}
+
+function readinessSnapshot() {
+  const queueMetrics = receiptQueue.metrics();
+  const workerMetrics = workerPool.metrics();
+  const watchdogState = watchdog.snapshot();
+  return {
+    ok: !queueMetrics.fail_closed && !watchdogState.fatal,
+    degraded: queueMetrics.fail_closed || watchdogState.degraded,
+    degraded_reason: queueMetrics.fail_closed_reason ?? watchdogState.degraded_reason,
+    active_policy_version: policy.policy_version,
+    policy_hash,
+    worker_id: cluster.worker?.id ?? 0,
+    inflight,
+    event_loop_lag_ms: latestEventLoopLagMs,
+    receipt_queue: telemetrySafe(queueMetrics),
+    worker_pool: telemetrySafe(workerMetrics),
+    watchdog: telemetrySafe(watchdogState),
+    durability_mode: RECEIPT_QUEUE_CONFIG.durability_mode
+  };
+}
+
+function auditBundleForApi() {
+  const queueMetrics = receiptQueue.metrics();
+  const workerMetrics = workerPool.metrics();
+  return createAuditBundle({
+    outputRoot: join(process.cwd(), "audit-bundles"),
+    recentReceipts: readRecentReceipts(RECEIPT_LOG_PATH, 100, () => {
+      counters.malformed_receipt_lines += 1;
+    }),
+    replaySummary: replayRecentForApi(100),
+    metricsText: metricsText(queueMetrics, workerMetrics),
+    readySnapshot: readinessSnapshot(),
+    policySummary: currentPolicyResponse()
+  });
 }
 
 async function handleReplay(req, res) {
   try {
     const input = await readStrictObject(req, {});
-    const receipt = receiptFromInput(input);
+    const receipt = receiptFromInput(input.value);
     if (!verifySignedReceipt(receipt)) {
       response(res, 200, {
         schema_version: "mnde.receipt_replay.v1",
@@ -773,40 +879,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
   if (req.method === "GET" && pathname === "/readyz") {
-    const queueMetrics = receiptQueue.metrics();
-    const workerMetrics = workerPool.metrics();
-    const watchdogState = watchdog.snapshot();
     const socketMetrics = socketRegistry.metrics();
     response(res, 200, {
-      ok: !queueMetrics.fail_closed && !watchdogState.fatal,
-      degraded: queueMetrics.fail_closed || watchdogState.degraded,
-      degraded_reason: queueMetrics.fail_closed_reason ?? watchdogState.degraded_reason,
-      active_policy_version: policy.policy_version,
-      policy_hash,
-      worker_id: cluster.worker?.id ?? 0,
-      inflight,
+      ...readinessSnapshot(),
       max_inflight: MAX_INFLIGHT,
       shed_inflight: Math.min(SHED_INFLIGHT, MAX_INFLIGHT),
-      event_loop_lag_ms: latestEventLoopLagMs,
-      receipt_queue: telemetrySafe(queueMetrics),
-      worker_pool: telemetrySafe(workerMetrics),
       sockets: telemetrySafe(socketMetrics),
-      watchdog: telemetrySafe(watchdogState),
-      durability_mode: RECEIPT_QUEUE_CONFIG.durability_mode
-    });
-    return;
-  }
-  if (req.method === "GET" && pathname === "/receipts/recent") {
-    const limit = Math.max(1, Math.min(500, Number.parseInt(new URL(req.url, `http://${HOST}:${PORT}`).searchParams.get("limit") ?? "25", 10) || 25));
-    response(res, 200, readRecentReceipts(limit));
-    return;
-  }
-  if (req.method === "GET" && pathname === "/policy/current") {
-    response(res, 200, {
-      status: "ACTIVE",
-      policy_hash,
-      policy_version: policy.policy_version,
-      policy
     });
     return;
   }
@@ -824,66 +902,6 @@ const server = http.createServer(async (req, res) => {
     res.end(body);
     return;
   }
-  if (req.method === "POST" && pathname === "/receipts/verify") {
-    if (!hasAuthorityContext(req)) {
-      response(res, 403, {
-        schema_version: "mnde.receipt_verification.v1",
-        status: "FAILED",
-        reason_code: "ERR_AUTH_REQUIRED"
-      });
-      return;
-    }
-    await handleVerify(req, res);
-    return;
-  }
-  if (req.method === "POST" && pathname === "/replay/recent") {
-    if (!hasAuthorityContext(req)) {
-      response(res, 403, {
-        schema_version: "mnde.receipt_replay_summary.v1",
-        status: "REPLAY_UNAVAILABLE",
-        reason_code: "ERR_AUTH_REQUIRED"
-      });
-      return;
-    }
-    const receipt = latestReceipt();
-    if (!receipt) {
-      response(res, 200, {
-        schema_version: "mnde.receipt_replay_summary.v1",
-        status: "REPLAY_UNAVAILABLE",
-        checked: 0,
-        drift: 0,
-        signature_failures: 0
-      });
-      return;
-    }
-    response(res, 200, {
-      schema_version: "mnde.receipt_replay_summary.v1",
-      status: verifySignedReceipt(receipt) ? "PASS" : "SIGNATURE_FAIL",
-      checked: 1,
-      drift: 0,
-      signature_failures: verifySignedReceipt(receipt) ? 0 : 1
-    });
-    return;
-  }
-  if (req.method === "POST" && pathname === "/audit/bundle") {
-    if (!hasAuthorityContext(req)) {
-      response(res, 403, {
-        schema_version: "mnde.audit_bundle.v1",
-        status: "FAIL",
-        reason_code: "ERR_AUTH_REQUIRED"
-      });
-      return;
-    }
-    const { dir, manifest } = createAuditBundle();
-    response(res, 200, {
-      schema_version: "mnde.audit_bundle.v1",
-      status: "PASS",
-      bundle_path: dir,
-      files: manifest.files,
-      policy_hash
-    });
-    return;
-  }
   if (req.method === "POST" && isDecisionRoute(pathname)) {
     if (L0_LIMITS.enable && l0ActiveConnections > L0_LIMITS.max_connections) {
       l0ShedDecision(req, res);
@@ -892,12 +910,71 @@ const server = http.createServer(async (req, res) => {
     await handleDecide(req, res);
     return;
   }
-  if (req.method === "POST" && pathname === "/verify") {
+  if (req.method === "GET" && pathname === "/receipts/recent") {
+    response(res, 200, recentReceiptsForApi(new URL(req.url, `http://${HOST}:${PORT}`)));
+    return;
+  }
+  if (req.method === "POST" && (pathname === "/verify" || pathname === "/receipts/verify")) {
     await handleVerify(req, res);
+    return;
+  }
+  if (req.method === "POST" && pathname === "/replay/recent") {
+    const authz = authorizeRequest(req, pathname);
+    if (!authz.ok) {
+      response(res, 403, refusalBody(authz.reason, authz.actor, "replay.recent"));
+      return;
+    }
+    try {
+      const input = await readStrictObject(req, {});
+      const result = replayRecentForApi(input.value?.limit);
+      auditAuthority(pathname, authz, result.status === "PASS" ? "ALLOW" : "REFUSE", `limit:${input.value?.limit ?? 100}`, result.policy_hash, result.status);
+      response(res, 200, result);
+    } catch {
+      const result = replayRecentForApi(100);
+      auditAuthority(pathname, authz, result.status === "PASS" ? "ALLOW" : "REFUSE", "limit:100", result.policy_hash, result.status);
+      response(res, 200, result);
+    }
     return;
   }
   if (req.method === "POST" && pathname === "/replay") {
     await handleReplay(req, res);
+    return;
+  }
+  if (req.method === "GET" && pathname === "/policy/current") {
+    response(res, 200, currentPolicyResponse());
+    return;
+  }
+  if (req.method === "POST" && pathname === "/policy/activate") {
+    await handlePolicyActivate(req, res);
+    return;
+  }
+  if (req.method === "POST" && pathname === "/audit/bundle") {
+    const authz = authorizeRequest(req, pathname);
+    if (!authz.ok) {
+      response(res, 403, refusalBody(authz.reason, authz.actor, "audit.bundle"));
+      return;
+    }
+    try {
+      const result = auditBundleForApi();
+      auditAuthority(pathname, authz, result.status === "PASS" ? "ALLOW" : "REFUSE", result.bundle_path, null, result.reason);
+      response(res, 200, result);
+    } catch (error) {
+      auditAuthority(pathname, authz, "REFUSE", "audit.bundle", null, error instanceof Error ? error.message : "audit bundle failed");
+      response(res, 200, { status: "FAIL", bundle_path: null, created_at: new Date().toISOString(), files: [], reason: error instanceof Error ? error.message : "audit bundle failed" });
+    }
+    return;
+  }
+  if (req.method === "GET" && pathname === "/capabilities") {
+    response(res, 200, buildCapabilityObject({
+      health: true,
+      ready: true,
+      metrics: true,
+      receipts_recent: true,
+      receipt_verify: true,
+      replay_recent: true,
+      policy_activation: true,
+      audit_bundle: true
+    }));
     return;
   }
   await fail(res, "ERR_NOT_FOUND", 404);
@@ -1014,6 +1091,7 @@ function metricsText(queueMetrics, workerMetrics) {
   out += metricLine("mnde_sidecar_request_timeout_refusals_total", counters.request_timeout_refusals);
   out += metricLine("mnde_sidecar_browser_origin_requests_total", counters.browser_origin_requests);
   out += metricLine("mnde_watchdog_interventions_total", counters.watchdog_interventions);
+  out += metricLine("mnde_receipt_history_malformed_lines_total", counters.malformed_receipt_lines);
   const socketMetrics = socketRegistry.metrics();
   out += metricLine("mnde_open_sockets", socketMetrics.open);
   out += metricLine("mnde_idle_sockets", socketMetrics.idle);

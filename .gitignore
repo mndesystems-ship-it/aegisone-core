@@ -1,5 +1,7 @@
 node_modules/
 receipts/
+!tests/receipts/
+!tests/receipts/**
 tmp/
 coverage/
 bench-temp/
@@ -34,6 +36,8 @@ sidecar-stability-proof-bundle/
 stable-proof-bundle/
 technical-drop-package/
 volatile-benchmark-bundle/
+reviewer-kit/artifacts/*
+!reviewer-kit/artifacts/.gitkeep
 
 # Generated release packages and build outputs. Release manifests are retained under releases/.
 mnde-release-package/
