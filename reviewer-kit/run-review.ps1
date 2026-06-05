@@ -16,6 +16,7 @@ $ReceiptLog = Join-Path $ArtifactsRoot "logs\sidecar-receipts.jsonl"
 $NonceCache = Join-Path $ArtifactsRoot "logs\auth-nonce-cache.json"
 $OutLog = Join-Path $ArtifactsRoot "logs\sidecar.stdout.log"
 $ErrLog = Join-Path $ArtifactsRoot "logs\sidecar.stderr.log"
+$script:SidecarStarted = $false
 
 function Fail([string]$Message) {
   Write-Host "[FAIL] $Message"
@@ -61,6 +62,19 @@ writeFileSync(publicPath, publicKey.export({ format: 'der', type: 'spki' }).suba
   if ($LASTEXITCODE -ne 0) { Fail "authority key generation failed" }
 }
 
+function Initialize-ReceiptSigningKeys {
+  $privateKey = Join-Path $RepoRoot "shared\receipt_keys\receipt_signing_private.pem"
+  $publicKey = Join-Path $RepoRoot "shared\receipt_keys\receipt_signing_public.pem"
+  if ((Test-Path -LiteralPath $privateKey) -and (Test-Path -LiteralPath $publicKey)) { return }
+  Push-Location $RepoRoot
+  try {
+    & node ".\scripts\bootstrap_dev_receipt_keys.mjs" | Out-Null
+    if ($LASTEXITCODE -ne 0) { Fail "receipt signing key bootstrap failed" }
+  } finally {
+    Pop-Location
+  }
+}
+
 function Assert-Port-Free {
   try {
     Invoke-RestMethod -Method Get -Uri "$SidecarUrl/healthz" -TimeoutSec 1 | Out-Null
@@ -72,6 +86,8 @@ function Assert-Port-Free {
 
 function Start-Sidecar {
   Assert-Port-Free
+  Set-Content -LiteralPath $OutLog -Value "" -Encoding ASCII
+  Set-Content -LiteralPath $ErrLog -Value "" -Encoding ASCII
   $publicKey = (Get-Content -LiteralPath $AuthPublicKey -Raw).Trim()
   $env:MNDE_AUTH_ASSERTION_PUBLIC_KEY_B64 = $publicKey
   $env:MNDE_AUTH_NONCE_CACHE = $NonceCache
@@ -82,10 +98,9 @@ function Start-Sidecar {
   $env:MNDE_RECEIPT_DURABILITY_MODE = "strict_audit"
   $env:MNDE_WORKER_POOL_SIZE = "1"
   $env:MNDE_WORKER_QUEUE_MAX_DEPTH = "16"
-  $process = Start-Process -FilePath "node" -ArgumentList "mnde-local-sidecar.mjs" -WorkingDirectory $RepoRoot -PassThru -WindowStyle Hidden
+  $process = Start-Process -FilePath "node" -ArgumentList "mnde-local-sidecar.mjs" -WorkingDirectory $RepoRoot -RedirectStandardOutput $OutLog -RedirectStandardError $ErrLog -PassThru -WindowStyle Hidden
+  $script:SidecarStarted = $true
   Set-Content -LiteralPath $PidFile -Value ([string]$process.Id) -Encoding ASCII
-  Set-Content -LiteralPath $OutLog -Value "" -Encoding ASCII
-  Set-Content -LiteralPath $ErrLog -Value "" -Encoding ASCII
 }
 
 function Stop-Sidecar {
@@ -96,6 +111,8 @@ function Stop-Sidecar {
   if ($null -ne $process) {
     Stop-Process -Id $process.Id -Force
   }
+  Remove-Item -LiteralPath $PidFile -Force -ErrorAction SilentlyContinue
+  $script:SidecarStarted = $false
 }
 
 function Wait-Ready {
@@ -139,6 +156,7 @@ function Run-FullReview {
 try {
   Ensure-Dirs
   Initialize-ReviewerAuthority
+  Initialize-ReceiptSigningKeys
   Start-Sidecar
   Wait-Ready
   Write-Host "MNDe Reviewer Session Ready"
@@ -150,5 +168,6 @@ try {
     }
   }
 } catch {
+  if ($script:SidecarStarted) { Stop-Sidecar }
   Fail $_.Exception.Message
 }
