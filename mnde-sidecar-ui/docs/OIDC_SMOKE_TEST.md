@@ -62,11 +62,14 @@ Required Okta fields:
 
 ## Run Smoke Test
 
-From `C:\Users\Shadow\Downloads\INsol\mnde-sidecar-ui`:
+From the sidecar UI folder:
 
 ```powershell
+cd .\mnde-sidecar-ui
 node --experimental-strip-types scripts\run_oidc_smoke_readiness.mjs
 ```
+
+In a clean-room clone without `auth-config.local.json`, OIDC readiness is expected to fail closed. The desktop can still launch in demo mode, but authenticated live authority actions remain blocked until a valid Entra or Okta configuration exists.
 
 Then run the desktop app and click each provider sign-in button. A procurement-clearing run must produce:
 

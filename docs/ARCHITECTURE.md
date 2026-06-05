@@ -1,6 +1,6 @@
 # Architecture
 
-AegisOne Core is a deterministic pre-execution authority. Requests flow through preflight parsing, Orbit intent validation, ARM cost authorization, RAM0NA runtime observation checks, receipt construction, and optional sidecar admission controls.
+MNDe is a deterministic pre-execution authority. Requests flow through preflight parsing, Orbit intent validation, ARM cost authorization, RAM0NA runtime observation checks, receipt construction, and optional sidecar admission controls.
 
 The runtime path is deliberately small:
 

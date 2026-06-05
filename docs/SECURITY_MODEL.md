@@ -1,6 +1,6 @@
 # Security Model
 
-AegisOne fails closed. Any invalid schema, malformed JSON, missing release material, unsigned allow, replay drift, policy hash mismatch, exhausted worker pool, saturated receipt queue, or consumed execution ID is a refusal condition.
+MNDe fails closed. Any invalid schema, malformed JSON, missing release material, unsigned allow, replay drift, policy hash mismatch, exhausted worker pool, saturated receipt queue, or consumed execution ID is a refusal condition.
 
 Security-sensitive invariants:
 

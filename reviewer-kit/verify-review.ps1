@@ -63,9 +63,10 @@ try {
 
   $receiptDir = Join-Path $ArtifactsRoot "receipts"
   New-Item -ItemType Directory -Force -Path $receiptDir | Out-Null
-  $probe = Join-Path $receiptDir ".write-probe"
+  $probe = Join-Path $receiptDir ("write-probe-{0}.tmp" -f ([guid]::NewGuid().ToString("N")))
   Set-Content -LiteralPath $probe -Value "probe" -Encoding ASCII
-  Remove-Item -LiteralPath $probe
+  if (-not (Test-Path -LiteralPath $probe)) { Fail "receipt storage" }
+  Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue
   Write-Host "[PASS] receipt storage"
 
   $proof = @{

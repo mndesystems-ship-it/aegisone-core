@@ -81,13 +81,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\reviewer-kit\verify-indepe
 reviewer-kit\artifacts\receipts\allow-receipt.json
 reviewer-kit\artifacts\receipts\refuse-receipt.json
 reviewer-kit\artifacts\logs\sidecar-receipts.jsonl
-reviewer-kit\artifacts\logs\sidecar.pid
 reviewer-kit\artifacts\proofs\determinism\allow-response.json
 reviewer-kit\artifacts\proofs\security\environment-verification.json
 reviewer-kit\artifacts\proofs\security\refuse-response.json
 reviewer-kit\artifacts\proofs\replay\allow-receipt-verification.json
 reviewer-kit\artifacts\proofs\replay\refuse-receipt-verification.json
 ```
+
+`reviewer-kit\artifacts\logs\sidecar.pid` is temporary runtime state. It is created while the sidecar is running and may be removed after successful shutdown.
 
 `reviewer-kit\expected\pass-transcript.txt` is a sanitized expected transcript. It is a fixture, not generated evidence.
 

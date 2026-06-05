@@ -13,7 +13,7 @@ The most important product signal is the **Last Refusal** panel on the right. Th
 From the app folder:
 
 ```powershell
-cd C:\Users\Shadow\Downloads\INsol\mnde-sidecar-ui
+cd .\mnde-sidecar-ui
 cmd /c npm run dev
 ```
 
@@ -80,6 +80,8 @@ Live Mode only reports sidecar data. If the sidecar is unavailable, the UI says:
 MNDe sidecar disconnected.
 No live protection status available.
 ```
+
+Live protected actions require configured authority. In a clean-room clone without OIDC configuration, protected endpoints may return `403` or show auth-required state. That is expected fail-closed behavior, not a broken desktop install.
 
 ## Read The Screen
 
