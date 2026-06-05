@@ -18,10 +18,23 @@ import {
   type SignedReceiptPayload
 } from "../shared/index.ts";
 
-const SIGNING_SECRET = "ecs-prod-signing-secret-v2";
-const SIGNING_KEY_ID = "ecs-prod-key-v2";
+const SIGNING_SECRET_ENV = "MNDE_RECEIPT_HMAC_SECRET";
+const SIGNING_KEY_ID_ENV = "MNDE_RECEIPT_HMAC_KEY_ID";
 const RECEIPT_KEY_SET_VERSION = "receipt-key-set-v1";
 type TimingCollector = Partial<Record<"signing_ms", number>>;
+type SigningConfig = { ok: true; secret: string; keyId: string } | { ok: false; reason_code: string };
+
+function signingConfig(): SigningConfig {
+  const secret = process.env[SIGNING_SECRET_ENV]?.trim();
+  const keyId = process.env[SIGNING_KEY_ID_ENV]?.trim();
+  if (!secret || !keyId) {
+    return { ok: false, reason_code: REASON_CODES.ReceiptSignatureInvalid };
+  }
+  if (secret.length < 32 || !/^[a-zA-Z0-9._:-]{1,128}$/.test(keyId)) {
+    return { ok: false, reason_code: REASON_CODES.ReceiptSignatureInvalid };
+  }
+  return { ok: true, secret, keyId };
+}
 
 function formatUsdFromCents(cents: number): string {
   const dollars = Math.floor(cents / 100);
@@ -29,10 +42,10 @@ function formatUsdFromCents(cents: number): string {
   return `${dollars}.${remainder.toString().padStart(2, "0")}`;
 }
 
-function signPayload(payload: SignedReceiptPayload, timings?: TimingCollector): SignedReceipt {
+function signPayload(payload: SignedReceiptPayload, config: SigningConfig, timings?: TimingCollector): SignedReceipt {
   const canonicalPayload = canonicalizeJson(payload as unknown as JsonValue);
   const signingStarted = performance.now();
-  const hmacValue = createHmac("sha256", SIGNING_SECRET).update(canonicalPayload).digest("hex");
+  const hmacValue = config.ok ? createHmac("sha256", config.secret).update(canonicalPayload).digest("hex") : "";
   const verifiableValue = signReceiptPayload(canonicalPayload);
   if (timings) {
     timings.signing_ms = Math.max(0, Math.round(performance.now() - signingStarted));
@@ -41,7 +54,7 @@ function signPayload(payload: SignedReceiptPayload, timings?: TimingCollector): 
     ...payload,
     signature: {
       algorithm: "HMAC-SHA256",
-      key_id: SIGNING_KEY_ID,
+      key_id: config.ok ? config.keyId : "unconfigured",
       value: hmacValue
     },
     verifiable_signature: {
@@ -117,7 +130,9 @@ export function buildReceipt(input: {
   policy_version: string;
   timings?: TimingCollector;
 }): SignedReceipt {
-  const decision = input.orbit.decision === "ALLOW" && input.arm.decision === "ALLOW" && input.ramona.decision === "ALLOW" ? "ALLOW" : "REFUSE";
+  const config = signingConfig();
+  const pipelineAllows = input.orbit.decision === "ALLOW" && input.arm.decision === "ALLOW" && input.ramona.decision === "ALLOW";
+  const decision = pipelineAllows ? "ALLOW" : "REFUSE";
   const reasonCode = decision === "ALLOW" ? REASON_CODES.OkAllow : input.ramona.reason_code;
   const decisionHash = createHash("sha256")
     .update(
@@ -159,23 +174,22 @@ export function buildReceipt(input: {
       ramona: input.ramona
     }
   };
-  return signPayload(payload, input.timings);
+  return signPayload(payload, config, input.timings);
 }
 
 export function verifyReceiptSignature(receipt: SignedReceipt): boolean {
   const { signature, verifiable_signature: _verifiableSignature, ...payload } = receipt;
-  if (signature.algorithm !== "HMAC-SHA256" || signature.key_id !== SIGNING_KEY_ID) {
-    return false;
-  }
   const canonicalPayload = canonicalizeJson(payload as unknown as JsonValue);
-  const expected = createHmac("sha256", SIGNING_SECRET).update(canonicalPayload).digest("hex");
-  const hmacValid = expected === signature.value;
-  if (!hmacValid) {
-    return false;
+  const config = signingConfig();
+  if (config.ok && signature?.algorithm === "HMAC-SHA256" && signature.key_id === config.keyId) {
+    const expected = createHmac("sha256", config.secret).update(canonicalPayload).digest("hex");
+    if (expected === signature.value) {
+      return true;
+    }
   }
 
   if (!receipt.verifiable_signature) {
-    return true;
+    return false;
   }
 
   return verifyReceiptPublicSignature(receipt);

@@ -3,16 +3,18 @@ import { readFileSync, writeFileSync } from "fs";
 import type { JsonValue } from "../shared/json.ts";
 import { canonicalizeJson } from "../shared/json.ts";
 import {
-  appendReceipts,
-  ensureDir,
   executeDeterministicPipeline,
   hashFileArtifact,
+  resetRuntimeState,
+  replayReceiptStore
+} from "./node_runtime.ts";
+import {
+  appendReceipts,
+  ensureDir,
   makeBaseInput,
   rawJson,
-  resetRuntimeState,
-  replayReceiptStore,
   writeJsonArtifact
-} from "./node_runtime.ts";
+} from "./test_helpers.ts";
 import type { SignedReceipt } from "./types.ts";
 import {
   buildBenchmarkMatrix,

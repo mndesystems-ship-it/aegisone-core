@@ -4,10 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "bootstrap:dev": "node ./scripts/bootstrap_dev_receipt_keys.mjs",
+    "test:bootstrap:dev": "node --experimental-strip-types ./scripts/test_bootstrap_dev_receipt_keys.mjs",
     "smoke": "node --experimental-strip-types ./mnde-core/index.ts",
     "audit": "powershell -ExecutionPolicy Bypass -File ./audit/run_bundle.ps1",
     "benchmark:mnde": "node --experimental-strip-types ./benchmark/run_mnde_controlled_benchmark.ts",
     "test:regression": "node --experimental-strip-types ./audit/run_regression_guards.ts",
+    "test:runtime-security": "node --experimental-strip-types ./scripts/test_runtime_security_corrections.mjs",
+    "test:replay": "set MNDE_RECEIPT_HMAC_SECRET=runtime-security-test-secret-000000000001&& set MNDE_RECEIPT_HMAC_KEY_ID=runtime-security-test-key&& npm run test:local:replay",
+    "test:concurrency": "set MNDE_RECEIPT_HMAC_SECRET=runtime-security-test-secret-000000000001&& set MNDE_RECEIPT_HMAC_KEY_ID=runtime-security-test-key&& npm run test:local:concurrency",
+    "test:proof": "set MNDE_RECEIPT_HMAC_SECRET=runtime-security-test-secret-000000000001&& set MNDE_RECEIPT_HMAC_KEY_ID=runtime-security-test-key&& npm run test:local:proof",
     "test:local:top5": "powershell -ExecutionPolicy Bypass -File ./scripts/run_top5_local_tests.ps1",
     "test:local:replay": "powershell -ExecutionPolicy Bypass -File ./scripts/run_local_replay_consistency.ps1",
     "test:local:concurrency": "powershell -ExecutionPolicy Bypass -File ./scripts/run_local_concurrency_storm.ps1",
@@ -32,11 +38,18 @@
     "test:external-audit-integration": "node --experimental-strip-types ./scripts/test_external_audit_integration.mjs",
     "test:codex-mnde": "node ./scripts/test_codex_mnde_integration.mjs",
     "test:sidecar-scaling": "node --experimental-strip-types ./scripts/test_sidecar_latency_scaling.mjs && node --experimental-strip-types ./scripts/test_sidecar_admission_control.mjs",
-    "test:sidecar-browser-torture": "node --experimental-strip-types ./scripts/test_browser_origin_runtime_torture.mjs",
+    "test:sidecar-browser-torture": "set MNDE_RECEIPT_HMAC_SECRET=runtime-security-test-secret-000000000001&& set MNDE_RECEIPT_HMAC_KEY_ID=runtime-security-test-key&& node --experimental-strip-types ./scripts/test_browser_origin_runtime_torture.mjs",
     "bench:sidecar:sustained": "node --experimental-strip-types ./scripts/bench_sidecar_scaling.mjs sustained",
     "bench:sidecar:burst": "node --experimental-strip-types ./scripts/bench_sidecar_scaling.mjs burst",
     "bench:sidecar:overload": "node --experimental-strip-types ./scripts/bench_sidecar_scaling.mjs overload",
     "bench:sidecar:replay": "node --experimental-strip-types ./scripts/bench_sidecar_scaling.mjs replay",
-    "bench:sidecar:parity": "node --experimental-strip-types ./scripts/bench_sidecar_scaling.mjs parity"
+    "bench:sidecar:parity": "node --experimental-strip-types ./scripts/bench_sidecar_scaling.mjs parity",
+    "reviewer-kit": "powershell -NoProfile -ExecutionPolicy Bypass -File ./reviewer-kit/run-review.ps1 -Full",
+    "reviewer-kit:verify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./reviewer-kit/verify-review.ps1",
+    "reviewer-kit:allow": "powershell -NoProfile -ExecutionPolicy Bypass -File ./reviewer-kit/allow-demo.ps1",
+    "reviewer-kit:refuse": "powershell -NoProfile -ExecutionPolicy Bypass -File ./reviewer-kit/refuse-demo.ps1",
+    "test:reviewer-kit": "powershell -NoProfile -ExecutionPolicy Bypass -File ./reviewer-kit/test-reviewer-kit.ps1",
+    "verify-receipt": "node ./tools/verify-receipt.mjs",
+    "test:receipt-verifier": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tests/test_receipt_verifier.ps1"
   }
 }

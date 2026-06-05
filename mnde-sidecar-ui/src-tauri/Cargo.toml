@@ -1,0 +1,24 @@
+[package]
+name = "mnde-sidecar-ui"
+version = "0.5.0"
+description = "MNDe Execution Control"
+authors = ["MNDe Systems"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+getrandom = "0.2"
+jsonwebtoken = "9"
+keyring = "3"
+reqwest = { version = "0.13.3", features = ["blocking", "json"] }
+sha2 = "0.10"
+url = "2"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

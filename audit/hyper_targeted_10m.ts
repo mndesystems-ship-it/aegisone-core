@@ -4,7 +4,8 @@ import { join } from "path";
 import readline from "readline";
 import type { JsonValue } from "../shared/json.ts";
 import { canonicalizeJson } from "../shared/json.ts";
-import { executeDeterministicPipeline, makeBaseInput, rawJson, writeJsonArtifact } from "./node_runtime.ts";
+import { executeDeterministicPipeline } from "./node_runtime.ts";
+import { makeBaseInput, rawJson, writeJsonArtifact } from "./test_helpers.ts";
 import type { SignedReceipt } from "./types.ts";
 
 const PHASE = process.argv[2] ?? "run";
