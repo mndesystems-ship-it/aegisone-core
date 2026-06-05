@@ -65,7 +65,7 @@ function validateSchema(receipt) {
     return fail("pipeline_trace.arm.execution_id is required");
   }
   if (!isObject(receipt.verifiable_signature)) return fail("verifiable_signature is required");
-  for (const field of ["algorithm", "key_id", "public_key_fingerprint", "value"]) {
+  for (const field of ["algorithm", "key_id", "public_key_fingerprint", "public_key_pem", "value"]) {
     if (typeof receipt.verifiable_signature[field] !== "string" || receipt.verifiable_signature[field].length === 0) {
       return fail(`verifiable_signature.${field} is required`);
     }

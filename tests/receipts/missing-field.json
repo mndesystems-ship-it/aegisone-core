@@ -52,6 +52,7 @@
     "algorithm": "ED25519",
     "key_id": "receipt-ed25519-9873a7f3636ae58c",
     "public_key_fingerprint": "9873a7f3636ae58c92a75a0160fdf273fc28a97c0e6eb1f12761440a848fb783",
+    "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAPa7aWBEmje8lfVbjSpT9eTTYu06z1iXm+Dy8EG5VYzA=\n-----END PUBLIC KEY-----\n",
     "value": "3296fc1f6067f42920f635b125eac506b1201d2dd3edba0f4679d5de15958ead63b013af6d26509bd5535b8a7bfe26e0a7a4daef2b73252d7b0b403ac770a304"
   }
 }

@@ -196,6 +196,13 @@ export type SignedReceipt = SignedReceiptPayload & {
     key_id: string;
     value: string;
   };
+  verifiable_signature: {
+    algorithm: "ED25519";
+    key_id: string;
+    public_key_fingerprint: string;
+    public_key_pem: string;
+    value: string;
+  };
 };
 
 export type ExecutionResult = {
