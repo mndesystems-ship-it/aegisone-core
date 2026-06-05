@@ -1,95 +1,131 @@
-# AegisOne Core
+# MNDe
 
-AegisOne Core is deterministic execution control infrastructure. It evaluates high-risk execution requests before work begins, returns a deterministic `ALLOW` or `REFUSE`, and emits signed receipts that can be replayed, verified, and audited.
+MNDe is a pre-execution authority layer for risky automation. Before an action runs, the action is sent to MNDe. MNDe returns a deterministic `ALLOW` or `REFUSE`, then writes a signed receipt that can be verified and replayed later.
 
-Deterministic execution control matters because infrastructure decisions are only trustworthy when the same request, policy, pricing data, and runtime observation always produce the same decision and receipt. AegisOne makes policy drift, replay mismatch, unsigned allows, release tampering, and concurrency double-allows explicit verification failures.
-
-## 5-Minute Demo
+The shortest proof is the reviewer kit:
 
 ```powershell
-npm run test:release:integrity
-npm run test:local:replay
-npm run test:local:proof
-node --experimental-strip-types .\mnde-local-sidecar.mjs
+cmd /c npm install
+cmd /c npm run reviewer-kit
 ```
 
-In another shell:
+Expected final output:
+
+```text
+FINAL VERDICT: PASS
+```
+
+## What MNDe Proves
+
+The reviewer kit demonstrates the core product behavior with real sidecar APIs and real receipts:
+
+- `read_status` is evaluated before execution and receives `ALLOW`.
+- `recursive_delete` is evaluated before execution and receives `REFUSE`.
+- Both decisions generate signed receipts.
+- Both receipts verify.
+- Replay verification recomputes the deterministic decision path.
+- Standalone receipt verification works without a running sidecar, desktop UI, network access, or localhost.
+
+The generated evidence is written under:
+
+```text
+reviewer-kit/artifacts/
+```
+
+## Start Here
+
+First-time evaluators should read:
+
+- [START_HERE.md](START_HERE.md)
+- [REVIEWER_QUICKSTART.md](REVIEWER_QUICKSTART.md)
+- [REVIEW.md](REVIEW.md)
+- [docs/reviewer-kit.md](docs/reviewer-kit.md)
+- [docs/independent-verification.md](docs/independent-verification.md)
+
+## One-Command External Review
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8787/healthz
-Invoke-RestMethod http://127.0.0.1:8787/readyz
-Invoke-RestMethod -Method Post -ContentType application/json -InFile .\requests\allow-request.json http://127.0.0.1:8787/v1/decisions
+cmd /c npm run reviewer-kit
 ```
 
-## Minimal Integration
+This command:
+
+1. Starts the local MNDe sidecar.
+2. Waits for readiness.
+3. Runs an `ALLOW` example.
+4. Runs a `REFUSE` example.
+5. Stores receipts under `reviewer-kit/artifacts/receipts/`.
+6. Verifies receipt signatures, schemas, hashes, and replay.
+7. Stops the sidecar.
+
+## Offline Receipt Verification
+
+A receipt can be copied to another machine and verified locally:
+
+```powershell
+node tools/verify-receipt.mjs reviewer-kit/artifacts/receipts/allow-receipt.json
+```
+
+Expected final output:
+
+```text
+FINAL VERDICT: VERIFIED
+```
+
+The standalone verifier does not call localhost and does not require a live MNDe process.
+
+## Integration Shape
+
+Applications integrate by sending execution requests to MNDe before performing work:
 
 ```js
 const response = await fetch("http://127.0.0.1:8787/v1/decisions", {
   method: "POST",
   headers: { "content-type": "application/json" },
-  body: JSON.stringify({
-    execution_request: {
-      request_id: "example-001",
-      submitted_region: "us-west-2",
-      actor: { user_id: "operator" },
-      resources: { gpu_type: "a10g", gpu_count: 2, hours: 4 },
-      execution: { auto_scale: false, max_scale_multiplier: 1, retry_on_fail: false, max_retries: 0 },
-      tool_calls: [{ tool: "provision-gpu-job", priority: 1 }],
-      orbit_intent: {
-        orbit_version: "2.0",
-        action: "execute",
-        boundary: "production",
-        payload: { tool_calls: [{ tool: "provision-gpu-job", priority: 1 }] },
-        lifecycle_state: "ARMED",
-        signatures: [{ alg: "ed25519.v1", sig: "operator-approved" }]
-      },
-      release_request: { execution_id: "example-001", hold_state: "APPROVED", already_consumed: false },
-      runtime_observation: {
-        kill_switch_active: false,
-        actual_gpu_count: 2,
-        actual_hours: 4,
-        actual_total_cost_cents: 4000
-      }
-    },
-    pricing_data: { gpu_hour_cents: 500 }
-  })
+  body: JSON.stringify(request)
 });
 
-const decision = await response.json();
-if (decision.decision !== "ALLOW") throw new Error(decision.reason_code);
+const result = await response.json();
+if (result.decision !== "ALLOW") {
+  throw new Error(result.reason_code);
+}
 ```
+
+The decision receipt is the audit object. It contains the canonical request, request hash, decision output, policy hash, pipeline trace, and signature material needed for verification.
+
+## Documentation Map
+
+Use [docs/README.md](docs/README.md) as the documentation index.
+
+Evaluator path:
+
+- [START_HERE.md](START_HERE.md)
+- [REVIEWER_QUICKSTART.md](REVIEWER_QUICKSTART.md)
+- [REVIEW.md](REVIEW.md)
+- [docs/reviewer-kit.md](docs/reviewer-kit.md)
+- [docs/independent-verification.md](docs/independent-verification.md)
+
+Technical model:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/OPERATIONAL_MODEL.md](docs/OPERATIONAL_MODEL.md)
+- [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
+
+Retained evidence:
+
+- `proofs/determinism/`
+- `proofs/replay/`
+- `proofs/parity/`
+- `proofs/security/`
+- `proofs/throughput/`
+- `proofs/external-reviews/`
 
 ## Verification Commands
 
 ```powershell
-npm run test:local:replay
-npm run test:release:integrity
-npm run test:sidecar-browser-torture
-npm run test:local:proof
-npm run test:local:concurrency
+cmd /c npm run reviewer-kit
+cmd /c npm run test:receipt-verifier
+node tools/verify-receipt.mjs tests/receipts/valid-receipt.json
 ```
 
-Use `npm run proof:full` for the broader local proof pack.
-
-## Proof Model
-
-Active, auditor-facing proof evidence lives in `proofs/`:
-
-- `proofs/determinism`: zero drift for canonical decisions.
-- `proofs/replay`: receipt replay and drift checks.
-- `proofs/parity`: Node and Rust parity vectors and reports.
-- `proofs/throughput`: controlled benchmark summaries without raw dumps.
-- `proofs/browser-torture`: browser-origin torture and replay evidence.
-- `proofs/security`: hostile inputs, schema enforcement, and remediation evidence.
-- `proofs/release-integrity`: manifests, provenance, and release integrity checks.
-- `proofs/custody`: custody rotation, timeout, and signed receipt evidence.
-
-Generated logs, JSONL receipt streams, ZIP packages, latency CSVs, and benchmark work folders are ignored. They can be regenerated by the scripts in `scripts/` and the proof runbooks.
-
-## Release Verification Flow
-
-1. Build release material with `npm run release:build` or `npm run release:build:sidecar-custody`.
-2. Verify deterministic release integrity with `npm run test:release:integrity`.
-3. Verify provenance with `npm run test:release:provenance`.
-4. Compare retained manifests and signatures under `releases/` and `proofs/release-integrity/artifacts/`.
-5. Treat missing manifest, malformed manifest, malformed provenance, or signature drift as release blockers.
+Broader internal proof and benchmark scripts remain available in `package.json`, `scripts/`, and `proofs/`, but the reviewer kit is the intended first evaluation path.

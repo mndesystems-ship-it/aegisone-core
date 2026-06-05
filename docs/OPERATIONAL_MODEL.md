@@ -1,12 +1,13 @@
 # Operational Model
 
-Operators run AegisOne as a local deterministic sidecar or package it for release verification. The sidecar exposes:
+Operators run MNDe as a local deterministic sidecar or package it for release verification. The sidecar exposes:
 
 - `POST /v1/decisions`
 - `GET /healthz`
 - `GET /readyz`
 - `GET /metrics`
-- demo-only `POST /verify` and `POST /replay`
+- `POST /verify`
+- `POST /replay`
 
 Operational controls:
 
