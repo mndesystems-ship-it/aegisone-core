@@ -1,7 +1,8 @@
-import { createHmac, createHash } from "crypto";
+import { createHmac, createHash, createPublicKey } from "crypto";
 import { performance } from "perf_hooks";
 import {
   RECEIPT_PUBLIC_KEY_FINGERPRINT,
+  RECEIPT_PUBLIC_KEY_PEM,
   RECEIPT_SIGNATURE_ALGORITHM,
   RECEIPT_SIGNATURE_KEY_ID,
   REASON_CODES,
@@ -61,6 +62,7 @@ function signPayload(payload: SignedReceiptPayload, config: SigningConfig, timin
       algorithm: RECEIPT_SIGNATURE_ALGORITHM,
       key_id: RECEIPT_SIGNATURE_KEY_ID,
       public_key_fingerprint: RECEIPT_PUBLIC_KEY_FINGERPRINT,
+      public_key_pem: RECEIPT_PUBLIC_KEY_PEM,
       value: verifiableValue
     }
   };
@@ -200,16 +202,25 @@ export function verifyReceiptPublicSignature(receipt: SignedReceipt): boolean {
     return false;
   }
   const { signature: _legacySignature, verifiable_signature, ...payload } = receipt;
+  const publicKeyPem = verifiable_signature.public_key_pem;
+  if (typeof publicKeyPem !== "string" || publicKeyPem.trim().length === 0) {
+    return false;
+  }
+  const publicKey = createPublicKey(publicKeyPem);
+  const publicKeyDer = publicKey.export({ format: "der", type: "spki" });
+  const rawPublicKeyHex = Buffer.from(publicKeyDer).subarray(-32).toString("hex");
+  const publicKeyFingerprint = createHash("sha256").update(Buffer.from(rawPublicKeyHex, "hex")).digest("hex");
+  const keyId = `receipt-ed25519-${publicKeyFingerprint.slice(0, 16)}`;
   if (
     verifiable_signature.algorithm !== RECEIPT_SIGNATURE_ALGORITHM ||
-    verifiable_signature.key_id !== RECEIPT_SIGNATURE_KEY_ID ||
-    verifiable_signature.public_key_fingerprint !== RECEIPT_PUBLIC_KEY_FINGERPRINT
+    verifiable_signature.key_id !== keyId ||
+    verifiable_signature.public_key_fingerprint !== publicKeyFingerprint
   ) {
     return false;
   }
 
   const canonicalPayload = canonicalizeJson(payload as unknown as JsonValue);
-  return verifyReceiptPayloadSignature(canonicalPayload, verifiable_signature.value);
+  return verifyReceiptPayloadSignature(canonicalPayload, verifiable_signature.value, publicKeyPem);
 }
 
 export function verifyReceiptReplay(receipt: SignedReceipt, rerunReceipt: SignedReceipt): { ok: boolean; reason_code: string } {
