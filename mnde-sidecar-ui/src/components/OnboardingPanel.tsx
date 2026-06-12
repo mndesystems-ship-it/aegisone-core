@@ -48,12 +48,12 @@ export function OnboardingPanel({ setup, settings, onSettingsChange, onStartSide
   }
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_360px] gap-3">
+    <div className="grid-safe grid min-h-0 flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px]">
       <section className="min-w-0 border border-line bg-panel">
-        <header className="flex items-center justify-between border-b border-line px-4 py-3">
-          <div>
+        <header className="grid-safe grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b border-line px-4 py-3">
+          <div className="min-w-0">
             <div className="text-[11px] uppercase tracking-[0.16em] text-signal">First-Run Operational Setup</div>
-            <h2 className="mt-1 text-base font-semibold text-ink">{setup.operationalReady ? "Operational Ready" : "Readiness Checks Required"}</h2>
+            <h2 className="safe-text mt-1 text-base font-semibold text-ink">{setup.operationalReady ? "Operational Ready" : "Readiness Checks Required"}</h2>
           </div>
           <div className={`border px-3 py-1.5 text-xs font-semibold ${setup.operationalReady ? "border-safe/35 bg-safe/10 text-safe" : "border-danger/35 bg-danger/10 text-danger"}`}>
             {setup.operationalReady ? "READY" : "BLOCKED"}
@@ -83,15 +83,15 @@ export function OnboardingPanel({ setup, settings, onSettingsChange, onStartSide
               onClick={() => setPosture(option.value)}
               type="button"
             >
-              <div className="text-sm font-semibold text-ink">{option.label}</div>
-              <div className="mt-1 text-xs leading-relaxed text-muted">{option.detail}</div>
+              <div className="safe-text text-sm font-semibold text-ink">{option.label}</div>
+              <div className="safe-text mt-1 text-xs leading-relaxed text-muted">{option.detail}</div>
             </button>
           ))}
         </div>
         <button className="button signal mt-4 h-9 w-full" onClick={applyGuidedSettings} type="button">Apply Local Settings</button>
         <details className="mt-4 border border-line bg-[#0d1116] p-3 text-xs text-muted">
           <summary className="cursor-pointer text-ink">Advanced generated settings</summary>
-          <pre className="mt-3 max-h-44 overflow-auto font-mono">{JSON.stringify(generated, null, 2)}</pre>
+          <pre className="json-scroll mt-3 max-h-44 font-mono">{JSON.stringify(generated, null, 2)}</pre>
         </details>
       </section>
     </div>
@@ -111,15 +111,15 @@ function SetupStepRow({ step, index, onAction }: { step: SetupStep; index: numbe
       <div className="flex items-start gap-3">
         <div className="grid h-6 w-6 shrink-0 place-items-center border border-current/40 font-mono text-xs">{step.state === "pass" ? "OK" : index}</div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-semibold text-ink">{step.label}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{step.summary}</p>
+          <div className="grid-safe grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+            <div className="min-w-0">
+              <h3 className="safe-text text-sm font-semibold text-ink">{step.label}</h3>
+              <p className="safe-text mt-1 text-sm leading-relaxed text-muted">{step.summary}</p>
             </div>
-            <div className="shrink-0 font-mono text-xs uppercase">{step.state}</div>
+            <div className="safe-mono shrink-0 font-mono text-xs uppercase">{step.state}</div>
           </div>
-          {step.remediation ? <p className="mt-2 text-xs leading-relaxed text-muted">{step.remediation}</p> : null}
-          <div className="mt-3 flex items-center gap-2">
+          {step.remediation ? <p className="safe-text mt-2 text-xs leading-relaxed text-muted">{step.remediation}</p> : null}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {step.action ? <button className="button px-3 text-xs" onClick={onAction} type="button">Repair</button> : null}
             {step.technical ? (
               <details className="text-xs text-muted">

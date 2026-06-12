@@ -12,11 +12,11 @@ export function SettingsPanel({ open, settings, onChange, onClose }: SettingsPan
 
   return (
     <div className="absolute inset-0 z-40 bg-black/45">
-      <section className="absolute right-4 top-4 w-[440px] border border-line bg-[#0b0f13] shadow-operational">
-        <header className="flex items-center justify-between border-b border-line px-4 py-3">
-          <div>
+      <section className="absolute inset-3 overflow-auto border border-line bg-[#0b0f13] shadow-operational sm:left-auto sm:w-[min(440px,calc(100vw-2rem))]">
+        <header className="grid-safe grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b border-line px-4 py-3">
+          <div className="min-w-0">
             <div className="text-[11px] uppercase tracking-[0.16em] text-signal">Settings</div>
-            <h2 className="text-base font-semibold text-ink">Sidecar Control</h2>
+            <h2 className="safe-text text-base font-semibold text-ink">Sidecar Control</h2>
           </div>
           <button className="text-sm text-muted hover:text-ink" onClick={onClose}>Close</button>
         </header>
@@ -32,7 +32,7 @@ export function SettingsPanel({ open, settings, onChange, onClose }: SettingsPan
             <span className="label">Sidecar endpoint</span>
             <input className="input" value={settings.sidecarEndpoint} onChange={(event) => onChange({ ...settings, sidecarEndpoint: event.target.value })} />
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid-safe grid grid-cols-1 gap-3 sm:grid-cols-2">
             <NumberField label="Poll interval ms" value={settings.pollIntervalMs} onChange={(value) => onChange({ ...settings, pollIntervalMs: value })} />
             <NumberField label="Timeout ms" value={settings.requestTimeoutMs} onChange={(value) => onChange({ ...settings, requestTimeoutMs: value })} />
             <NumberField label="Receipt limit" value={settings.receiptLimit} onChange={(value) => onChange({ ...settings, receiptLimit: value })} />
@@ -40,7 +40,7 @@ export function SettingsPanel({ open, settings, onChange, onClose }: SettingsPan
           </div>
           <Toggle label="Auto reconnect" checked={settings.enableAutoReconnect} onChange={(value) => onChange({ ...settings, enableAutoReconnect: value })} />
           <Toggle label="Native refusal notifications" checked={settings.enableNativeNotifications} onChange={(value) => onChange({ ...settings, enableNativeNotifications: value })} hint="Native notification bridge is disabled until explicitly configured." />
-          <div className="border border-line bg-panel p-3 text-xs leading-relaxed text-muted">
+          <div className="safe-text border border-line bg-panel p-3 text-xs leading-relaxed text-muted">
             Live Mode never uses simulated telemetry. If an endpoint is missing or disconnected, the UI shows unavailable state instead of pretending protection is active.
           </div>
         </div>
@@ -60,10 +60,10 @@ function NumberField({ label, value, onChange }: { label: string; value: number;
 
 function Toggle({ label, checked, onChange, hint }: { label: string; checked: boolean; onChange: (value: boolean) => void; hint?: string }) {
   return (
-    <label className="flex items-start justify-between gap-3 border border-line bg-panel p-3">
-      <span>
-        <span className="block text-sm text-ink">{label}</span>
-        {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
+    <label className="grid-safe grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border border-line bg-panel p-3">
+      <span className="min-w-0">
+        <span className="safe-text block text-sm text-ink">{label}</span>
+        {hint && <span className="safe-text mt-1 block text-xs text-muted">{hint}</span>}
       </span>
       <input checked={checked} onChange={(event) => onChange(event.target.checked)} type="checkbox" />
     </label>

@@ -212,6 +212,11 @@ async function run() {
       }
       if (smoke.status !== 0) throw new Error("OIDC smoke readiness failed");
     });
+
+    await check("signed sidecar auth hostile probes pass", async () => {
+      const probe = spawnSync(process.execPath, ["--experimental-strip-types", "../INsol/scripts/probe_signed_authority.mjs"], { stdio: "inherit", shell: false });
+      if (probe.status !== 0) throw new Error("signed authority sidecar probes failed");
+    });
   } finally {
     if (ownedSidecar) ownedSidecar.kill();
   }

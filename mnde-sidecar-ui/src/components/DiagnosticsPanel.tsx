@@ -15,16 +15,16 @@ interface DiagnosticsPanelProps {
 
 export function DiagnosticsPanel({ setup, telemetry, trust, onStartSidecar, onReconnect, onReloadPolicy, onVerifyReplay, onRerunDiagnostics }: DiagnosticsPanelProps) {
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px] gap-3">
+    <div className="grid-safe grid min-h-0 flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
       <section className="border border-line bg-panel">
         <header className="border-b border-line px-4 py-3">
           <div className="text-[11px] uppercase tracking-[0.16em] text-signal">Startup Diagnostics</div>
-          <h2 className="mt-1 text-base font-semibold text-ink">{setup.primaryIssue ?? "No blocking diagnostic issue reported"}</h2>
+          <h2 className="safe-text mt-1 text-base font-semibold text-ink">{setup.primaryIssue ?? "No blocking diagnostic issue reported"}</h2>
         </header>
         <div className="divide-y divide-line">
           {setup.steps.map((step) => (
-            <div className="grid grid-cols-[160px_minmax(0,1fr)_90px] gap-3 px-4 py-3 text-sm" key={step.id}>
-              <div className="font-semibold text-ink">{step.label}</div>
+            <div className="grid-safe grid grid-cols-1 gap-3 px-4 py-3 text-sm md:grid-cols-[160px_minmax(0,1fr)_90px]" key={step.id}>
+              <div className="safe-text font-semibold text-ink">{step.label}</div>
               <div className="min-w-0">
                 <div className="break-words text-muted">{step.summary}</div>
                 {step.remediation ? <div className="mt-1 break-words text-xs text-danger">{step.remediation}</div> : null}
@@ -35,7 +35,7 @@ export function DiagnosticsPanel({ setup, telemetry, trust, onStartSidecar, onRe
                   </details>
                 ) : null}
               </div>
-              <div className={step.state === "pass" ? "text-safe" : step.state === "fail" ? "text-danger" : "text-warn"}>{step.state}</div>
+              <div className={`safe-text ${step.state === "pass" ? "text-safe" : step.state === "fail" ? "text-danger" : "text-warn"}`}>{step.state}</div>
             </div>
           ))}
         </div>
@@ -52,7 +52,7 @@ export function DiagnosticsPanel({ setup, telemetry, trust, onStartSidecar, onRe
         </div>
         <details className="mt-4 border border-line bg-[#0d1116] p-3 text-xs text-muted">
           <summary className="cursor-pointer text-ink">Current evidence</summary>
-          <pre className="mt-3 max-h-56 overflow-auto font-mono">{JSON.stringify({
+          <pre className="json-scroll mt-3 max-h-56 font-mono">{JSON.stringify({
             trust: trust.verdict,
             causes: trust.causes,
             staleProofs: trust.staleProofs,

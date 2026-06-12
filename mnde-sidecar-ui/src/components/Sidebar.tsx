@@ -10,9 +10,9 @@ interface SidebarProps {
   onViewChange: (view: AppView) => void;
 }
 
-export type AppView = "Setup" | "Decision Stream" | "Receipts" | "Policies" | "Replay" | "Runtime" | "Audit" | "Access";
+export type AppView = "Setup" | "Decision Stream" | "Demos" | "Receipts" | "Policies" | "Replay" | "Runtime" | "Audit" | "Access";
 
-export const nav: AppView[] = ["Setup", "Decision Stream", "Receipts", "Policies", "Replay", "Runtime", "Audit", "Access"];
+export const nav: AppView[] = ["Setup", "Decision Stream", "Demos", "Receipts", "Policies", "Replay", "Runtime", "Audit", "Access"];
 
 function SidebarMark() {
   return (

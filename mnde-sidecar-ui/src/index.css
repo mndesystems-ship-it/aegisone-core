@@ -33,6 +33,51 @@ button {
   font: inherit;
 }
 
+button,
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
+pre,
+code,
+.break-hostile {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.json-scroll {
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.hash-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.safe-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.safe-mono {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.grid-safe > * {
+  min-width: 0;
+}
+
 .label {
   display: block;
   margin-bottom: 0.375rem;

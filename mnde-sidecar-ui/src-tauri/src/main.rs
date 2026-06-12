@@ -1,23 +1,33 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use keyring::Entry;
+use ring::{
+    hmac,
+    rand::SystemRandom,
+    signature::{Ed25519KeyPair, KeyPair},
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs::{canonicalize, create_dir_all, read_to_string, remove_file, write};
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
-use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
-use keyring::Entry;
-use sha2::{Digest, Sha256};
 use url::Url;
 
 static LIFECYCLE_LOCK: Mutex<()> = Mutex::new(());
 static AUTH_LOCK: Mutex<()> = Mutex::new(());
+static AUTHORITY_SIGNING_KEY_PKCS8: OnceLock<Vec<u8>> = OnceLock::new();
+const AUTHORITY_ASSERTION_ISSUER: &str = "mnde-desktop";
+const AUTHORITY_ASSERTION_AUDIENCE: &str = "mnde-sidecar";
+const AUTHORITY_ASSERTION_LIFETIME_MS: u64 = 90_000;
+const JWKS_CACHE_TTL_MS: u64 = 6 * 60 * 60 * 1000;
 
 #[derive(Serialize)]
 struct SidecarLaunchResult {
@@ -77,6 +87,45 @@ struct AuthSession {
 struct AuthAuditResult {
     recorded: bool,
     path: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct SignedAuthSessionFile {
+    schema_version: String,
+    session: AuthSession,
+    integrity: SessionIntegrity,
+}
+
+#[derive(Serialize, Deserialize)]
+struct SessionIntegrity {
+    alg: String,
+    value: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct JwksCacheFile {
+    schema_version: String,
+    fetched_at_ms: u64,
+    jwks: Value,
+}
+
+#[derive(Serialize)]
+struct AuthorityAssertionClaims {
+    issuer: String,
+    audience: String,
+    subject: String,
+    roles: Vec<String>,
+    capabilities: Vec<String>,
+    issued_at: u64,
+    expires_at: u64,
+    nonce: String,
+    session_id: String,
+    user_id: String,
+    display_name: String,
+    email: String,
+    tenant_id: String,
+    provider: String,
+    login_time: String,
 }
 
 #[derive(Serialize)]
@@ -239,7 +288,13 @@ fn start_mnde_sidecar_inner() -> Result<SidecarLaunchResult, String> {
         .ok_or_else(|| "MNDe sidecar launcher was not found in the local workspace.".to_string())?;
 
     let mut command = Command::new(&launcher.program);
-    command.args(&launcher.args).current_dir(&launcher.working_dir);
+    command
+        .args(&launcher.args)
+        .current_dir(&launcher.working_dir);
+    command.env(
+        "MNDE_AUTH_ASSERTION_PUBLIC_KEY_B64",
+        authority_public_key_b64()?,
+    );
 
     #[cfg(windows)]
     {
@@ -293,7 +348,11 @@ fn restart_mnde_sidecar() -> Result<LifecycleResult, String> {
     let started = start_mnde_sidecar_inner()?;
     let status = sidecar_status_inner();
     Ok(LifecycleResult {
-        status: if status.status == "running" { "running".to_string() } else { status.status },
+        status: if status.status == "running" {
+            "running".to_string()
+        } else {
+            status.status
+        },
         pid: status.pid,
         owned: status.owned,
         message: started.message,
@@ -310,7 +369,9 @@ fn sidecar_request(
 ) -> Result<SidecarHttpResponse, String> {
     let (host, port) = parse_local_http_endpoint(&endpoint)?;
     if host != "127.0.0.1" && host != "localhost" {
-        return Err("Only local MNDe sidecar endpoints are supported by the desktop bridge.".to_string());
+        return Err(
+            "Only local MNDe sidecar endpoints are supported by the desktop bridge.".to_string(),
+        );
     }
     if !path.starts_with('/') || path.contains('\r') || path.contains('\n') {
         return Err("Invalid MNDe sidecar request path.".to_string());
@@ -353,9 +414,19 @@ fn export_receipt_json(receipt_id: String, body: String) -> Result<ExportReceipt
     require_capability("inspect_receipts")?;
     let safe_id: String = receipt_id
         .chars()
-        .map(|ch| if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' { ch } else { '-' })
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' {
+                ch
+            } else {
+                '-'
+            }
+        })
         .collect();
-    let filename = if safe_id.is_empty() { "receipt".to_string() } else { safe_id };
+    let filename = if safe_id.is_empty() {
+        "receipt".to_string()
+    } else {
+        safe_id
+    };
     let dir = std::env::current_dir()
         .map_err(|error| format!("Failed to resolve export directory: {error}"))?
         .join("receipt-exports");
@@ -400,6 +471,12 @@ fn open_audit_bundle_folder(path: String) -> Result<OpenFolderResult, String> {
 #[tauri::command]
 fn auth_bootstrap() -> Result<Option<AuthSession>, String> {
     let Some(session) = read_auth_session() else {
+        let _ = append_auth_audit_raw(
+            "bootstrap.session_missing",
+            "microsoft_entra",
+            "REFUSE",
+            None,
+        );
         return Ok(None);
     };
     if session_expires_soon(&session, 5 * 60 * 1000) {
@@ -419,6 +496,30 @@ fn auth_bootstrap() -> Result<Option<AuthSession>, String> {
     }
 }
 
+fn append_auth_audit_raw(
+    action: &str,
+    provider: &str,
+    result: &str,
+    detail: Option<&str>,
+) -> Result<(), String> {
+    let path = auth_audit_file_path()?;
+    if let Some(parent) = path.parent() {
+        create_dir_all(parent)
+            .map_err(|error| format!("Failed to create auth audit dir: {error}"))?;
+    }
+    let event = serde_json::json!({
+        "action": action,
+        "provider": provider,
+        "result": result,
+        "detail": detail,
+        "timestamp": now_millis().to_string()
+    });
+    let mut existing = read_to_string(&path).unwrap_or_default();
+    existing.push_str(&event.to_string());
+    existing.push('\n');
+    write(path, existing).map_err(|error| format!("Failed to write auth audit event: {error}"))
+}
+
 #[tauri::command]
 fn auth_config_status() -> AuthConfigStatus {
     AuthConfigStatus {
@@ -434,15 +535,23 @@ fn rbac_status() -> Result<RbacStatus, String> {
     let session = read_auth_session();
     let policy = load_rbac_policy().ok();
     Ok(RbacStatus {
-        bootstrapped: policy.as_ref().map(|item| !item.can_bootstrap()).unwrap_or(false),
-        can_bootstrap: session.is_some() && policy.as_ref().map(RbacPolicy::can_bootstrap).unwrap_or(true),
+        bootstrapped: policy
+            .as_ref()
+            .map(|item| !item.can_bootstrap())
+            .unwrap_or(false),
+        can_bootstrap: session.is_some()
+            && policy
+                .as_ref()
+                .map(RbacPolicy::can_bootstrap)
+                .unwrap_or(true),
         assignments: policy.map(|item| item.assignments).unwrap_or_default(),
     })
 }
 
 #[tauri::command]
 fn rbac_bootstrap_admin() -> Result<AuthSession, String> {
-    let mut session = read_auth_session().ok_or_else(|| "enterprise authentication required".to_string())?;
+    let mut session =
+        read_auth_session().ok_or_else(|| "enterprise authentication required".to_string())?;
     validate_session(&session)?;
     let policy = load_rbac_policy().unwrap_or_else(|_| RbacPolicy::new(session.tenant_id.clone()));
     if !policy.can_bootstrap() {
@@ -464,7 +573,13 @@ fn rbac_bootstrap_admin() -> Result<AuthSession, String> {
     save_rbac_policy(&policy)?;
     session.role = "ADMIN".to_string();
     write_auth_session(&session)?;
-    append_auth_audit(&session, "rbac.bootstrap_admin", &session.email, "ALLOW", None)?;
+    append_auth_audit(
+        &session,
+        "rbac.bootstrap_admin",
+        &session.email,
+        "ALLOW",
+        None,
+    )?;
     Ok(session)
 }
 
@@ -480,7 +595,10 @@ fn rbac_upsert_assignment(input: RbacAssignmentInput) -> Result<RbacStatus, Stri
         return Err("ERR_RBAC_ROLE_INVALID".to_string());
     }
     let user_id = input.user_id.filter(|value| !value.trim().is_empty());
-    let email = input.email.map(|value| value.trim().to_lowercase()).filter(|value| !value.is_empty());
+    let email = input
+        .email
+        .map(|value| value.trim().to_lowercase())
+        .filter(|value| !value.is_empty());
     if user_id.is_none() && email.is_none() {
         return Err("ERR_RBAC_SUBJECT_REQUIRED".to_string());
     }
@@ -494,7 +612,13 @@ fn rbac_upsert_assignment(input: RbacAssignmentInput) -> Result<RbacStatus, Stri
     };
     policy.upsert(assignment)?;
     save_rbac_policy(&policy)?;
-    append_auth_audit(&session, "rbac.upsert_assignment", "rbac-policy.local.json", "ALLOW", None)?;
+    append_auth_audit(
+        &session,
+        "rbac.upsert_assignment",
+        "rbac-policy.local.json",
+        "ALLOW",
+        None,
+    )?;
     rbac_status()
 }
 
@@ -508,7 +632,9 @@ fn begin_oidc_login(provider: String) -> Result<AuthSession, String> {
     }
     let config = load_oidc_config(&provider)?;
     if !secure_token_storage_available() {
-        return Err(format!("{provider} OIDC refused: OS secure token storage is unavailable."));
+        return Err(format!(
+            "{provider} OIDC refused: OS secure token storage is unavailable."
+        ));
     }
     oidc_login_flow(&config)
 }
@@ -523,9 +649,20 @@ fn auth_logout() -> Result<(), String> {
 }
 
 #[tauri::command]
-fn record_auth_audit(action: String, target: String, result: String, decision_hash: Option<String>) -> Result<AuthAuditResult, String> {
+fn record_auth_audit(
+    action: String,
+    target: String,
+    result: String,
+    decision_hash: Option<String>,
+) -> Result<AuthAuditResult, String> {
     let session = current_valid_session()?;
-    append_auth_audit(&session, &action, &target, &result, decision_hash.as_deref())?;
+    append_auth_audit(
+        &session,
+        &action,
+        &target,
+        &result,
+        decision_hash.as_deref(),
+    )?;
     Ok(AuthAuditResult {
         recorded: true,
         path: auth_audit_file_path()?.display().to_string(),
@@ -540,7 +677,8 @@ struct SidecarLauncher {
 }
 
 fn auth_session_path() -> Result<PathBuf, String> {
-    let exe = std::env::current_exe().map_err(|error| format!("Failed to resolve current executable: {error}"))?;
+    let exe = std::env::current_exe()
+        .map_err(|error| format!("Failed to resolve current executable: {error}"))?;
     Ok(exe
         .parent()
         .ok_or_else(|| "Failed to resolve executable directory.".to_string())?
@@ -574,18 +712,26 @@ fn secure_token_storage_available() -> bool {
 fn load_oidc_config(provider: &str) -> Result<OidcConfig, String> {
     let readiness = validate_provider_config(provider);
     if !readiness.configured {
-        return Err(format!("{provider} OIDC is not configured: {}", readiness.errors.join("; ")));
+        return Err(format!(
+            "{provider} OIDC is not configured: {}",
+            readiness.errors.join("; ")
+        ));
     }
     let file = provider_file_config(provider)?;
     let issuer = required_config_value(file.issuer.clone(), "issuer")?;
     let client_id = required_config_value(file.client_id.clone(), "client_id")?;
     let redirect_uri = required_config_value(file.redirect_uri.clone(), "redirect_uri")?;
-    let scopes = file.scopes.clone().ok_or_else(|| "ERR_AUTH_CONFIG_INVALID:scopes".to_string())?;
+    let scopes = file
+        .scopes
+        .clone()
+        .ok_or_else(|| "ERR_AUTH_CONFIG_INVALID:scopes".to_string())?;
     let audience = required_config_value(file.audience.clone(), "audience")?;
     let tenant_id = if provider == "microsoft_entra" {
         Some(required_config_value(file.tenant_id.clone(), "tenant_id")?)
     } else {
-        file.tenant_id.clone().filter(|value| !value.trim().is_empty())
+        file.tenant_id
+            .clone()
+            .filter(|value| !value.trim().is_empty())
     };
     Ok(OidcConfig {
         provider: provider.to_string(),
@@ -610,9 +756,11 @@ fn oidc_login_flow(config: &OidcConfig) -> Result<AuthSession, String> {
     open_system_browser(&auth_url)?;
     let callback = wait_for_callback(listener, &state)?;
     let token = exchange_code(config, &discovery, &callback.code, &verifier)?;
-    let jwks = fetch_jwks(&config.issuer, &discovery.jwks_uri)?;
-    let session = validate_id_token_rust(config, &token.id_token, &jwks, &nonce)?;
-    let refresh = token.refresh_token.ok_or_else(|| "OIDC provider did not return refresh_token".to_string())?;
+    let session =
+        validate_id_token_with_jwks_refresh(config, &token.id_token, &discovery.jwks_uri, &nonce)?;
+    let refresh = token
+        .refresh_token
+        .ok_or_else(|| "OIDC provider did not return refresh_token".to_string())?;
     store_refresh_token(&config.provider, &session.user_id, &refresh)?;
     write_auth_session(&session)?;
     append_auth_audit(&session, "login.success", &config.provider, "ALLOW", None)?;
@@ -620,7 +768,10 @@ fn oidc_login_flow(config: &OidcConfig) -> Result<AuthSession, String> {
 }
 
 fn fetch_discovery(config: &OidcConfig) -> Result<DiscoveryDocument, String> {
-    let url = format!("{}/.well-known/openid-configuration", config.issuer.trim_end_matches('/'));
+    let url = format!(
+        "{}/.well-known/openid-configuration",
+        config.issuer.trim_end_matches('/')
+    );
     reqwest::blocking::get(url)
         .map_err(|error| format!("OIDC discovery fetch failed: {error}"))?
         .error_for_status()
@@ -629,8 +780,15 @@ fn fetch_discovery(config: &OidcConfig) -> Result<DiscoveryDocument, String> {
         .map_err(|error| format!("OIDC discovery parse failed: {error}"))
 }
 
-fn build_auth_url(config: &OidcConfig, discovery: &DiscoveryDocument, challenge: &str, state: &str, nonce: &str) -> Result<String, String> {
-    let mut url = Url::parse(&discovery.authorization_endpoint).map_err(|error| format!("Invalid authorization endpoint: {error}"))?;
+fn build_auth_url(
+    config: &OidcConfig,
+    discovery: &DiscoveryDocument,
+    challenge: &str,
+    state: &str,
+    nonce: &str,
+) -> Result<String, String> {
+    let mut url = Url::parse(&discovery.authorization_endpoint)
+        .map_err(|error| format!("Invalid authorization endpoint: {error}"))?;
     url.query_pairs_mut()
         .append_pair("client_id", &config.client_id)
         .append_pair("redirect_uri", &config.redirect_uri)
@@ -648,28 +806,183 @@ fn bind_callback_listener(redirect_uri: &str) -> Result<TcpListener, String> {
     if url.host_str() != Some("localhost") {
         return Err("redirect_uri must use localhost".to_string());
     }
-    let port = url.port().ok_or_else(|| "redirect_uri must include a port".to_string())?;
-    let listener = TcpListener::bind(("127.0.0.1", port)).map_err(|error| format!("Failed to bind OIDC callback listener: {error}"))?;
-    listener.set_nonblocking(false).map_err(|error| format!("Failed to configure OIDC listener: {error}"))?;
+    let port = url
+        .port()
+        .ok_or_else(|| "redirect_uri must include a port".to_string())?;
+    let listener = TcpListener::bind(("127.0.0.1", port))
+        .map_err(|error| format!("Failed to bind OIDC callback listener: {error}"))?;
+    listener
+        .set_nonblocking(false)
+        .map_err(|error| format!("Failed to configure OIDC listener: {error}"))?;
     Ok(listener)
 }
 
-fn wait_for_callback(listener: TcpListener, expected_state: &str) -> Result<OidcCallbackResult, String> {
+fn wait_for_callback(
+    listener: TcpListener,
+    expected_state: &str,
+) -> Result<OidcCallbackResult, String> {
     listener.set_ttl(64).ok();
-    let (mut stream, _) = listener.accept().map_err(|error| format!("OIDC callback accept failed: {error}"))?;
+    let (mut stream, _) = listener
+        .accept()
+        .map_err(|error| format!("OIDC callback accept failed: {error}"))?;
     let mut buffer = [0_u8; 8192];
-    let count = stream.read(&mut buffer).map_err(|error| format!("OIDC callback read failed: {error}"))?;
+    let count = stream
+        .read(&mut buffer)
+        .map_err(|error| format!("OIDC callback read failed: {error}"))?;
     let request = String::from_utf8_lossy(&buffer[..count]);
-    let request_line = request.lines().next().ok_or_else(|| "OIDC callback request missing request line".to_string())?;
-    let path = request_line.split_whitespace().nth(1).ok_or_else(|| "OIDC callback path missing".to_string())?;
+    let request_line = request
+        .lines()
+        .next()
+        .ok_or_else(|| "OIDC callback request missing request line".to_string())?;
+    let path = request_line
+        .split_whitespace()
+        .nth(1)
+        .ok_or_else(|| "OIDC callback path missing".to_string())?;
     let callback = parse_oidc_callback_url(&format!("http://127.0.0.1{path}"), expected_state);
-    let body = if callback.is_ok() { "MNDe login complete. You may close this window." } else { "MNDe login failed. Return to the app." };
-    let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", body.len(), body);
+    let body = oidc_callback_page(callback.is_ok());
+    let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", body.len(), body);
     let _ = stream.write_all(response.as_bytes());
     callback
 }
 
-fn exchange_code(config: &OidcConfig, discovery: &DiscoveryDocument, code: &str, verifier: &str) -> Result<TokenResponse, String> {
+fn oidc_callback_page(success: bool) -> String {
+    let (status, title, message, tone, detail) = if success {
+        (
+            "Authority sign-in complete",
+            "MNDe authority established",
+            "You can return to the MNDe desktop app.",
+            "#2dd4bf",
+            "Microsoft Entra identity was accepted and the local app is completing the secure session.",
+        )
+    } else {
+        (
+            "Authority sign-in failed",
+            "MNDe authority not established",
+            "Return to the MNDe desktop app to try again.",
+            "#f87171",
+            "The callback could not be verified. MNDe keeps protected actions blocked until authority is valid.",
+        )
+    };
+
+    format!(
+        r#"<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{status}</title>
+  <style>
+    :root {{
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #070a0e;
+      color: #d7dde4;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(180deg, rgba(45, 212, 191, 0.08), transparent 34%),
+        #070a0e;
+    }}
+    main {{
+      width: min(560px, calc(100vw - 32px));
+      border: 1px solid #252c34;
+      background: #0b0f13;
+      padding: 32px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }}
+    .brand {{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }}
+    .mark {{
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(45, 212, 191, 0.35);
+      background: #10171d;
+      color: #2dd4bf;
+      font-weight: 800;
+      letter-spacing: 0;
+    }}
+    .name {{
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }}
+    .sub {{
+      margin-top: 3px;
+      color: #89939f;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }}
+    .status {{
+      display: inline-flex;
+      border: 1px solid {tone};
+      color: {tone};
+      background: color-mix(in srgb, {tone} 12%, transparent);
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }}
+    h1 {{
+      margin: 18px 0 0;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }}
+    p {{
+      margin: 14px 0 0;
+      color: #a7b0bb;
+      font-size: 15px;
+      line-height: 1.6;
+    }}
+    .detail {{
+      margin-top: 24px;
+      border: 1px solid #252c34;
+      background: #080b0f;
+      padding: 16px;
+      color: #89939f;
+      font-size: 13px;
+      line-height: 1.5;
+    }}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">
+      <div class="mark">M</div>
+      <div>
+        <div class="name">MNDe</div>
+        <div class="sub">Enterprise Authority Sign-In</div>
+      </div>
+    </div>
+    <div class="status">{status}</div>
+    <h1>{title}</h1>
+    <p>{message}</p>
+    <div class="detail">{detail}</div>
+  </main>
+</body>
+</html>"#
+    )
+}
+
+fn exchange_code(
+    config: &OidcConfig,
+    discovery: &DiscoveryDocument,
+    code: &str,
+    verifier: &str,
+) -> Result<TokenResponse, String> {
     let body = form_encode(&[
         ("grant_type", "authorization_code"),
         ("client_id", &config.client_id),
@@ -689,11 +1002,17 @@ fn exchange_code(config: &OidcConfig, discovery: &DiscoveryDocument, code: &str,
         .map_err(|error| format!("OIDC token response parse failed: {error}"))
 }
 
-fn fetch_jwks(issuer: &str, jwks_uri: &str) -> Result<Value, String> {
+fn fetch_jwks(issuer: &str, jwks_uri: &str, force_refresh: bool) -> Result<Value, String> {
     let path = jwks_cache_path(issuer)?;
-    if let Ok(raw) = read_to_string(&path) {
-        if let Ok(value) = serde_json::from_str::<Value>(&raw) {
-            return Ok(value);
+    if !force_refresh {
+        if let Ok(raw) = read_to_string(&path) {
+            if let Ok(cache) = serde_json::from_str::<JwksCacheFile>(&raw) {
+                if cache.schema_version == "mnde.jwks_cache.v1"
+                    && now_millis().saturating_sub(cache.fetched_at_ms) <= JWKS_CACHE_TTL_MS
+                {
+                    return Ok(cache.jwks);
+                }
+            }
         }
     }
     let value = reqwest::blocking::get(jwks_uri)
@@ -703,13 +1022,41 @@ fn fetch_jwks(issuer: &str, jwks_uri: &str) -> Result<Value, String> {
         .json::<Value>()
         .map_err(|error| format!("JWKS parse failed: {error}"))?;
     if let Some(parent) = path.parent() {
-        create_dir_all(parent).map_err(|error| format!("Failed to create JWKS cache directory: {error}"))?;
+        create_dir_all(parent)
+            .map_err(|error| format!("Failed to create JWKS cache directory: {error}"))?;
     }
-    write(&path, serde_json::to_string(&value).unwrap_or_default()).map_err(|error| format!("Failed to write JWKS cache: {error}"))?;
+    let cache = JwksCacheFile {
+        schema_version: "mnde.jwks_cache.v1".to_string(),
+        fetched_at_ms: now_millis(),
+        jwks: value.clone(),
+    };
+    write(&path, serde_json::to_string(&cache).unwrap_or_default())
+        .map_err(|error| format!("Failed to write JWKS cache: {error}"))?;
     Ok(value)
 }
 
-fn validate_id_token_rust(config: &OidcConfig, id_token: &str, jwks: &Value, expected_nonce: &str) -> Result<AuthSession, String> {
+fn validate_id_token_with_jwks_refresh(
+    config: &OidcConfig,
+    id_token: &str,
+    jwks_uri: &str,
+    expected_nonce: &str,
+) -> Result<AuthSession, String> {
+    let jwks = fetch_jwks(&config.issuer, jwks_uri, false)?;
+    match validate_id_token_rust(config, id_token, &jwks, expected_nonce) {
+        Err(error) if error == "ERR_JWKS_KEY_NOT_FOUND" => {
+            let refreshed = fetch_jwks(&config.issuer, jwks_uri, true)?;
+            validate_id_token_rust(config, id_token, &refreshed, expected_nonce)
+        }
+        result => result,
+    }
+}
+
+fn validate_id_token_rust(
+    config: &OidcConfig,
+    id_token: &str,
+    jwks: &Value,
+    expected_nonce: &str,
+) -> Result<AuthSession, String> {
     if id_token.len() > 16 * 1024 {
         return Err("ERR_TOKEN_TOO_LARGE".to_string());
     }
@@ -717,21 +1064,36 @@ fn validate_id_token_rust(config: &OidcConfig, id_token: &str, jwks: &Value, exp
     if header.alg != Algorithm::RS256 {
         return Err("ERR_TOKEN_UNSIGNED_OR_UNSUPPORTED".to_string());
     }
-    let kid = header.kid.ok_or_else(|| "ERR_TOKEN_KID_MISSING".to_string())?;
-    let key_value = jwks.get("keys")
+    let kid = header
+        .kid
+        .ok_or_else(|| "ERR_TOKEN_KID_MISSING".to_string())?;
+    let key_value = jwks
+        .get("keys")
         .and_then(Value::as_array)
-        .and_then(|keys| keys.iter().find(|key| key.get("kid").and_then(Value::as_str) == Some(&kid)))
+        .and_then(|keys| {
+            keys.iter()
+                .find(|key| key.get("kid").and_then(Value::as_str) == Some(&kid))
+        })
         .ok_or_else(|| "ERR_JWKS_KEY_NOT_FOUND".to_string())?;
-    let jwk = serde_json::from_value(key_value.clone()).map_err(|error| format!("JWKS key parse failed: {error}"))?;
+    let jwk = serde_json::from_value(key_value.clone())
+        .map_err(|error| format!("JWKS key parse failed: {error}"))?;
     let mut validation = Validation::new(Algorithm::RS256);
     validation.set_issuer(&[config.issuer.clone()]);
     validation.set_audience(&[config.audience.clone()]);
-    let decoded = decode::<Claims>(id_token, &DecodingKey::from_jwk(&jwk).map_err(|error| format!("JWKS decode key failed: {error}"))?, &validation)
-        .map_err(|error| format!("ID token validation failed: {error}"))?;
+    let decoded = decode::<Claims>(
+        id_token,
+        &DecodingKey::from_jwk(&jwk).map_err(|error| format!("JWKS decode key failed: {error}"))?,
+        &validation,
+    )
+    .map_err(|error| format!("ID token validation failed: {error}"))?;
     claims_to_session(config, decoded.claims, expected_nonce)
 }
 
-fn claims_to_session(config: &OidcConfig, claims: Claims, expected_nonce: &str) -> Result<AuthSession, String> {
+fn claims_to_session(
+    config: &OidcConfig,
+    claims: Claims,
+    expected_nonce: &str,
+) -> Result<AuthSession, String> {
     if claims.iss != config.issuer {
         return Err("wrong issuer".to_string());
     }
@@ -749,10 +1111,27 @@ fn claims_to_session(config: &OidcConfig, claims: Claims, expected_nonce: &str) 
             return Err("wrong tenant".to_string());
         }
     }
-    let email = claims.email.or(claims.preferred_username).or(claims.upn).ok_or_else(|| "missing email claim".to_string())?;
-    let user_id = claims.sub.or(claims.oid).ok_or_else(|| "missing user claim".to_string())?;
-    let tenant_id = claims.tid.or_else(|| config.tenant_id.clone()).ok_or_else(|| "missing tenant claim".to_string())?;
-    let role = resolve_session_role(config, &tenant_id, &user_id, &email, claims.mnde_role.as_deref(), claims.groups.as_deref());
+    let email = claims
+        .email
+        .or(claims.preferred_username)
+        .or(claims.upn)
+        .ok_or_else(|| "missing email claim".to_string())?;
+    let user_id = claims
+        .sub
+        .or(claims.oid)
+        .ok_or_else(|| "missing user claim".to_string())?;
+    let tenant_id = claims
+        .tid
+        .or_else(|| config.tenant_id.clone())
+        .ok_or_else(|| "missing tenant claim".to_string())?;
+    let role = resolve_session_role(
+        config,
+        &tenant_id,
+        &user_id,
+        &email,
+        claims.mnde_role.as_deref(),
+        claims.groups.as_deref(),
+    );
     Ok(AuthSession {
         user_id,
         display_name: claims.name.unwrap_or_else(|| email.clone()),
@@ -787,8 +1166,8 @@ fn refresh_session_if_possible(session: &AuthSession) -> Result<Option<AuthSessi
         .map_err(|error| format!("OIDC refresh returned error: {error}"))?
         .json::<TokenResponse>()
         .map_err(|error| format!("OIDC refresh response parse failed: {error}"))?;
-    let jwks = fetch_jwks(&config.issuer, &discovery.jwks_uri)?;
-    let refreshed = validate_id_token_rust(&config, &token.id_token, &jwks, "").or_else(|_| validate_refreshed_id_token(&config, &token.id_token, &jwks))?;
+    let refreshed =
+        validate_refreshed_token_with_jwks_refresh(&config, &token.id_token, &discovery.jwks_uri)?;
     if let Some(new_refresh) = token.refresh_token {
         store_refresh_token(&config.provider, &refreshed.user_id, &new_refresh)?;
     }
@@ -796,7 +1175,11 @@ fn refresh_session_if_possible(session: &AuthSession) -> Result<Option<AuthSessi
     Ok(Some(refreshed))
 }
 
-fn validate_refreshed_id_token(config: &OidcConfig, id_token: &str, jwks: &Value) -> Result<AuthSession, String> {
+fn validate_refreshed_id_token(
+    config: &OidcConfig,
+    id_token: &str,
+    jwks: &Value,
+) -> Result<AuthSession, String> {
     if id_token.len() > 16 * 1024 {
         return Err("ERR_TOKEN_TOO_LARGE".to_string());
     }
@@ -804,21 +1187,53 @@ fn validate_refreshed_id_token(config: &OidcConfig, id_token: &str, jwks: &Value
     if header.alg != Algorithm::RS256 {
         return Err("ERR_TOKEN_UNSIGNED_OR_UNSUPPORTED".to_string());
     }
-    let kid = header.kid.ok_or_else(|| "ERR_TOKEN_KID_MISSING".to_string())?;
-    let key_value = jwks.get("keys")
+    let kid = header
+        .kid
+        .ok_or_else(|| "ERR_TOKEN_KID_MISSING".to_string())?;
+    let key_value = jwks
+        .get("keys")
         .and_then(Value::as_array)
-        .and_then(|keys| keys.iter().find(|key| key.get("kid").and_then(Value::as_str) == Some(&kid)))
-        .ok_or_else(|| "JWKS key not found".to_string())?;
-    let jwk = serde_json::from_value(key_value.clone()).map_err(|error| format!("JWKS key parse failed: {error}"))?;
+        .and_then(|keys| {
+            keys.iter()
+                .find(|key| key.get("kid").and_then(Value::as_str) == Some(&kid))
+        })
+        .ok_or_else(|| "ERR_JWKS_KEY_NOT_FOUND".to_string())?;
+    let jwk = serde_json::from_value(key_value.clone())
+        .map_err(|error| format!("JWKS key parse failed: {error}"))?;
     let mut validation = Validation::new(Algorithm::RS256);
     validation.set_issuer(&[config.issuer.clone()]);
     validation.set_audience(&[config.audience.clone()]);
-    let decoded = decode::<Claims>(id_token, &DecodingKey::from_jwk(&jwk).map_err(|error| format!("JWKS decode key failed: {error}"))?, &validation)
-        .map_err(|error| format!("ID token validation failed: {error}"))?;
+    let decoded = decode::<Claims>(
+        id_token,
+        &DecodingKey::from_jwk(&jwk).map_err(|error| format!("JWKS decode key failed: {error}"))?,
+        &validation,
+    )
+    .map_err(|error| format!("ID token validation failed: {error}"))?;
     claims_to_session_without_nonce(config, decoded.claims)
 }
 
-fn claims_to_session_without_nonce(config: &OidcConfig, mut claims: Claims) -> Result<AuthSession, String> {
+fn validate_refreshed_token_with_jwks_refresh(
+    config: &OidcConfig,
+    id_token: &str,
+    jwks_uri: &str,
+) -> Result<AuthSession, String> {
+    let jwks = fetch_jwks(&config.issuer, jwks_uri, false)?;
+    let result = validate_id_token_rust(config, id_token, &jwks, "")
+        .or_else(|_| validate_refreshed_id_token(config, id_token, &jwks));
+    match result {
+        Err(error) if error == "ERR_JWKS_KEY_NOT_FOUND" => {
+            let refreshed = fetch_jwks(&config.issuer, jwks_uri, true)?;
+            validate_id_token_rust(config, id_token, &refreshed, "")
+                .or_else(|_| validate_refreshed_id_token(config, id_token, &refreshed))
+        }
+        other => other,
+    }
+}
+
+fn claims_to_session_without_nonce(
+    config: &OidcConfig,
+    mut claims: Claims,
+) -> Result<AuthSession, String> {
     claims.nonce = Some("refresh".to_string());
     claims_to_session(config, claims, "refresh")
 }
@@ -833,9 +1248,15 @@ fn open_system_browser(url: &str) -> Result<(), String> {
     let status = Command::new("open").arg(url).status();
     #[cfg(all(not(windows), not(target_os = "macos")))]
     let status = Command::new("xdg-open").arg(url).status();
-    status.map_err(|error| format!("Failed to open system browser: {error}")).and_then(|status| {
-        if status.success() { Ok(()) } else { Err("System browser launch failed".to_string()) }
-    })
+    status
+        .map_err(|error| format!("Failed to open system browser: {error}"))
+        .and_then(|status| {
+            if status.success() {
+                Ok(())
+            } else {
+                Err("System browser launch failed".to_string())
+            }
+        })
 }
 
 #[cfg(windows)]
@@ -844,35 +1265,53 @@ fn windows_browser_launcher_command(url: &str) -> (&'static str, [&str; 2]) {
 }
 
 fn store_refresh_token(provider: &str, user_id: &str, token: &str) -> Result<(), String> {
-    Entry::new("MNDe Execution Control", &format!("{provider}:{user_id}:refresh"))
-        .map_err(|error| format!("Secure storage unavailable: {error}"))?
-        .set_password(token)
-        .map_err(|error| format!("Failed to store refresh token securely: {error}"))
+    Entry::new(
+        "MNDe Execution Control",
+        &format!("{provider}:{user_id}:refresh"),
+    )
+    .map_err(|error| format!("Secure storage unavailable: {error}"))?
+    .set_password(token)
+    .map_err(|error| format!("Failed to store refresh token securely: {error}"))
 }
 
 fn read_refresh_token(provider: &str, user_id: &str) -> Result<String, String> {
-    Entry::new("MNDe Execution Control", &format!("{provider}:{user_id}:refresh"))
-        .map_err(|error| format!("Secure storage unavailable: {error}"))?
-        .get_password()
-        .map_err(|error| format!("Refresh token unavailable: {error}"))
+    Entry::new(
+        "MNDe Execution Control",
+        &format!("{provider}:{user_id}:refresh"),
+    )
+    .map_err(|error| format!("Secure storage unavailable: {error}"))?
+    .get_password()
+    .map_err(|error| format!("Refresh token unavailable: {error}"))
 }
 
 fn delete_refresh_token(provider: &str, user_id: &str) -> Result<(), String> {
-    Entry::new("MNDe Execution Control", &format!("{provider}:{user_id}:refresh"))
-        .map_err(|error| format!("Secure storage unavailable: {error}"))?
-        .delete_credential()
-        .map_err(|error| format!("Failed to delete refresh token: {error}"))
+    Entry::new(
+        "MNDe Execution Control",
+        &format!("{provider}:{user_id}:refresh"),
+    )
+    .map_err(|error| format!("Secure storage unavailable: {error}"))?
+    .delete_credential()
+    .map_err(|error| format!("Failed to delete refresh token: {error}"))
 }
 
 fn jwks_cache_path(issuer: &str) -> Result<PathBuf, String> {
-    let safe = issuer.chars().map(|ch| if ch.is_ascii_alphanumeric() { ch } else { '-' }).collect::<String>();
-    let exe = std::env::current_exe().map_err(|error| format!("Failed to resolve current executable: {error}"))?;
-    Ok(exe.parent().ok_or_else(|| "Failed to resolve executable directory.".to_string())?.join("jwks-cache").join(format!("{safe}.json")))
+    let safe = issuer
+        .chars()
+        .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { '-' })
+        .collect::<String>();
+    let exe = std::env::current_exe()
+        .map_err(|error| format!("Failed to resolve current executable: {error}"))?;
+    Ok(exe
+        .parent()
+        .ok_or_else(|| "Failed to resolve executable directory.".to_string())?
+        .join("jwks-cache")
+        .join(format!("{safe}.json")))
 }
 
 fn random_urlsafe(length: usize) -> Result<String, String> {
     let mut bytes = vec![0_u8; length];
-    getrandom::getrandom(&mut bytes).map_err(|error| format!("secure random read failed: {error}"))?;
+    getrandom::getrandom(&mut bytes)
+        .map_err(|error| format!("secure random read failed: {error}"))?;
     Ok(URL_SAFE_NO_PAD.encode(bytes))
 }
 
@@ -882,10 +1321,20 @@ fn pkce_challenge(verifier: &str) -> String {
 
 fn audience_matches(aud: &Value, expected: &str) -> bool {
     aud.as_str().map(|value| value == expected).unwrap_or(false)
-        || aud.as_array().map(|items| items.iter().any(|item| item.as_str() == Some(expected))).unwrap_or(false)
+        || aud
+            .as_array()
+            .map(|items| items.iter().any(|item| item.as_str() == Some(expected)))
+            .unwrap_or(false)
 }
 
-fn resolve_session_role(config: &OidcConfig, tenant_id: &str, user_id: &str, email: &str, direct: Option<&str>, groups: Option<&[String]>) -> String {
+fn resolve_session_role(
+    config: &OidcConfig,
+    tenant_id: &str,
+    user_id: &str,
+    email: &str,
+    direct: Option<&str>,
+    groups: Option<&[String]>,
+) -> String {
     if let Ok(policy) = load_rbac_policy() {
         if let Some(role) = policy.resolve_role(tenant_id, user_id, email) {
             return role;
@@ -909,9 +1358,14 @@ fn map_oidc_role(config: &OidcConfig, direct: Option<&str>, groups: Option<&[Str
     "VIEWER".to_string()
 }
 
-fn reconcile_session_role_with_policy(session: &mut AuthSession, policy: Option<&RbacPolicy>) -> bool {
+fn reconcile_session_role_with_policy(
+    session: &mut AuthSession,
+    policy: Option<&RbacPolicy>,
+) -> bool {
     let previous = session.role.clone();
-    if let Some(role) = policy.and_then(|item| item.resolve_role(&session.tenant_id, &session.user_id, &session.email)) {
+    if let Some(role) = policy
+        .and_then(|item| item.resolve_role(&session.tenant_id, &session.user_id, &session.email))
+    {
         session.role = role;
     } else if session.role != "VIEWER" {
         session.role = "VIEWER".to_string();
@@ -930,7 +1384,10 @@ fn reconcile_stored_session_role(mut session: AuthSession) -> Result<AuthSession
 }
 
 #[allow(dead_code)]
-fn parse_oidc_callback_url(callback_url: &str, expected_state: &str) -> Result<OidcCallbackResult, String> {
+fn parse_oidc_callback_url(
+    callback_url: &str,
+    expected_state: &str,
+) -> Result<OidcCallbackResult, String> {
     let query = callback_url
         .split_once('?')
         .map(|(_, query)| query)
@@ -1004,26 +1461,41 @@ fn validate_provider_config(provider: &str) -> ProviderConfigReadiness {
     let mut errors = Vec::new();
     if provider != "microsoft_entra" && provider != "okta" {
         errors.push("ERR_AUTH_PROVIDER_UNSUPPORTED".to_string());
-        return ProviderConfigReadiness { configured: false, errors };
+        return ProviderConfigReadiness {
+            configured: false,
+            errors,
+        };
     }
     let config_file = match load_auth_config_file() {
         Ok(file) => file,
         Err(error) => {
             errors.push(error);
-            return ProviderConfigReadiness { configured: false, errors };
+            return ProviderConfigReadiness {
+                configured: false,
+                errors,
+            };
         }
     };
     if normalize_provider(&config_file.provider).as_deref() != Some(provider) {
         errors.push("ERR_AUTH_PROVIDER_UNSUPPORTED".to_string());
     }
     let file = match provider {
-        "microsoft_entra" => config_file.entra.clone().or_else(|| flat_provider_file_config(&config_file)),
-        "okta" => config_file.okta.clone().or_else(|| flat_provider_file_config(&config_file)),
+        "microsoft_entra" => config_file
+            .entra
+            .clone()
+            .or_else(|| flat_provider_file_config(&config_file)),
+        "okta" => config_file
+            .okta
+            .clone()
+            .or_else(|| flat_provider_file_config(&config_file)),
         _ => None,
     };
     let Some(file) = file else {
         errors.push("ERR_AUTH_CONFIG_MISSING".to_string());
-        return ProviderConfigReadiness { configured: false, errors };
+        return ProviderConfigReadiness {
+            configured: false,
+            errors,
+        };
     };
     let issuer = file.issuer.clone().unwrap_or_default();
     let client_id = file.client_id.clone().unwrap_or_default();
@@ -1043,7 +1515,10 @@ fn validate_provider_config(provider: &str) -> ProviderConfigReadiness {
     if !valid_loopback_redirect(&redirect_uri) {
         errors.push("ERR_AUTH_REDIRECT_INVALID".to_string());
     }
-    if scopes.is_empty() || !scopes.iter().all(|scope| !scope.trim().is_empty()) || !scopes.iter().any(|scope| scope == "openid") {
+    if scopes.is_empty()
+        || !scopes.iter().all(|scope| !scope.trim().is_empty())
+        || !scopes.iter().any(|scope| scope == "openid")
+    {
         errors.push("ERR_AUTH_CONFIG_INVALID:scopes".to_string());
     }
     if provider == "microsoft_entra" && tenant_id.trim().is_empty() {
@@ -1052,11 +1527,19 @@ fn validate_provider_config(provider: &str) -> ProviderConfigReadiness {
     if provider == "microsoft_entra" && !tenant_id.trim().is_empty() && !valid_guid(&tenant_id) {
         errors.push("ERR_AUTH_CONFIG_INVALID:tenant_id_format".to_string());
     }
-    if provider == "microsoft_entra" && !tenant_id.trim().is_empty() && !issuer.trim_end_matches('/').ends_with(&format!("/{tenant_id}/v2.0")) {
+    if provider == "microsoft_entra"
+        && !tenant_id.trim().is_empty()
+        && !issuer
+            .trim_end_matches('/')
+            .ends_with(&format!("/{tenant_id}/v2.0"))
+    {
         errors.push("ERR_AUTH_ISSUER_INVALID:tenant_mismatch".to_string());
     }
     if let Some(map) = file.group_role_map {
-        if !map.values().all(|role| matches!(role.as_str(), "ADMIN" | "OPERATOR" | "AUDITOR" | "VIEWER")) {
+        if !map
+            .values()
+            .all(|role| matches!(role.as_str(), "ADMIN" | "OPERATOR" | "AUDITOR" | "VIEWER"))
+        {
             errors.push("ERR_AUTH_CONFIG_INVALID:group_role_map".to_string());
         }
     }
@@ -1068,14 +1551,21 @@ fn validate_provider_config(provider: &str) -> ProviderConfigReadiness {
 
 fn provider_file_config(provider: &str) -> Result<AuthProviderFileConfig, String> {
     let parsed = load_auth_config_file()?;
-    let active = normalize_provider(&parsed.provider).ok_or_else(|| "ERR_AUTH_PROVIDER_UNSUPPORTED".to_string())?;
+    let active = normalize_provider(&parsed.provider)
+        .ok_or_else(|| "ERR_AUTH_PROVIDER_UNSUPPORTED".to_string())?;
     if active != provider {
         return Err("ERR_AUTH_PROVIDER_UNSUPPORTED".to_string());
     }
     let file = if provider == "microsoft_entra" {
-        parsed.entra.clone().or_else(|| flat_provider_file_config(&parsed))
+        parsed
+            .entra
+            .clone()
+            .or_else(|| flat_provider_file_config(&parsed))
     } else {
-        parsed.okta.clone().or_else(|| flat_provider_file_config(&parsed))
+        parsed
+            .okta
+            .clone()
+            .or_else(|| flat_provider_file_config(&parsed))
     };
     file.ok_or_else(|| "ERR_AUTH_CONFIG_MISSING".to_string())
 }
@@ -1118,7 +1608,9 @@ impl RbacPolicy {
     }
 
     fn can_bootstrap(&self) -> bool {
-        self.assignments.iter().all(|assignment| assignment.role != "ADMIN")
+        self.assignments
+            .iter()
+            .all(|assignment| assignment.role != "ADMIN")
     }
 
     fn validate(&self) -> Result<(), String> {
@@ -1126,10 +1618,20 @@ impl RbacPolicy {
             return Err("ERR_RBAC_POLICY_INVALID".to_string());
         }
         for assignment in &self.assignments {
-            if !matches!(assignment.role.as_str(), "ADMIN" | "OPERATOR" | "AUDITOR" | "VIEWER") {
+            if !matches!(
+                assignment.role.as_str(),
+                "ADMIN" | "OPERATOR" | "AUDITOR" | "VIEWER"
+            ) {
                 return Err("ERR_RBAC_ROLE_INVALID".to_string());
             }
-            if assignment.user_id.as_deref().unwrap_or("").trim().is_empty() && assignment.email.as_deref().unwrap_or("").trim().is_empty() {
+            if assignment
+                .user_id
+                .as_deref()
+                .unwrap_or("")
+                .trim()
+                .is_empty()
+                && assignment.email.as_deref().unwrap_or("").trim().is_empty()
+            {
                 return Err("ERR_RBAC_SUBJECT_REQUIRED".to_string());
             }
         }
@@ -1145,7 +1647,12 @@ impl RbacPolicy {
             .iter()
             .find(|assignment| {
                 assignment.user_id.as_deref() == Some(user_id)
-                    || assignment.email.as_deref().map(str::to_lowercase).as_deref() == Some(normalized_email.as_str())
+                    || assignment
+                        .email
+                        .as_deref()
+                        .map(str::to_lowercase)
+                        .as_deref()
+                        == Some(normalized_email.as_str())
             })
             .map(|assignment| assignment.role.clone())
     }
@@ -1153,9 +1660,15 @@ impl RbacPolicy {
     fn upsert(&mut self, assignment: RbacAssignment) -> Result<(), String> {
         let matches_subject = |existing: &RbacAssignment| {
             assignment.user_id.is_some() && existing.user_id == assignment.user_id
-                || assignment.email.is_some() && existing.email.as_ref().map(|value| value.to_lowercase()) == assignment.email.as_ref().map(|value| value.to_lowercase())
+                || assignment.email.is_some()
+                    && existing.email.as_ref().map(|value| value.to_lowercase())
+                        == assignment.email.as_ref().map(|value| value.to_lowercase())
         };
-        if let Some(existing) = self.assignments.iter_mut().find(|existing| matches_subject(existing)) {
+        if let Some(existing) = self
+            .assignments
+            .iter_mut()
+            .find(|existing| matches_subject(existing))
+        {
             *existing = assignment;
         } else {
             self.assignments.push(assignment);
@@ -1167,7 +1680,8 @@ impl RbacPolicy {
 fn load_rbac_policy() -> Result<RbacPolicy, String> {
     let path = rbac_policy_path()?;
     let raw = read_to_string(path).map_err(|_| "ERR_RBAC_POLICY_MISSING".to_string())?;
-    let policy = serde_json::from_str::<RbacPolicy>(&raw).map_err(|_| "ERR_RBAC_POLICY_INVALID".to_string())?;
+    let policy = serde_json::from_str::<RbacPolicy>(&raw)
+        .map_err(|_| "ERR_RBAC_POLICY_INVALID".to_string())?;
     policy.validate()?;
     Ok(policy)
 }
@@ -1175,12 +1689,14 @@ fn load_rbac_policy() -> Result<RbacPolicy, String> {
 fn save_rbac_policy(policy: &RbacPolicy) -> Result<(), String> {
     policy.validate()?;
     let path = rbac_policy_path()?;
-    let raw = serde_json::to_string_pretty(policy).map_err(|error| format!("Failed to serialize RBAC policy: {error}"))?;
+    let raw = serde_json::to_string_pretty(policy)
+        .map_err(|error| format!("Failed to serialize RBAC policy: {error}"))?;
     write(path, raw).map_err(|error| format!("Failed to persist RBAC policy: {error}"))
 }
 
 fn rbac_policy_path() -> Result<PathBuf, String> {
-    let cwd = std::env::current_dir().map_err(|error| format!("Failed to resolve current directory: {error}"))?;
+    let cwd = std::env::current_dir()
+        .map_err(|error| format!("Failed to resolve current directory: {error}"))?;
     if cwd.join("auth-config.local.json").exists() {
         return Ok(cwd.join("rbac-policy.local.json"));
     }
@@ -1189,8 +1705,12 @@ fn rbac_policy_path() -> Result<PathBuf, String> {
             return Ok(parent.join("rbac-policy.local.json"));
         }
     }
-    let exe = std::env::current_exe().map_err(|error| format!("Failed to resolve current executable: {error}"))?;
-    Ok(exe.parent().ok_or_else(|| "Failed to resolve executable directory.".to_string())?.join("rbac-policy.local.json"))
+    let exe = std::env::current_exe()
+        .map_err(|error| format!("Failed to resolve current executable: {error}"))?;
+    Ok(exe
+        .parent()
+        .ok_or_else(|| "Failed to resolve executable directory.".to_string())?
+        .join("rbac-policy.local.json"))
 }
 
 fn required_config_value(file_value: Option<String>, field: &str) -> Result<String, String> {
@@ -1208,23 +1728,34 @@ fn normalize_provider(value: &str) -> Option<String> {
 }
 
 fn valid_https_url(value: &str) -> bool {
-    Url::parse(value).map(|url| url.scheme() == "https").unwrap_or(false)
+    Url::parse(value)
+        .map(|url| url.scheme() == "https")
+        .unwrap_or(false)
 }
 
 fn valid_loopback_redirect(value: &str) -> bool {
     Url::parse(value)
-        .map(|url| url.scheme() == "http" && url.host_str() == Some("localhost") && url.port() == Some(8788) && url.path() == "/callback")
+        .map(|url| {
+            url.scheme() == "http"
+                && url.host_str() == Some("localhost")
+                && url.port() == Some(8788)
+                && url.path() == "/callback"
+        })
         .unwrap_or(false)
 }
 
 fn valid_guid(value: &str) -> bool {
     let parts: Vec<&str> = value.split('-').collect();
     parts.len() == 5
-        && [8, 4, 4, 4, 12].iter().zip(parts.iter()).all(|(len, part)| part.len() == *len && part.chars().all(|ch| ch.is_ascii_hexdigit()))
+        && [8, 4, 4, 4, 12]
+            .iter()
+            .zip(parts.iter())
+            .all(|(len, part)| part.len() == *len && part.chars().all(|ch| ch.is_ascii_hexdigit()))
 }
 
 fn auth_config_local_path() -> Result<PathBuf, String> {
-    let cwd = std::env::current_dir().map_err(|error| format!("Failed to resolve current directory: {error}"))?;
+    let cwd = std::env::current_dir()
+        .map_err(|error| format!("Failed to resolve current directory: {error}"))?;
     let local = cwd.join("auth-config.local.json");
     if local.exists() {
         return Ok(local);
@@ -1237,7 +1768,8 @@ fn auth_config_local_path() -> Result<PathBuf, String> {
 }
 
 fn auth_audit_file_path() -> Result<PathBuf, String> {
-    let exe = std::env::current_exe().map_err(|error| format!("Failed to resolve current executable: {error}"))?;
+    let exe = std::env::current_exe()
+        .map_err(|error| format!("Failed to resolve current executable: {error}"))?;
     Ok(exe
         .parent()
         .ok_or_else(|| "Failed to resolve executable directory.".to_string())?
@@ -1247,13 +1779,88 @@ fn auth_audit_file_path() -> Result<PathBuf, String> {
 
 fn read_auth_session() -> Option<AuthSession> {
     let raw = read_to_string(auth_session_path().ok()?).ok()?;
-    serde_json::from_str::<AuthSession>(&raw).ok()
+    let envelope = serde_json::from_str::<SignedAuthSessionFile>(&raw).ok()?;
+    if envelope.schema_version != "mnde.auth_session.v2" || envelope.integrity.alg != "HMAC-SHA256"
+    {
+        return None;
+    }
+    let session_raw = serde_json::to_vec(&envelope.session).ok()?;
+    let expected = sign_session_bytes(&session_raw).ok()?;
+    if expected != envelope.integrity.value {
+        return None;
+    }
+    Some(envelope.session)
 }
 
 fn write_auth_session(session: &AuthSession) -> Result<(), String> {
     let path = auth_session_path()?;
-    let raw = serde_json::to_string_pretty(session).map_err(|error| format!("Failed to serialize auth session: {error}"))?;
+    let session_raw = serde_json::to_vec(session)
+        .map_err(|error| format!("Failed to serialize auth session: {error}"))?;
+    let envelope = SignedAuthSessionFile {
+        schema_version: "mnde.auth_session.v2".to_string(),
+        session: session.clone(),
+        integrity: SessionIntegrity {
+            alg: "HMAC-SHA256".to_string(),
+            value: sign_session_bytes(&session_raw)?,
+        },
+    };
+    let raw = serde_json::to_string_pretty(&envelope)
+        .map_err(|error| format!("Failed to serialize auth session: {error}"))?;
     write(path, raw).map_err(|error| format!("Failed to persist auth session: {error}"))
+}
+
+fn sign_session_bytes(raw: &[u8]) -> Result<String, String> {
+    let secret = session_integrity_secret()?;
+    let key = hmac::Key::new(hmac::HMAC_SHA256, &secret);
+    Ok(URL_SAFE_NO_PAD.encode(hmac::sign(&key, raw).as_ref()))
+}
+
+fn session_integrity_secret() -> Result<Vec<u8>, String> {
+    if let Ok(secret) = file_backed_session_integrity_secret() {
+        return Ok(secret);
+    }
+    if let Ok(entry) = Entry::new("MNDe Execution Control", "auth-session-integrity") {
+        if let Ok(existing) = entry.get_password() {
+            if let Ok(decoded) = URL_SAFE_NO_PAD.decode(existing.as_bytes()) {
+                if decoded.len() == 32 {
+                    return Ok(decoded);
+                }
+            }
+        }
+        if let Ok(secret) = generate_integrity_secret() {
+            if entry.set_password(&URL_SAFE_NO_PAD.encode(&secret)).is_ok() {
+                return Ok(secret);
+            }
+        }
+    }
+    file_backed_session_integrity_secret()
+}
+
+fn generate_integrity_secret() -> Result<Vec<u8>, String> {
+    let mut secret = [0u8; 32];
+    getrandom::getrandom(&mut secret)
+        .map_err(|error| format!("Failed to generate session integrity key: {error}"))?;
+    Ok(secret.to_vec())
+}
+
+fn file_backed_session_integrity_secret() -> Result<Vec<u8>, String> {
+    let exe = std::env::current_exe()
+        .map_err(|error| format!("Failed to resolve current executable: {error}"))?;
+    let path = exe
+        .parent()
+        .ok_or_else(|| "Failed to resolve executable directory.".to_string())?
+        .join("mnde-auth-session-integrity.key");
+    if let Ok(existing) = read_to_string(&path) {
+        if let Ok(decoded) = URL_SAFE_NO_PAD.decode(existing.trim().as_bytes()) {
+            if decoded.len() == 32 {
+                return Ok(decoded);
+            }
+        }
+    }
+    let secret = generate_integrity_secret()?;
+    write(&path, URL_SAFE_NO_PAD.encode(&secret))
+        .map_err(|error| format!("Failed to persist local session integrity key: {error}"))?;
+    Ok(secret)
 }
 
 fn clear_auth_session() {
@@ -1279,7 +1886,10 @@ fn validate_session(session: &AuthSession) -> Result<(), String> {
     {
         return Err("auth session is missing required claims".to_string());
     }
-    if !matches!(session.role.as_str(), "ADMIN" | "OPERATOR" | "AUDITOR" | "VIEWER") {
+    if !matches!(
+        session.role.as_str(),
+        "ADMIN" | "OPERATOR" | "AUDITOR" | "VIEWER"
+    ) {
         return Err("auth session role is invalid".to_string());
     }
     if let Some(expiry) = session.session_expiry_ms {
@@ -1299,7 +1909,8 @@ fn session_expires_soon(session: &AuthSession, window_ms: u64) -> bool {
 }
 
 fn current_valid_session() -> Result<AuthSession, String> {
-    let session = read_auth_session().ok_or_else(|| "enterprise authentication required".to_string())?;
+    let session =
+        read_auth_session().ok_or_else(|| "enterprise authentication required".to_string())?;
     validate_session(&session)?;
     reconcile_stored_session_role(session)
 }
@@ -1314,9 +1925,35 @@ fn require_enterprise_session() -> Result<AuthSession, String> {
 
 fn role_has_capability(role: &str, capability: &str) -> bool {
     match role {
-        "ADMIN" => matches!(capability, "activate_policy" | "manage_runtime" | "export_audit" | "manage_integrations" | "manage_users" | "view_runtime" | "replay_decisions" | "inspect_receipts" | "verify_receipts" | "view_dashboard"),
-        "OPERATOR" => matches!(capability, "view_runtime" | "replay_decisions" | "inspect_receipts" | "verify_receipts" | "view_dashboard"),
-        "AUDITOR" => matches!(capability, "inspect_receipts" | "verify_receipts" | "replay_decisions" | "export_audit" | "view_dashboard"),
+        "ADMIN" => matches!(
+            capability,
+            "activate_policy"
+                | "manage_runtime"
+                | "export_audit"
+                | "manage_integrations"
+                | "manage_users"
+                | "view_runtime"
+                | "replay_decisions"
+                | "inspect_receipts"
+                | "verify_receipts"
+                | "view_dashboard"
+        ),
+        "OPERATOR" => matches!(
+            capability,
+            "view_runtime"
+                | "replay_decisions"
+                | "inspect_receipts"
+                | "verify_receipts"
+                | "view_dashboard"
+        ),
+        "AUDITOR" => matches!(
+            capability,
+            "inspect_receipts"
+                | "verify_receipts"
+                | "replay_decisions"
+                | "export_audit"
+                | "view_dashboard"
+        ),
         "VIEWER" => capability == "view_dashboard",
         _ => false,
     }
@@ -1326,7 +1963,9 @@ fn require_capability(capability: &str) -> Result<AuthSession, String> {
     let session = require_enterprise_session()?;
     if !role_has_capability(&session.role, capability) {
         append_auth_audit(&session, capability, "desktop-ipc", "REFUSE", None)?;
-        return Err(format!("authorization refused: {capability} requires a higher role"));
+        return Err(format!(
+            "authorization refused: {capability} requires a higher role"
+        ));
     }
     Ok(session)
 }
@@ -1335,14 +1974,101 @@ fn authority_context_header() -> Result<String, String> {
     let Ok(session) = current_valid_session() else {
         return Ok(String::new());
     };
-    let raw = serde_json::to_string(&session).map_err(|error| format!("Failed to serialize authority context: {error}"))?;
-    Ok(format!("X-MNDE-Authority-Context: {raw}\r\n"))
+    let assertion = authority_assertion_for_session(&session)?;
+    Ok(format!("X-MNDE-Authority-Assertion: {assertion}\r\n"))
 }
 
-fn append_auth_audit(session: &AuthSession, action: &str, target: &str, result: &str, decision_hash: Option<&str>) -> Result<(), String> {
+fn authority_assertion_for_session(session: &AuthSession) -> Result<String, String> {
+    let issued_at = now_millis();
+    let claims = AuthorityAssertionClaims {
+        issuer: AUTHORITY_ASSERTION_ISSUER.to_string(),
+        audience: AUTHORITY_ASSERTION_AUDIENCE.to_string(),
+        subject: session.user_id.clone(),
+        roles: vec![session.role.clone()],
+        capabilities: capabilities_for_role(&session.role),
+        issued_at,
+        expires_at: issued_at + AUTHORITY_ASSERTION_LIFETIME_MS,
+        nonce: random_urlsafe(32)?,
+        session_id: session_id(session),
+        user_id: session.user_id.clone(),
+        display_name: session.display_name.clone(),
+        email: session.email.clone(),
+        tenant_id: session.tenant_id.clone(),
+        provider: session.provider.clone(),
+        login_time: session.login_time.clone(),
+    };
+    let payload = serde_json::to_string(&claims)
+        .map_err(|error| format!("Failed to serialize authority assertion: {error}"))?;
+    let payload_part = URL_SAFE_NO_PAD.encode(payload.as_bytes());
+    let key_pair = authority_key_pair()?;
+    let signature = key_pair.sign(payload_part.as_bytes());
+    Ok(format!(
+        "{payload_part}.{}",
+        URL_SAFE_NO_PAD.encode(signature.as_ref())
+    ))
+}
+
+fn authority_public_key_b64() -> Result<String, String> {
+    Ok(URL_SAFE_NO_PAD.encode(authority_key_pair()?.public_key().as_ref()))
+}
+
+fn authority_key_pair() -> Result<Ed25519KeyPair, String> {
+    if AUTHORITY_SIGNING_KEY_PKCS8.get().is_none() {
+        let rng = SystemRandom::new();
+        let document = Ed25519KeyPair::generate_pkcs8(&rng)
+            .map_err(|_| "Failed to generate authority assertion signing key".to_string())?;
+        let _ = AUTHORITY_SIGNING_KEY_PKCS8.set(document.as_ref().to_vec());
+    }
+    let pkcs8 = AUTHORITY_SIGNING_KEY_PKCS8
+        .get()
+        .ok_or_else(|| "Failed to initialize authority assertion signing key".to_string())?;
+    Ed25519KeyPair::from_pkcs8(pkcs8)
+        .map_err(|_| "Failed to load authority assertion signing key".to_string())
+}
+
+fn capabilities_for_role(role: &str) -> Vec<String> {
+    let capabilities = [
+        "activate_policy",
+        "manage_runtime",
+        "export_audit",
+        "manage_integrations",
+        "manage_users",
+        "view_runtime",
+        "replay_decisions",
+        "inspect_receipts",
+        "verify_receipts",
+        "view_dashboard",
+    ];
+    capabilities
+        .iter()
+        .filter(|capability| role_has_capability(role, capability))
+        .map(|capability| (*capability).to_string())
+        .collect()
+}
+
+fn session_id(session: &AuthSession) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(session.provider.as_bytes());
+    hasher.update(b"\0");
+    hasher.update(session.tenant_id.as_bytes());
+    hasher.update(b"\0");
+    hasher.update(session.user_id.as_bytes());
+    hasher.update(b"\0");
+    hasher.update(session.login_time.as_bytes());
+    URL_SAFE_NO_PAD.encode(hasher.finalize())
+}
+
+fn append_auth_audit(
+    session: &AuthSession,
+    action: &str,
+    target: &str,
+    result: &str,
+    decision_hash: Option<&str>,
+) -> Result<(), String> {
     let path = auth_audit_file_path()?;
     if let Some(parent) = path.parent() {
-        create_dir_all(parent).map_err(|error| format!("Failed to create auth audit directory: {error}"))?;
+        create_dir_all(parent)
+            .map_err(|error| format!("Failed to create auth audit directory: {error}"))?;
     }
     let record = serde_json::json!({
         "timestamp": now_millis().to_string(),
@@ -1356,7 +2082,8 @@ fn append_auth_audit(session: &AuthSession, action: &str, target: &str, result: 
         "result": result,
         "decision_hash": decision_hash
     });
-    let mut raw = serde_json::to_string(&record).map_err(|error| format!("Failed to serialize auth audit event: {error}"))?;
+    let mut raw = serde_json::to_string(&record)
+        .map_err(|error| format!("Failed to serialize auth audit event: {error}"))?;
     raw.push('\n');
     std::fs::OpenOptions::new()
         .create(true)
@@ -1416,8 +2143,18 @@ fn candidate_sidecar_launchers() -> Vec<SidecarLauncher> {
 
     let local_sidecar_root = workspace.clone();
     let local_sidecar = local_sidecar_root.join("mnde-local-sidecar.mjs");
-    let release_script = workspace.join("mnde-gpu-demo").join("release-extract-temp").join("mnde-release-package").join("bin").join("mnde-sidecar-background.cmd");
-    let bundled_script = workspace.join("mnde-gpu-demo").join("mnde").join("bin").join("bin").join("mnde-sidecar-background.cmd");
+    let release_script = workspace
+        .join("mnde-gpu-demo")
+        .join("release-extract-temp")
+        .join("mnde-release-package")
+        .join("bin")
+        .join("mnde-sidecar-background.cmd");
+    let bundled_script = workspace
+        .join("mnde-gpu-demo")
+        .join("mnde")
+        .join("bin")
+        .join("bin")
+        .join("mnde-sidecar-background.cmd");
 
     vec![
         SidecarLauncher {
@@ -1455,7 +2192,8 @@ fn sidecar_port_is_open() -> bool {
 }
 
 fn pid_file_path() -> Result<PathBuf, String> {
-    let exe = std::env::current_exe().map_err(|error| format!("Failed to resolve current executable: {error}"))?;
+    let exe = std::env::current_exe()
+        .map_err(|error| format!("Failed to resolve current executable: {error}"))?;
     Ok(exe
         .parent()
         .ok_or_else(|| "Failed to resolve executable directory.".to_string())?
@@ -1470,7 +2208,8 @@ fn read_owned_pid() -> Option<OwnedSidecarPid> {
 
 fn write_owned_pid(record: &OwnedSidecarPid) -> Result<(), String> {
     let path = pid_file_path()?;
-    let raw = serde_json::to_string_pretty(record).map_err(|error| format!("Failed to serialize sidecar PID file: {error}"))?;
+    let raw = serde_json::to_string_pretty(record)
+        .map_err(|error| format!("Failed to serialize sidecar PID file: {error}"))?;
     write(path, raw).map_err(|error| format!("Failed to write sidecar PID file: {error}"))
 }
 
@@ -1495,7 +2234,11 @@ fn process_executable_path(pid: u32) -> Option<String> {
             return None;
         }
         let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if text.is_empty() { None } else { Some(text) }
+        if text.is_empty() {
+            None
+        } else {
+            Some(text)
+        }
     }
     #[cfg(not(windows))]
     {
@@ -1512,10 +2255,18 @@ fn pid_is_running(pid: u32) -> bool {
 fn sidecar_status_inner() -> LifecycleResult {
     let Some(record) = read_owned_pid() else {
         return LifecycleResult {
-            status: if sidecar_port_is_open() { "running".to_string() } else { "stopped".to_string() },
+            status: if sidecar_port_is_open() {
+                "running".to_string()
+            } else {
+                "stopped".to_string()
+            },
             pid: None,
             owned: false,
-            message: if sidecar_port_is_open() { "external sidecar detected".to_string() } else { "sidecar is stopped".to_string() },
+            message: if sidecar_port_is_open() {
+                "external sidecar detected".to_string()
+            } else {
+                "sidecar is stopped".to_string()
+            },
             executable_path: None,
         };
     };
@@ -1583,7 +2334,11 @@ fn stop_mnde_sidecar_inner() -> Result<LifecycleResult, String> {
 
     #[cfg(windows)]
     let stop_status = Command::new("powershell")
-        .args(["-NoProfile", "-Command", &format!("Stop-Process -Id {} -ErrorAction Stop", record.pid)])
+        .args([
+            "-NoProfile",
+            "-Command",
+            &format!("Stop-Process -Id {} -ErrorAction Stop", record.pid),
+        ])
         .status()
         .map_err(|error| format!("Failed to stop sidecar: {error}"))?;
     #[cfg(not(windows))]
@@ -1639,7 +2394,8 @@ fn validate_audit_bundle_path(input: &str) -> Result<PathBuf, String> {
         .ok_or_else(|| "Failed to resolve workspace root.".to_string())?;
     let audit_root = canonicalize(workspace.join("audit-bundles"))
         .map_err(|_| "Audit bundle root does not exist.".to_string())?;
-    let target = canonicalize(input).map_err(|_| "Audit bundle folder does not exist.".to_string())?;
+    let target =
+        canonicalize(input).map_err(|_| "Audit bundle folder does not exist.".to_string())?;
     if !target.starts_with(&audit_root) {
         return Err("Path is outside the generated audit bundle directory.".to_string());
     }
@@ -1683,7 +2439,8 @@ fn validate_startup_auth_config() -> Result<(), String> {
     let Ok(file) = load_auth_config_file() else {
         return Ok(());
     };
-    let provider = normalize_provider(&file.provider).ok_or_else(|| "ERR_AUTH_PROVIDER_UNSUPPORTED".to_string())?;
+    let provider = normalize_provider(&file.provider)
+        .ok_or_else(|| "ERR_AUTH_PROVIDER_UNSUPPORTED".to_string())?;
     let _readiness = validate_provider_config(&provider);
     Ok(())
 }
@@ -1694,15 +2451,24 @@ mod tests {
 
     #[test]
     fn parses_only_local_http_endpoints() {
-        assert_eq!(parse_local_http_endpoint("http://127.0.0.1:8787").unwrap(), ("127.0.0.1".to_string(), 8787));
+        assert_eq!(
+            parse_local_http_endpoint("http://127.0.0.1:8787").unwrap(),
+            ("127.0.0.1".to_string(), 8787)
+        );
         assert!(parse_local_http_endpoint("https://127.0.0.1:8787").is_err());
         assert!(parse_local_http_endpoint("http://127.0.0.1").is_err());
     }
 
     #[test]
     fn path_identity_compare_is_case_insensitive_for_windows() {
-        assert!(paths_match("C:\\Program Files\\nodejs\\node.exe", "c:\\program files\\nodejs\\NODE.exe"));
-        assert!(!paths_match("C:\\Program Files\\nodejs\\node.exe", "C:\\Windows\\System32\\cmd.exe"));
+        assert!(paths_match(
+            "C:\\Program Files\\nodejs\\node.exe",
+            "c:\\program files\\nodejs\\NODE.exe"
+        ));
+        assert!(!paths_match(
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Windows\\System32\\cmd.exe"
+        ));
     }
 
     #[test]
@@ -1750,11 +2516,23 @@ mod tests {
 
     #[test]
     fn oidc_callback_validates_state_and_code() {
-        let parsed = parse_oidc_callback_url("http://localhost:8788/callback?code=abc123&state=expected", "expected").unwrap();
+        let parsed = parse_oidc_callback_url(
+            "http://localhost:8788/callback?code=abc123&state=expected",
+            "expected",
+        )
+        .unwrap();
         assert_eq!(parsed.code, "abc123");
         assert_eq!(parsed.state, "expected");
-        assert!(parse_oidc_callback_url("http://localhost:8788/callback?code=abc123&state=wrong", "expected").is_err());
-        assert!(parse_oidc_callback_url("http://localhost:8788/callback?state=expected", "expected").is_err());
+        assert!(parse_oidc_callback_url(
+            "http://localhost:8788/callback?code=abc123&state=wrong",
+            "expected"
+        )
+        .is_err());
+        assert!(parse_oidc_callback_url(
+            "http://localhost:8788/callback?state=expected",
+            "expected"
+        )
+        .is_err());
     }
 
     #[test]
@@ -1762,7 +2540,9 @@ mod tests {
         assert!(valid_loopback_redirect("http://localhost:8788/callback"));
         assert!(!valid_loopback_redirect("http://127.0.0.1:8788/callback"));
         assert!(!valid_loopback_redirect("http://localhost:49152/callback"));
-        assert!(!valid_loopback_redirect("http://localhost:8788/oidc/callback"));
+        assert!(!valid_loopback_redirect(
+            "http://localhost:8788/oidc/callback"
+        ));
         assert!(!valid_loopback_redirect("http://localhost:8788/*"));
     }
 
@@ -1775,15 +2555,28 @@ mod tests {
 
     #[test]
     fn form_encoding_escapes_oauth_values() {
-        assert_eq!(form_encode(&[("scope", "openid profile"), ("redirect_uri", "http://127.0.0.1:49152/cb")]), "scope=openid%20profile&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcb");
+        assert_eq!(
+            form_encode(&[
+                ("scope", "openid profile"),
+                ("redirect_uri", "http://127.0.0.1:49152/cb")
+            ]),
+            "scope=openid%20profile&redirect_uri=http%3A%2F%2F127.0.0.1%3A49152%2Fcb"
+        );
     }
 
     #[cfg(windows)]
     #[test]
     fn browser_launcher_uses_url_protocol_handler() {
-        let (program, args) = windows_browser_launcher_command("https://login.microsoftonline.com/example");
+        let (program, args) =
+            windows_browser_launcher_command("https://login.microsoftonline.com/example");
         assert_eq!(program, "rundll32.exe");
-        assert_eq!(args, ["url.dll,FileProtocolHandler", "https://login.microsoftonline.com/example"]);
+        assert_eq!(
+            args,
+            [
+                "url.dll,FileProtocolHandler",
+                "https://login.microsoftonline.com/example"
+            ]
+        );
     }
 
     #[test]
@@ -1830,9 +2623,18 @@ mod tests {
         };
 
         assert!(!policy.can_bootstrap());
-        assert_eq!(policy.resolve_role("tenant-1", "admin-subject", "admin@mnde.invalid"), Some("ADMIN".to_string()));
-        assert_eq!(policy.resolve_role("tenant-1", "unknown", "operator@mnde.invalid"), Some("OPERATOR".to_string()));
-        assert_eq!(policy.resolve_role("other-tenant", "admin-subject", "admin@mnde.invalid"), None);
+        assert_eq!(
+            policy.resolve_role("tenant-1", "admin-subject", "admin@mnde.invalid"),
+            Some("ADMIN".to_string())
+        );
+        assert_eq!(
+            policy.resolve_role("tenant-1", "unknown", "operator@mnde.invalid"),
+            Some("OPERATOR".to_string())
+        );
+        assert_eq!(
+            policy.resolve_role("other-tenant", "admin-subject", "admin@mnde.invalid"),
+            None
+        );
     }
 
     #[test]

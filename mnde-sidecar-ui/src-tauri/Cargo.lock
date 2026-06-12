@@ -1938,6 +1938,7 @@ dependencies = [
  "jsonwebtoken",
  "keyring",
  "reqwest",
+ "ring",
  "serde",
  "serde_json",
  "sha2",

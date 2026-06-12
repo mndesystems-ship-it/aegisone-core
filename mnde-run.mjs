@@ -19,6 +19,16 @@ const DEFAULT_DECISION_URL = "http://127.0.0.1:8787/v1/decisions";
 async function main() {
   const argv = process.argv.slice(2);
   if (argv.length === 0) throw new Error("ERR_EMPTY_COMMAND");
+  if (argv[0] === "demo") {
+    const result = spawnSync(process.execPath, ["--experimental-strip-types", path.resolve("scripts", "mnde_live_demo.mjs"), ...argv.slice(1)], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      shell: false,
+      stdio: "inherit",
+      windowsHide: true
+    });
+    process.exit(result.status ?? 1);
+  }
   const cwd = process.cwd();
   const policyPath = process.env.MNDE_CODEX_POLICY ?? path.resolve("codex_mnde_policy.json");
   const receiptLog = process.env.MNDE_RECEIPT_LOG ?? path.resolve("receipts.jsonl");

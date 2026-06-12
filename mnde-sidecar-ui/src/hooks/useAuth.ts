@@ -1,19 +1,31 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { AuthProvider, AuthSession, AuthState } from "../auth/model";
 import { bootstrapAuth, loginWithProvider, logoutAuth } from "../auth/session";
 
-export function useAuth() {
+export function useAuth({ requireFreshLogin = false }: { requireFreshLogin?: boolean } = {}) {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
+  const clearedStartupSession = useRef(false);
+  const freshLoginKey = "mnde.auth.fresh-login-cleared";
 
   const refresh = useCallback(async () => {
     setAuth(await bootstrapAuth());
   }, []);
 
   useEffect(() => {
-    void refresh();
+    async function bootstrap() {
+      const alreadyCleared = window.sessionStorage.getItem(freshLoginKey) === "true";
+      if (requireFreshLogin && !clearedStartupSession.current && !alreadyCleared) {
+        clearedStartupSession.current = true;
+        window.sessionStorage.setItem(freshLoginKey, "true");
+        await logoutAuth();
+      }
+      await refresh();
+    }
+
+    void bootstrap();
     const timer = window.setInterval(() => void refresh(), 15_000);
     return () => window.clearInterval(timer);
-  }, [refresh]);
+  }, [refresh, requireFreshLogin]);
 
   const login = useCallback(async (provider: AuthProvider) => {
     setAuth({ kind: "loading" });

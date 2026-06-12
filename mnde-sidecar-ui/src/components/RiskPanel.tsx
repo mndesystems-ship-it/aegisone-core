@@ -14,7 +14,7 @@ export function RiskPanel({ latestRefusal, selectedReceipt, onOpenReceipt }: Ris
 
   if (!latestRefusal) {
     return (
-      <aside className="flex w-[360px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0f13] p-3">
+      <aside className="hidden w-[320px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0f13] p-3 2xl:flex">
         <section className="border border-line bg-panel p-4">
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Last Refusal</div>
           <h2 className="min-w-0 break-words text-lg font-semibold leading-tight text-ink">No live refusal reported</h2>
@@ -25,7 +25,7 @@ export function RiskPanel({ latestRefusal, selectedReceipt, onOpenReceipt }: Ris
   }
 
   return (
-    <aside className="flex w-[360px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0f13] p-3">
+    <aside className="hidden w-[320px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0f13] p-3 2xl:flex">
       <section className="min-w-0 border border-danger/40 bg-danger/10">
         <header className="border-b border-danger/25 px-4 py-3">
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-danger">Last Refusal</div>
@@ -68,7 +68,7 @@ export function RiskPanel({ latestRefusal, selectedReceipt, onOpenReceipt }: Ris
                 <Field label="Replay Drift" value={`${receipt.replay_drift}`} />
               </>
             ) : null}
-            <div className="min-w-0 overflow-hidden break-words border border-line bg-[#0d1116] p-3 font-mono text-xs leading-relaxed text-muted">
+            <div className="safe-mono min-w-0 overflow-auto border border-line bg-[#0d1116] p-3 font-mono text-xs leading-relaxed text-muted">
               {receipt?.command_preview ?? "No receipt selected."}
             </div>
           </div>
@@ -79,21 +79,15 @@ export function RiskPanel({ latestRefusal, selectedReceipt, onOpenReceipt }: Ris
 }
 
 function Field({ label, value, mono, strong }: { label: string; value: string; mono?: boolean; strong?: boolean }) {
-  const displayValue = mono ? compactLongValue(value) : value;
   return (
     <div className="min-w-0">
       <div className="mb-1 text-[11px] uppercase tracking-[0.14em] text-muted">{label}</div>
       <div
-        className={`${mono ? "font-mono" : ""} ${strong ? "text-danger" : "text-ink"} min-w-0 overflow-hidden break-words text-sm leading-relaxed`}
+        className={`${mono ? "safe-mono font-mono" : "safe-text"} ${strong ? "text-danger" : "text-ink"} min-w-0 text-sm leading-relaxed`}
         title={value}
       >
-        {displayValue}
+        {value}
       </div>
     </div>
   );
-}
-
-function compactLongValue(value: string) {
-  if (value.length <= 34) return value;
-  return `${value.slice(0, 18)}...${value.slice(-10)}`;
 }

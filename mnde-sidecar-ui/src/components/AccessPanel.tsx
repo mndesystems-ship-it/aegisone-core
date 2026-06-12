@@ -49,30 +49,30 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
     <div className="space-y-3">
       <section className="border border-line bg-panel p-4">
         <div className="text-[11px] uppercase tracking-[0.16em] text-signal">Organization Access</div>
-        <h2 className="mt-1 text-lg font-semibold text-ink">MNDe RBAC</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+        <h2 className="safe-text mt-1 text-lg font-semibold text-ink">MNDe RBAC</h2>
+        <p className="safe-text mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Microsoft verifies identity. MNDe roles decide what each signed-in user can do in this desktop app.
         </p>
-        {message ? <div className="mt-3 border border-signal/30 bg-signal/10 px-3 py-2 text-xs text-signal">{message}</div> : null}
+        {message ? <div className="safe-text mt-3 border border-signal/30 bg-signal/10 px-3 py-2 text-xs text-signal">{message}</div> : null}
       </section>
 
       {!status.bootstrapped ? (
         <section className="border border-warn/35 bg-warn/10 p-4">
-          <div className="text-sm font-semibold text-warn">No MNDe admin has been created yet.</div>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <div className="safe-text text-sm font-semibold text-warn">No MNDe admin has been created yet.</div>
+          <p className="safe-text mt-2 text-sm leading-relaxed text-muted">
             Bootstrap makes the currently signed-in Microsoft account the first MNDe admin. After this, only admins can grant roles.
           </p>
           <button className="button mt-3 px-4 text-ink disabled:opacity-45" disabled={!status.can_bootstrap || !session || authorityGate?.allowed === false} onClick={handleBootstrap} title={authorityGate?.allowed === false ? authorityGate.reason : undefined} type="button">
             Make me first MNDe admin
           </button>
-          {authorityGate?.allowed === false ? <p className="mt-2 text-xs text-danger">Authority changes blocked: {authorityGate.reason}</p> : null}
+          {authorityGate?.allowed === false ? <p className="safe-text mt-2 text-xs text-danger">Authority changes blocked: {authorityGate.reason}</p> : null}
         </section>
       ) : null}
 
       {isAdmin ? (
         <section className="border border-line bg-panel p-4">
           <div className="text-[11px] uppercase tracking-[0.16em] text-muted">Grant User Role</div>
-          <form className="mt-3 grid grid-cols-2 gap-3" onSubmit={handleSubmit}>
+          <form className="grid-safe mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" onSubmit={handleSubmit}>
             <label className="block">
               <span className="label">Email</span>
               <input className="input" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="user@company.com" />
@@ -93,7 +93,7 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
             </label>
             <button className="button col-span-2 h-10 px-4 text-ink disabled:opacity-45" disabled={authorityGate?.allowed === false} title={authorityGate?.allowed === false ? authorityGate.reason : undefined} type="submit">Save role assignment</button>
           </form>
-          {authorityGate?.allowed === false ? <p className="mt-2 text-xs text-danger">Authority changes blocked: {authorityGate.reason}</p> : null}
+          {authorityGate?.allowed === false ? <p className="safe-text mt-2 text-xs text-danger">Authority changes blocked: {authorityGate.reason}</p> : null}
         </section>
       ) : status.bootstrapped ? (
         <section className="border border-danger/35 bg-danger/10 p-4 text-sm text-danger">
@@ -114,12 +114,12 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
 
 function AssignmentRow({ assignment }: { assignment: RbacAssignment }) {
   return (
-    <div className="grid grid-cols-[1fr_120px] gap-4 px-4 py-3 text-sm">
+    <div className="grid-safe grid grid-cols-[minmax(0,1fr)_120px] gap-4 px-4 py-3 text-sm">
       <div className="min-w-0">
-        <div className="font-semibold text-ink">{assignment.display_name || assignment.email || assignment.user_id}</div>
+        <div className="safe-text font-semibold text-ink">{assignment.display_name || assignment.email || assignment.user_id}</div>
         <div className="mt-1 break-all font-mono text-xs text-muted">{assignment.email ?? "no email"} / {assignment.user_id ?? "no user id"}</div>
       </div>
-      <div className="font-mono text-signal">{assignment.role}</div>
+      <div className="safe-mono font-mono text-signal">{assignment.role}</div>
     </div>
   );
 }

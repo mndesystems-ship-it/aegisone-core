@@ -13,7 +13,7 @@ export function BottomHealthStrip({ health }: BottomHealthStripProps) {
   const api = health.find((item) => item.name === "API");
 
   return (
-    <footer className="grid h-12 shrink-0 grid-cols-5 border-t border-line bg-[#0b0f13]">
+    <footer className="grid-safe grid min-h-12 shrink-0 grid-cols-5 border-t border-line bg-[#0b0f13]">
       <StripItem label="Parser" item={api} />
       <StripItem label="MCJ-1" item={parser} />
       <StripItem label="Signer" item={signer} />
@@ -25,9 +25,9 @@ export function BottomHealthStrip({ health }: BottomHealthStripProps) {
 
 function StripItem({ label, item }: { label: string; item?: HealthItem }) {
   return (
-    <div className="flex items-center justify-between border-r border-line px-4 text-xs last:border-r-0">
-      <span className="uppercase tracking-[0.12em] text-muted">{label}</span>
-      <span className={`font-semibold ${healthClass(item?.state ?? "Failed")}`}>{item?.state ?? "Failed"}</span>
+    <div className="grid-safe grid grid-cols-1 items-center gap-0.5 border-r border-line px-3 py-1 text-xs last:border-r-0 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <span className="safe-text uppercase tracking-[0.12em] text-muted">{label}</span>
+      <span className={`safe-text font-semibold ${healthClass(item?.state ?? "Failed")}`}>{item?.state ?? "Failed"}</span>
     </div>
   );
 }

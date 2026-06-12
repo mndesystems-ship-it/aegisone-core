@@ -14,10 +14,10 @@ const trustTone: Record<TrustState["verdict"], string> = {
 
 export function TrustVerdictPanel({ trust, authority }: { trust: TrustState; authority: AuthorityScopeState }) {
   return (
-    <section className={`min-w-[270px] border px-3 py-2 ${trustTone[trust.verdict]}`}>
+    <section className={`min-w-0 border px-3 py-2 ${trustTone[trust.verdict]}`}>
       <div className="text-[11px] uppercase tracking-[0.14em] opacity-80">Composite Trust State</div>
-      <div className="mt-1 font-mono text-lg font-semibold">{trust.verdict}</div>
-      <div className="mt-1 min-w-0 truncate text-xs text-ink">
+      <div className="safe-mono mt-1 font-mono text-lg font-semibold">{trust.verdict}</div>
+      <div className="safe-text mt-1 min-w-0 text-xs text-ink">
         {trust.causes[0] ?? trust.staleProofs[0] ?? `${authority.currentScope} authority`}
       </div>
     </section>
@@ -26,11 +26,11 @@ export function TrustVerdictPanel({ trust, authority }: { trust: TrustState; aut
 
 export function HeaderAuthorityPanel({ authority, displayName }: { authority: AuthorityScopeState; displayName?: string }) {
   return (
-    <section className="min-w-[230px] border border-line bg-[#0b0f13] px-3 py-2 text-xs">
+    <section className="min-w-0 border border-line bg-[#0b0f13] px-3 py-2 text-xs">
       <div className="text-[11px] uppercase tracking-[0.14em] text-muted">Effective Authority</div>
-      <div className="mt-1 truncate font-semibold text-ink">{displayName ?? "Unauthenticated"}</div>
-      <div className="mt-0.5 font-mono text-muted">{authority.currentScope} / {authority.source}</div>
-      <div className="mt-1 font-mono text-[11px] text-muted">{authority.assurance} / MFA {authority.mfa}</div>
+      <div className="safe-text mt-1 font-semibold text-ink">{displayName ?? "Unauthenticated"}</div>
+      <div className="safe-mono mt-0.5 font-mono text-muted">{authority.currentScope} / {authority.source}</div>
+      <div className="safe-mono mt-1 font-mono text-[11px] text-muted">{authority.assurance} / MFA {authority.mfa}</div>
     </section>
   );
 }

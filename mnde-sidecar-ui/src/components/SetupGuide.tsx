@@ -60,12 +60,12 @@ export function SetupGuide({ onStartSidecar, sidecarLaunchState, startGate }: Se
 
   return (
     <section className="border border-line bg-panel">
-      <header className="flex items-center justify-between border-b border-line px-4 py-3">
-        <div>
+      <header className="grid-safe grid grid-cols-1 gap-3 border-b border-line px-4 py-3 md:grid-cols-[minmax(0,1fr)_176px] md:items-center">
+        <div className="min-w-0">
           <div className="text-[11px] uppercase tracking-[0.16em] text-signal">Setup Assistant</div>
-          <h2 className="mt-1 text-sm font-semibold text-ink">Bring MNDe online safely</h2>
+          <h2 className="safe-text mt-1 text-sm font-semibold text-ink">Bring MNDe online safely</h2>
         </div>
-        <div className="w-44">
+        <div className="min-w-0">
           <div className="mb-1 flex justify-between text-[11px] text-muted">
             <span>Readiness</span>
             <span className="font-mono text-signal">{progress}%</span>
@@ -76,7 +76,7 @@ export function SetupGuide({ onStartSidecar, sidecarLaunchState, startGate }: Se
         </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-2 p-3 xl:grid-cols-4">
+      <div className="grid-safe grid grid-cols-1 gap-2 p-3 md:grid-cols-2 xl:grid-cols-4">
         {setupSteps.map((step, index) => {
           const done = completed.has(step.id);
           return (
@@ -86,12 +86,12 @@ export function SetupGuide({ onStartSidecar, sidecarLaunchState, startGate }: Se
                   {done ? "✓" : index + 1}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-ink">{step.label}</span>
-                  <span className="mt-1 block text-xs leading-relaxed text-muted">{step.detail}</span>
+                  <span className="safe-text block text-sm font-semibold text-ink">{step.label}</span>
+                  <span className="safe-text mt-1 block text-xs leading-relaxed text-muted">{step.detail}</span>
                 </span>
               </button>
               <div className="flex items-center gap-2">
-                <code className="min-w-0 flex-1 truncate border border-line bg-[#080b0f] px-2 py-1.5 font-mono text-[11px] text-muted">{step.command}</code>
+                <code className="safe-mono min-w-0 flex-1 border border-line bg-[#080b0f] px-2 py-1.5 font-mono text-[11px] text-muted">{step.command}</code>
                 {step.id === "sidecar" ? (
                   <button
                     className="h-8 shrink-0 border border-safe/40 px-2 text-xs font-semibold text-safe transition hover:bg-safe/10 hover:text-ink disabled:cursor-wait disabled:opacity-60"
