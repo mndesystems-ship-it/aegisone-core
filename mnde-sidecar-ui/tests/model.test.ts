@@ -7,7 +7,7 @@ import { deriveAuthorityScope, deriveTrustState, gateProtectedAction } from "../
 import { makeDisconnectedLiveTelemetry, makeInitialTelemetry, advanceTelemetry } from "../src/data/telemetry.ts";
 import { buildSetupModel, mapReadableReason, generateGuidedSettings } from "../src/onboarding/setupModel.ts";
 import { defaultSettings, sanitizeSettings } from "../src/data/settings.ts";
-import { shouldAutoStartSidecar, shouldUseLiveModeOnDesktopStartup } from "../src/desktop/sidecarControl.ts";
+import { shouldAutoStartSidecar, shouldUseLiveModeOnDesktopStartup, startMndeLiveDemo } from "../src/desktop/sidecarControl.ts";
 
 test("demo telemetry declares demo mode and generates refusal impact", () => {
   const telemetry = makeInitialTelemetry();
@@ -92,6 +92,18 @@ test("missing receipt history does not make a healthy sidecar degraded", () => {
   assert.equal(state, "CONNECTED");
 });
 
+test("refusal history does not make a healthy production sidecar refusing", () => {
+  const state = deriveLiveConnectionState({
+    healthOk: true,
+    readyOk: true,
+    metricsOk: true,
+    receiptsOk: true,
+    hasRefusal: true
+  });
+
+  assert.equal(state, "CONNECTED");
+});
+
 test("settings are sanitized for supported ranges", () => {
   const settings = sanitizeSettings({
     ...defaultSettings,
@@ -133,6 +145,36 @@ test("auto-start does not loop after a launch attempt", () => {
 test("browser preview and demo mode do not auto-start the sidecar", () => {
   assert.equal(shouldAutoStartSidecar({ isDesktop: false, mode: "live", launchState: "idle" }), false);
   assert.equal(shouldAutoStartSidecar({ isDesktop: true, mode: "demo", launchState: "idle" }), false);
+});
+
+test("desktop live demo falls back when native start command is unavailable", async () => {
+  const result = await startMndeLiveDemo({
+    isTauriRuntime: () => true,
+    invokeImpl: async () => {
+      throw new Error("Command start_live_demo not found");
+    },
+    fetchImpl: async () => {
+      throw new Error("dev server route unavailable");
+    }
+  });
+
+  assert.equal(result.started, true);
+  assert.match(result.message, /demo/i);
+});
+
+test("desktop live demo falls back when legacy native launcher is missing", async () => {
+  const result = await startMndeLiveDemo({
+    isTauriRuntime: () => true,
+    invokeImpl: async () => {
+      throw new Error("MNDe live demo launcher was not found in the local workspace.");
+    },
+    fetchImpl: async () => {
+      throw new Error("dev server route unavailable");
+    }
+  });
+
+  assert.equal(result.started, true);
+  assert.match(result.message, /demo/i);
 });
 
 test("live mode accepts only non-expired enterprise identity", () => {

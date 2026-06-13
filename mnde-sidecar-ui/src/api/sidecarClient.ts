@@ -28,7 +28,6 @@ export interface LiveEndpointStatus {
 }
 
 export function deriveLiveConnectionState(status: LiveEndpointStatus): TelemetryState["liveConnectionState"] {
-  if (status.hasRefusal) return "REFUSING";
   if (status.healthOk && status.readyOk && status.metricsOk) return "CONNECTED";
   if (status.healthOk || status.readyOk || status.metricsOk || status.receiptsOk) return "DEGRADED";
   return "DISCONNECTED";

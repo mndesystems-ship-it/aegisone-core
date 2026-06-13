@@ -14,6 +14,18 @@ export type AppView = "Setup" | "Decision Stream" | "Demos" | "Receipts" | "Poli
 
 export const nav: AppView[] = ["Setup", "Decision Stream", "Demos", "Receipts", "Policies", "Replay", "Runtime", "Audit", "Access"];
 
+const navLabels: Record<AppView, string> = {
+  Setup: "Authority Setup",
+  "Decision Stream": "Authority",
+  Demos: "Demonstration",
+  Receipts: "Receipts",
+  Policies: "Policy",
+  Replay: "Replay",
+  Runtime: "Infrastructure",
+  Audit: "Audit Record",
+  Access: "Access"
+};
+
 function SidebarMark() {
   return (
     <svg aria-hidden="true" className="h-6 w-7" viewBox="0 0 56 36" role="img">
@@ -27,7 +39,7 @@ function SidebarMark() {
 
 export function Sidebar({ state, mode, liveConnectionState, connection, activeView, onViewChange }: SidebarProps) {
   return (
-    <aside className="flex h-full w-[236px] shrink-0 flex-col border-r border-line bg-[#0b0f13]">
+    <aside className="flex h-full w-[236px] shrink-0 flex-col border-r border-line bg-[#0b0d10]">
       <div className="border-b border-line px-5 py-5">
         <div className="flex items-center gap-3">
           <div className="grid h-9 w-9 place-items-center border border-signal/30 bg-[#10171d]">
@@ -35,7 +47,7 @@ export function Sidebar({ state, mode, liveConnectionState, connection, activeVi
           </div>
           <div>
             <div className="text-lg font-semibold tracking-normal text-ink">MNDe</div>
-            <div className="text-xs uppercase tracking-[0.16em] text-muted">Execution Control</div>
+            <div className="text-xs uppercase tracking-[0.16em] text-muted">Authority System</div>
           </div>
         </div>
         <div className={`mt-5 inline-flex items-center gap-2 border px-2.5 py-1.5 text-xs font-semibold ${systemClass(state)}`}>
@@ -54,7 +66,7 @@ export function Sidebar({ state, mode, liveConnectionState, connection, activeVi
             onClick={() => onViewChange(item)}
             type="button"
           >
-            <span>{item}</span>
+            <span>{navLabels[item]}</span>
             {item === "Receipts" && <span className="font-mono text-[11px] text-signal">{mode}</span>}
           </button>
         ))}

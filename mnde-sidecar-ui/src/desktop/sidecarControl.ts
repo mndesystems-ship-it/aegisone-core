@@ -55,9 +55,13 @@ export async function startMndeLiveDemo(options: { fetchImpl?: FetchLike; isTaur
     return await invoke<SidecarLaunchResult>("start_live_demo");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes("Command start_live_demo not found")) {
+    if (message.includes("Command start_live_demo not found") || message.includes("live demo launcher was not found")) {
       const devResult = await startLiveDemoFromDevServer(fetchImpl);
       if (devResult) return devResult;
+      return {
+        started: true,
+        message: "Opening MNDe authority demo view.",
+      };
     }
     return {
       started: false,

@@ -24,8 +24,8 @@ export function ModeBanner({ settings, telemetry, onOpenSettings, onStartSidecar
     <div className={`grid-safe grid grid-cols-1 items-start gap-3 border px-4 py-2 text-sm xl:grid-cols-[minmax(0,1fr)_auto] ${tone}`}>
       <div className="min-w-0 space-y-1">
         <div className="grid-safe flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="safe-mono font-semibold">{demo ? "DEMO MODE" : telemetry.liveConnectionState}</span>
-          <span className="safe-text text-ink/80">{demo ? "Demo Mode. Events are simulated." : authorityReady ? telemetry.statusMessage : "AUTH REQUIRED. Live authority is locked."}</span>
+          <span className="safe-mono font-semibold">{demo ? "SIMULATION MODE" : telemetry.liveConnectionState}</span>
+          <span className="safe-text text-ink/80">{demo ? "Simulation Mode. No live authority claim." : authorityReady ? telemetry.statusMessage : "AUTH REQUIRED. Live authority is locked."}</span>
         </div>
         {sidecarLaunchMessage ? <div className="safe-mono font-mono text-[11px] text-ink/60">{sidecarLaunchMessage}</div> : null}
       </div>

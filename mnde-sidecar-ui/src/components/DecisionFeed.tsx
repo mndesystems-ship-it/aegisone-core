@@ -9,7 +9,7 @@ interface DecisionFeedProps {
   badge?: string;
 }
 
-export function DecisionFeed({ events, onReceiptClick, title = "Realtime Decision Stream", subtitle = "Execution requests evaluated before runtime access", badge = "live" }: DecisionFeedProps) {
+export function DecisionFeed({ events, onReceiptClick, title = "Authority Ledger", subtitle = "Execution requests rendered before runtime access", badge = "records" }: DecisionFeedProps) {
   return (
     <section className="flex min-h-0 flex-1 flex-col border border-line bg-panel shadow-operational">
       <header className="grid-safe grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-line px-4 py-2">

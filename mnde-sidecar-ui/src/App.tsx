@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { can, isSessionAllowedForMode, type AuthSession } from "./auth/model";
 import { AccessPanel } from "./components/AccessPanel";
+import { AuthorityHero, AuthorityMetricStrip, CompactInfrastructureRow, GuardrailsRecord, ReceiptIntegrityRecord, RecentDecisionsRecord } from "./components/AuthorityRecord";
 import { buildOperationalTimeline, deriveAuthorityScope, deriveTrustState, gateProtectedAction, type AuthorityScopeState, type TrustState } from "./authority/trust";
 import { BottomHealthStrip } from "./components/BottomHealthStrip";
 import { activatePolicy, generateAuditBundle, getCurrentPolicy, replayRecent } from "./api/sidecarClient";
@@ -19,7 +20,6 @@ import { SetupGuide } from "./components/SetupGuide";
 import { Sidebar, type AppView } from "./components/Sidebar";
 import { StatusCards } from "./components/StatusCards";
 import { SystemHealth } from "./components/SystemHealth";
-import { HeaderAuthorityPanel, TrustVerdictPanel } from "./components/TrustVerdictPanel";
 import { TrustEvidencePanel } from "./components/TrustEvidencePanel";
 import { OperationalTimeline } from "./components/OperationalTimeline";
 import { buildSetupModel } from "./onboarding/setupModel";
@@ -32,7 +32,8 @@ import type { AppLog, AppSettings, DecisionEvent, TelemetryState } from "./types
 
 export default function App() {
   const [settings, setSettings] = useSettings();
-  const liveDemo = isLiveDemoRequested();
+  const [manualLiveDemo, setManualLiveDemo] = useState(false);
+  const liveDemo = manualLiveDemo || isLiveDemoRequested();
   const { auth, login, logout, setSession } = useAuth();
   const { telemetry, logs, setLogs, liveDemoOverlay } = useOperationalTelemetry(settings, liveDemo);
   const [selectedReceipt, setSelectedReceipt] = useState<DecisionEvent | undefined>();
@@ -113,11 +114,9 @@ export default function App() {
     if (result.started) {
       setLiveDemoLaunchState("started");
       setLiveDemoLaunchMessage(result.message);
+      setManualLiveDemo(true);
+      setActiveView("Decision Stream");
       setSettings({ ...settings, mode: "live", enableAutoReconnect: true });
-      window.setTimeout(() => {
-        const nextUrl = `${window.location.pathname}?liveDemo=1`;
-        window.location.assign(nextUrl);
-      }, 250);
       return;
     }
 
@@ -139,7 +138,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative flex h-screen min-h-0 overflow-hidden bg-[#080b0f] text-ink">
+    <div className="relative flex h-screen min-h-0 overflow-hidden bg-[#090a0c] text-ink">
       <Sidebar
         activeView={activeView}
         connection={liveDemo ? "MNDe live demo attached to real runtime." : telemetry.connectionState}
@@ -152,44 +151,38 @@ export default function App() {
       <main className="flex min-w-0 flex-1 flex-col">
         <div className="flex min-h-0 flex-1">
           <section className="flex min-w-0 flex-1 flex-col gap-3 overflow-auto p-3">
-            <header className="grid-safe grid shrink-0 grid-cols-1 items-start gap-4 border border-line bg-panel px-4 py-3 shadow-operational 2xl:grid-cols-[minmax(190px,1fr)_auto] 2xl:items-center">
-              <div className="min-w-0">
-                <div className="text-xs uppercase tracking-[0.16em] text-muted">{settings.mode === "demo" ? "Simulated Safety Layer" : "Live Safety Layer"}</div>
-                <h1 className="mt-1 truncate text-xl font-semibold text-ink">{liveDemo ? "MNDe Live Authority Demo" : "Execution Firewall"}</h1>
-              </div>
-              <div className="grid-safe grid min-w-0 grid-cols-[repeat(auto-fit,minmax(160px,1fr))] items-stretch gap-3 text-sm 2xl:flex 2xl:flex-nowrap">
-                <div className="min-w-0 border border-line bg-[#0b0f13] px-3 py-2">
-                  <div className="text-[11px] uppercase tracking-[0.14em] text-muted">Estimated Prevented Impact</div>
-                  <div className="safe-mono mt-1 font-mono text-danger">{telemetry.latestRefusal?.prevented_impact ?? "not reported"}</div>
-                  <div className="mt-0.5 text-[11px] text-muted">policy/runtime evidence only</div>
+            {activeView === "Decision Stream" ? null : (
+              <header className="grid-safe grid shrink-0 grid-cols-1 items-start gap-4 border border-line bg-panel px-4 py-3 2xl:grid-cols-[minmax(190px,1fr)_auto] 2xl:items-center">
+                <div className="min-w-0">
+                  <div className="text-xs uppercase tracking-[0.16em] text-muted">{settings.mode === "demo" ? "Simulation Mode" : "Authority System"}</div>
+                  <h1 className="mt-1 truncate text-xl font-semibold text-ink">{liveDemo ? "MNDe Authority Demonstration" : "Execution Authority"}</h1>
                 </div>
-                {liveDemo ? (
-                  <div className="min-w-0 border border-safe/35 bg-safe/10 px-3 py-2">
-                    <div className="text-[11px] uppercase tracking-[0.14em] text-muted">Demo Status</div>
-                    <div className="safe-mono mt-1 font-mono text-signal">{liveDemoOverlay.evidence?.status ?? "waiting"}</div>
-                    <div className="mt-0.5 text-[11px] text-muted">verdict {liveDemoOverlay.evidence?.verdict ?? "PENDING"}</div>
+                <div className="flex min-w-0 flex-wrap items-center justify-start gap-2 text-sm 2xl:justify-end">
+                  <div className="safe-text min-w-0 border border-line bg-[#0b0f13] px-3 py-2 text-xs text-muted">
+                    Authority: <span className="font-semibold text-ink">{liveDemo ? "Demo Authority" : auth.session?.display_name ?? "not signed in"}</span>
                   </div>
-                ) : null}
-                <TrustVerdictPanel authority={authorityScope} trust={trustState} />
-                <HeaderAuthorityPanel authority={authorityScope} displayName={liveDemo ? "Demo Authority" : auth.session?.display_name} />
-                {!liveDemo ? <button className="button px-3" onClick={logout} type="button">Logout</button> : null}
-                <div className={`safe-text border px-3 py-2 text-xs font-semibold ${settings.mode === "demo" ? "border-warn/35 bg-warn/10 text-warn" : telemetry.liveConnectionState === "CONNECTED" ? "border-safe/35 bg-safe/10 text-safe" : "border-danger/35 bg-danger/10 text-danger"}`}>
-                  {liveDemo ? "live demo attached" : settings.mode === "demo" ? "simulated protection" : telemetry.liveConnectionState === "CONNECTED" ? "MNDe sidecar connected" : "no live protection status"}
+                  <div className={`safe-text border px-3 py-2 text-xs font-semibold ${settings.mode === "demo" ? "border-warn/35 bg-warn/10 text-warn" : telemetry.liveConnectionState === "CONNECTED" ? "border-safe/35 bg-safe/10 text-safe" : "border-danger/35 bg-danger/10 text-danger"}`}>
+                    {liveDemo ? "demonstration attached" : settings.mode === "demo" ? "simulation mode" : telemetry.liveConnectionState === "CONNECTED" ? "protected" : "fail closed"}
+                  </div>
+                  {!liveDemo ? <button className="button px-3" onClick={logout} type="button">Logout</button> : null}
+                  <button className="button px-3" onClick={() => setSettingsOpen(true)} type="button">Settings</button>
                 </div>
-              </div>
-            </header>
+              </header>
+            )}
 
-            <ModeBanner
-              onOpenSettings={() => setSettingsOpen(true)}
-              onStartSidecar={handleStartSidecar}
-              onStartLiveDemo={handleStartLiveDemo}
-              authorityReady={authorityReady}
-              settings={settings}
-              sidecarLaunchMessage={sidecarLaunchMessage}
-              sidecarLaunchState={sidecarLaunchState}
-              liveDemoLaunchState={liveDemoLaunchState}
-              telemetry={telemetry}
-            />
+            {activeView === "Decision Stream" ? null : (
+              <ModeBanner
+                onOpenSettings={() => setSettingsOpen(true)}
+                onStartSidecar={handleStartSidecar}
+                onStartLiveDemo={handleStartLiveDemo}
+                authorityReady={authorityReady}
+                settings={settings}
+                sidecarLaunchMessage={sidecarLaunchMessage}
+                sidecarLaunchState={sidecarLaunchState}
+                liveDemoLaunchState={liveDemoLaunchState}
+                telemetry={telemetry}
+              />
+            )}
 
             <ActiveWorkspace
               activeView={activeView}
@@ -230,10 +223,10 @@ export default function App() {
             />
           </section>
 
-          {liveDemo ? null : <RiskPanel latestRefusal={telemetry.latestRefusal} onOpenReceipt={setDetailReceipt} selectedReceipt={selectedReceipt} />}
+          {liveDemo || activeView === "Decision Stream" ? null : <RiskPanel latestRefusal={telemetry.latestRefusal} onOpenReceipt={setDetailReceipt} selectedReceipt={selectedReceipt} />}
         </div>
 
-        <BottomHealthStrip health={telemetry.health} />
+        {activeView === "Decision Stream" ? null : <BottomHealthStrip health={telemetry.health} />}
       </main>
       <ReceiptDetail onClose={() => setDetailReceipt(undefined)} receipt={detailReceipt} settings={settings} />
       <SettingsPanel onChange={setSettings} onClose={() => setSettingsOpen(false)} open={settingsOpen} settings={settings} />
@@ -431,19 +424,31 @@ function ActiveWorkspace({ activeView, telemetry, logs, sidecarLaunchState, sele
   }
 
   return (
-    <>
-      <SetupGuide onStartSidecar={onStartSidecar} sidecarLaunchState={sidecarLaunchState} startGate={runtimeGate} />
-      <StatusCards metrics={telemetry.metrics} />
-      <div className="grid-safe grid min-h-0 flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_296px]">
-        <DecisionFeed events={telemetry.events} onReceiptClick={onReceiptClick} />
-        <div className="flex min-h-0 flex-col gap-3">
-          <TrustEvidencePanel trust={trustState} />
-          <SystemHealth health={telemetry.health} />
-          <ResourcePanel resources={telemetry.resources} />
-          <OperationalTimeline events={timelineEvents} />
+    <AuthorityHome
+      telemetry={telemetry}
+      trustState={trustState}
+      authorityScope={authorityScope}
+      authSession={authSession}
+      onReceiptClick={onReceiptClick}
+    />
+  );
+}
+
+function AuthorityHome({ telemetry, trustState, authorityScope, authSession, onReceiptClick }: { telemetry: TelemetryState; trustState: TrustState; authorityScope: AuthorityScopeState; authSession?: AuthSession; onReceiptClick: (event: DecisionEvent) => void }) {
+  const latestDecision = telemetry.events[0];
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <AuthorityHero telemetry={telemetry} trust={trustState} authority={authorityScope} session={authSession} />
+      <AuthorityMetricStrip telemetry={telemetry} />
+      <div className="grid-safe grid min-h-0 grid-cols-1 gap-3 2xl:grid-cols-[minmax(0,1fr)_360px]">
+        <RecentDecisionsRecord events={telemetry.events} onReceiptClick={onReceiptClick} />
+        <div className="grid-safe grid min-h-0 grid-cols-1 gap-3 lg:grid-cols-2 2xl:flex 2xl:flex-col">
+          <GuardrailsRecord />
+          <ReceiptIntegrityRecord telemetry={telemetry} latest={latestDecision} />
         </div>
       </div>
-    </>
+      <CompactInfrastructureRow health={telemetry.health} />
+    </div>
   );
 }
 

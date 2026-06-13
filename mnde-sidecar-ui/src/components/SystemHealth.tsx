@@ -7,9 +7,9 @@ interface SystemHealthProps {
 
 export function SystemHealth({ health }: SystemHealthProps) {
   return (
-    <section className="border border-line bg-panel">
+    <section className="authority-panel">
       <header className="border-b border-line px-4 py-3">
-        <h2 className="text-sm font-semibold text-ink">System Health</h2>
+        <h2 className="authority-eyebrow">Authority Components</h2>
       </header>
       <div className="divide-y divide-line">
         {health.map((item) => (

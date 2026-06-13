@@ -16,7 +16,7 @@ use std::fs::{canonicalize, create_dir_all, read_to_string, remove_file, write};
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use url::Url;
@@ -324,6 +324,48 @@ fn start_mnde_sidecar_inner() -> Result<SidecarLaunchResult, String> {
 #[tauri::command]
 fn sidecar_status() -> LifecycleResult {
     sidecar_status_inner()
+}
+
+#[tauri::command]
+fn start_live_demo() -> Result<SidecarLaunchResult, String> {
+    let _guard = LIFECYCLE_LOCK
+        .try_lock()
+        .map_err(|_| "demo lifecycle operation already in progress".to_string())?;
+    if demo_evidence_port_is_open() {
+        return Ok(SidecarLaunchResult {
+            started: true,
+            message: "MNDe live demo is already running. Attaching dashboard.".to_string(),
+            script_path: None,
+        });
+    }
+
+    let launcher = find_live_demo_launcher()
+        .ok_or_else(|| "MNDe live demo launcher was not found in the local workspace.".to_string())?;
+
+    let mut command = Command::new(&launcher.program);
+    command
+        .args(&launcher.args)
+        .current_dir(&launcher.working_dir)
+        .env("MNDE_DEMO_NO_OPEN", "1")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    command
+        .spawn()
+        .map_err(|error| format!("Failed to start MNDe live demo: {error}"))?;
+
+    Ok(SidecarLaunchResult {
+        started: true,
+        message: "MNDe live demo start requested. Attaching dashboard.".to_string(),
+        script_path: Some(launcher.display_path.display().to_string()),
+    })
 }
 
 #[tauri::command]
@@ -2131,6 +2173,34 @@ fn find_sidecar_launcher() -> Option<SidecarLauncher> {
         .find(|candidate| candidate.display_path.is_file())
 }
 
+fn find_live_demo_launcher() -> Option<SidecarLauncher> {
+    candidate_live_demo_launchers()
+        .into_iter()
+        .find(|candidate| candidate.display_path.is_file())
+}
+
+fn candidate_live_demo_launchers() -> Vec<SidecarLauncher> {
+    let workspace = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .map(Path::to_path_buf);
+
+    let Some(workspace) = workspace else {
+        return Vec::new();
+    };
+
+    let demo_script = workspace.join("scripts").join("mnde_live_demo.mjs");
+    vec![SidecarLauncher {
+        program: "node".to_string(),
+        args: vec![
+            "--experimental-strip-types".to_string(),
+            demo_script.display().to_string(),
+        ],
+        working_dir: workspace,
+        display_path: demo_script,
+    }]
+}
+
 fn candidate_sidecar_launchers() -> Vec<SidecarLauncher> {
     let workspace = Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
@@ -2188,6 +2258,11 @@ fn command_script_launcher(script: PathBuf) -> SidecarLauncher {
 
 fn sidecar_port_is_open() -> bool {
     let address = SocketAddr::from(([127, 0, 0, 1], 8787));
+    TcpStream::connect_timeout(&address, Duration::from_millis(250)).is_ok()
+}
+
+fn demo_evidence_port_is_open() -> bool {
+    let address = SocketAddr::from(([127, 0, 0, 1], 8789));
     TcpStream::connect_timeout(&address, Duration::from_millis(250)).is_ok()
 }
 
@@ -2416,6 +2491,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             start_mnde_sidecar,
+            start_live_demo,
             stop_mnde_sidecar,
             restart_mnde_sidecar,
             sidecar_status,

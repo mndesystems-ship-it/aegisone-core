@@ -14,21 +14,21 @@ export function RiskPanel({ latestRefusal, selectedReceipt, onOpenReceipt }: Ris
 
   if (!latestRefusal) {
     return (
-      <aside className="hidden w-[320px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0f13] p-3 2xl:flex">
-        <section className="border border-line bg-panel p-4">
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Last Refusal</div>
-          <h2 className="min-w-0 break-words text-lg font-semibold leading-tight text-ink">No live refusal reported</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted">Live Mode only displays real sidecar receipts. If disconnected, no protection claim is made.</p>
+      <aside className="hidden w-[320px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0d10] p-3 2xl:flex">
+        <section className="authority-panel p-4">
+          <div className="authority-eyebrow mb-1">Refusal Record</div>
+          <h2 className="min-w-0 break-words text-lg font-semibold leading-tight text-ink">No refusal receipt recorded</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted">Live Mode displays signed refusal receipts only. If disconnected, no protection claim is made.</p>
         </section>
       </aside>
     );
   }
 
   return (
-    <aside className="hidden w-[320px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0f13] p-3 2xl:flex">
+    <aside className="hidden w-[320px] shrink-0 flex-col gap-3 overflow-x-hidden border-l border-line bg-[#0b0d10] p-3 2xl:flex">
       <section className="min-w-0 border border-danger/40 bg-danger/10">
         <header className="border-b border-danger/25 px-4 py-3">
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-danger">Last Refusal</div>
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-danger">Refusal Record</div>
           <h2 className="min-w-0 break-words text-base font-semibold leading-tight text-ink">{latestRefusal.action}</h2>
         </header>
         <div className="space-y-4 px-4 py-4">
@@ -48,14 +48,14 @@ export function RiskPanel({ latestRefusal, selectedReceipt, onOpenReceipt }: Ris
           <Field label="Decision Hash" value={latestRefusal.decision_hash} mono />
           <Field label="Timestamp" value={latestRefusal.timestamp} mono />
           <button className="h-9 w-full border border-signal/40 bg-signal/10 text-sm font-semibold text-signal transition hover:bg-signal/15 hover:text-ink" onClick={() => onOpenReceipt(latestRefusal)}>
-            View Receipt
+            Open Refusal Receipt
           </button>
         </div>
       </section>
 
       <section className="min-w-0 border border-line bg-panel">
         <button className="flex h-11 w-full items-center justify-between px-4 text-left" onClick={() => setExpanded((value) => !value)}>
-          <span className="text-sm font-semibold text-ink">Receipt Inspector</span>
+          <span className="text-sm font-semibold text-ink">Receipt Record</span>
           <span className="font-mono text-xs text-muted">{expanded ? "open" : "closed"}</span>
         </button>
         {expanded && (

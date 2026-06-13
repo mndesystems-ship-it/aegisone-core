@@ -15,6 +15,7 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
   const [message, setMessage] = useState("");
   const [form, setForm] = useState({ email: "", user_id: "", display_name: "", role: "VIEWER" as AuthRole });
   const isAdmin = session?.role === "ADMIN";
+  const authorityChangeBlocked = status.bootstrapped && authorityGate?.allowed === false;
 
   async function refresh() {
     setStatus(await getRbacStatus());
@@ -25,16 +26,16 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
   }, []);
 
   async function handleBootstrap() {
-    setMessage("Bootstrapping admin authority...");
+    setMessage("Creating initial authority custodian...");
     const updated = await bootstrapAdmin();
     onSessionChange(updated);
     await refresh();
-    setMessage("Initial MNDe admin created.");
+    setMessage("Initial authority custodian recorded.");
   }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setMessage("Saving assignment...");
+    setMessage("Recording authority assignment...");
     setStatus(await upsertRbacAssignment({
       email: form.email,
       user_id: form.user_id,
@@ -42,36 +43,36 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
       role: form.role
     }));
     setForm({ email: "", user_id: "", display_name: "", role: "VIEWER" });
-    setMessage("Assignment saved. User must log out and log in again to receive the new role.");
+    setMessage("Authority assignment recorded. User must log out and log in again before the authority change is effective.");
   }
 
   return (
     <div className="space-y-3">
-      <section className="border border-line bg-panel p-4">
-        <div className="text-[11px] uppercase tracking-[0.16em] text-signal">Organization Access</div>
-        <h2 className="safe-text mt-1 text-lg font-semibold text-ink">MNDe RBAC</h2>
+      <section className="authority-panel p-4">
+        <div className="authority-eyebrow">Authority Registry</div>
+        <h2 className="safe-text mt-1 text-lg font-semibold text-ink">Execution Authority Assignments</h2>
         <p className="safe-text mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Microsoft verifies identity. MNDe roles decide what each signed-in user can do in this desktop app.
+          Identity establishes who is present. MNDe authority assignments define who may alter policy, replay decisions, export audit records, or control runtime execution.
         </p>
         {message ? <div className="safe-text mt-3 border border-signal/30 bg-signal/10 px-3 py-2 text-xs text-signal">{message}</div> : null}
       </section>
 
       {!status.bootstrapped ? (
         <section className="border border-warn/35 bg-warn/10 p-4">
-          <div className="safe-text text-sm font-semibold text-warn">No MNDe admin has been created yet.</div>
+          <div className="safe-text text-sm font-semibold text-warn">No authority custodian has been recorded.</div>
           <p className="safe-text mt-2 text-sm leading-relaxed text-muted">
-            Bootstrap makes the currently signed-in Microsoft account the first MNDe admin. After this, only admins can grant roles.
+            Bootstrap records the currently signed-in account as the first authority custodian. After this record exists, only custodians may grant authority.
           </p>
-          <button className="button mt-3 px-4 text-ink disabled:opacity-45" disabled={!status.can_bootstrap || !session || authorityGate?.allowed === false} onClick={handleBootstrap} title={authorityGate?.allowed === false ? authorityGate.reason : undefined} type="button">
-            Make me first MNDe admin
+          <button className="button mt-3 px-4 text-ink disabled:opacity-45" disabled={!status.can_bootstrap || !session} onClick={handleBootstrap} type="button">
+            Record initial custodian
           </button>
-          {authorityGate?.allowed === false ? <p className="safe-text mt-2 text-xs text-danger">Authority changes blocked: {authorityGate.reason}</p> : null}
+          {!status.can_bootstrap ? <p className="safe-text mt-2 text-xs text-danger">Initial custodian cannot be recorded until an enterprise session is present.</p> : null}
         </section>
       ) : null}
 
       {isAdmin ? (
         <section className="border border-line bg-panel p-4">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-muted">Grant User Role</div>
+          <div className="authority-eyebrow">Grant Authority</div>
           <form className="grid-safe mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" onSubmit={handleSubmit}>
             <label className="block">
               <span className="label">Email</span>
@@ -91,20 +92,20 @@ export function AccessPanel({ session, onSessionChange, authorityGate }: AccessP
                 {roles.map((role) => <option key={role} value={role}>{role}</option>)}
               </select>
             </label>
-            <button className="button col-span-2 h-10 px-4 text-ink disabled:opacity-45" disabled={authorityGate?.allowed === false} title={authorityGate?.allowed === false ? authorityGate.reason : undefined} type="submit">Save role assignment</button>
+            <button className="button col-span-2 h-10 px-4 text-ink disabled:opacity-45" disabled={authorityChangeBlocked} title={authorityChangeBlocked ? authorityGate?.reason : undefined} type="submit">Record authority assignment</button>
           </form>
-          {authorityGate?.allowed === false ? <p className="safe-text mt-2 text-xs text-danger">Authority changes blocked: {authorityGate.reason}</p> : null}
+          {authorityChangeBlocked ? <p className="safe-text mt-2 text-xs text-danger">Authority changes blocked: {authorityGate?.reason}</p> : null}
         </section>
       ) : status.bootstrapped ? (
         <section className="border border-danger/35 bg-danger/10 p-4 text-sm text-danger">
-          Admin authority is required to grant or change MNDe roles.
+          Custodian authority is required to grant or change MNDe authority assignments.
         </section>
       ) : null}
 
       <section className="border border-line bg-panel">
-        <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-muted">Assignments</div>
+        <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-muted">Authority Assignments</div>
         <div className="divide-y divide-line">
-          {status.assignments.length === 0 ? <div className="p-4 text-sm text-muted">No role assignments yet.</div> : null}
+          {status.assignments.length === 0 ? <div className="p-4 text-sm text-muted">No authority assignments recorded.</div> : null}
           {status.assignments.map((assignment) => <AssignmentRow assignment={assignment} key={`${assignment.user_id ?? ""}:${assignment.email ?? ""}`} />)}
         </div>
       </section>
